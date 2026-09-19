@@ -483,6 +483,20 @@ if (miniPlay) {
     });
 }
 
+if (miniShuffle) {
+    miniShuffle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (shuffle) shuffle.click();
+    });
+}
+
+if (miniRepeat) {
+    miniRepeat.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (repeat) repeat.click();
+    });
+}
+
 function updateVolumeFill(el) {
     let value = el.value;
     el.style.background = `linear-gradient(to right, white ${value}%, #555 ${value}%)`;

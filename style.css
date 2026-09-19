@@ -1354,21 +1354,21 @@ input[type="range"]::-webkit-slider-thumb{
     .now-playing-panel.mobile-open .phone-frame{
         position: relative;
         z-index: 1;
-        width: 82%;
-        max-width: 19rem;
+        width: 78%;
+        max-width: 16rem;
         background: rgba(30, 30, 30, 0.6);
         backdrop-filter: blur(1.9rem);
         -webkit-backdrop-filter: blur(1.9rem);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 1.5rem;
-        padding: 1rem;
+        border-radius: 1.3rem;
+        padding: 0.8rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .now-playing-panel.mobile-open .np-art{
-        max-height: 40vh;
-        border-radius: 0.8rem;
-        margin-bottom: 1rem;
+        max-height: 30vh;
+        border-radius: 0.7rem;
+        margin-bottom: 0.8rem;
     }
 
     .now-playing-panel.mobile-open .np-info{
@@ -1389,11 +1389,11 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     .now-playing-panel.mobile-open .np-title{
-        font-size: 1.15rem;
+        font-size: 0.85rem;
     }
 
     .now-playing-panel.mobile-open .np-artist{
-        font-size: 1rem;
+        font-size: 0.85rem;
         color: var(--gray-light);
         margin-top: 0.1rem;
     }
@@ -1403,17 +1403,17 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     .now-playing-panel.mobile-open .np-controls{
-        gap: 3rem;
-        margin-bottom: 1.4rem;
+        gap: 2.2rem;
+        margin-bottom: 1rem;
     }
 
     .now-playing-panel.mobile-open #npPlay{
-        font-size: 2.8rem;
+        font-size: 2.2rem;
     }
 
     .now-playing-panel.mobile-open #npBackward,
     .now-playing-panel.mobile-open #npForward{
-        font-size: 2rem;
+        font-size: 1.6rem;
     }
 
     .now-playing-panel.mobile-open .np-volume{
