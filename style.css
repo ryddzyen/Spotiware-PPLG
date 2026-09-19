@@ -33,8 +33,6 @@ body{
     overflow-x: hidden;
 }
 
-/* Elemen khusus mobile: disembunyikan di desktop.
-   (Sengaja ditaruh DI ATAS media query supaya tidak menimpa aturan mobile) */
 .bottom-nav{
     display: none;
 }
@@ -46,7 +44,6 @@ body{
     display: none;
 }
 
-/* NavBar */
 nav{
     background-color: black;
     display: flex;
@@ -213,7 +210,6 @@ nav{
     transition: .2s ease;
 }
 
-/* Main layout: 3 kolom */
 .main{
     background-color: black;
     min-width: 98vw;
@@ -469,7 +465,6 @@ nav{
     transform: translate(110px, -50px);
 }
 
-/* Now Playing Panel (iPhone style) */
 .now-playing-panel{
     width: 22%;
     height: 100%;
@@ -765,7 +760,6 @@ nav{
     cursor: pointer;
 }
 
-/* Player */
 .player-bar{
     width: 100%;
     height: 5.2rem;
@@ -967,9 +961,6 @@ input[type="range"]::-webkit-slider-thumb{
     cursor: pointer;
 }
 
-/* ============ RESPONSIVE ============ */
-
-/* Tablet / laptop kecil */
 @media (max-width: 1100px) {
     .right-half-p1 {
         display: none;
@@ -1064,10 +1055,6 @@ input[type="range"]::-webkit-slider-thumb{
     }
 }
 
-/* ============ MOBILE LAYOUT (ala Spotify) ============
-   Aktif kalau layar <= 768px, ATAU perangkatnya layar sentuh.
-   Kondisi kedua bikin tampilan mobile tetap muncul walaupun
-   Chrome HP lagi dalam mode "Desktop site". */
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
 
     .music-card,
@@ -1077,7 +1064,6 @@ input[type="range"]::-webkit-slider-thumb{
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* --- Navbar atas --- */
     nav{
         height: auto;
         min-height: 3.5rem;
@@ -1130,7 +1116,6 @@ input[type="range"]::-webkit-slider-thumb{
         height: 2.2rem;
     }
 
-    /* --- Konten --- */
     .main{
         flex-direction: column;
         min-width: 0;
@@ -1138,7 +1123,7 @@ input[type="range"]::-webkit-slider-thumb{
         height: auto;
         margin: 0.5rem 0 0;
         gap: 0;
-        padding-bottom: 9.5rem; /* ruang untuk mini player + menu bawah */
+        padding-bottom: 9.5rem;
     }
 
     .main-left-part{
@@ -1192,8 +1177,6 @@ input[type="range"]::-webkit-slider-thumb{
         border-radius: 0.3rem;
     }
 
-    /* Di HP tidak ada hover, jadi tombol play dibuat transparan
-       dan menutupi seluruh cover: tap cover = putar lagu */
     .music-card .music-play-btn,
     .music-card:hover .music-play-btn{
         top: 0.7rem;
@@ -1212,7 +1195,8 @@ input[type="range"]::-webkit-slider-thumb{
         height: 100%;
     }
 
-    /* --- Mini player (di atas menu bawah) --- */
+    /* --- Mini player: sengaja dikasih z-index LEBIH RENDAH dari bottom-nav,
+       dan tidak boleh melewati batas atasnya (bottom-nav) --- */
     .player-bar{
         position: fixed;
         bottom: 4.6rem;
@@ -1273,10 +1257,10 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     .mini-controls{
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        flex-shrink: 0;
     }
 
     .mini-controls i{
@@ -1287,11 +1271,11 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     #miniPlay{  
-    font-size: 1.3rem;
+        font-size: 1.3rem;
     }
 
     .mini-controls i.active{    
-    color: var(--yellow);
+        color: var(--yellow);
     }
 
     .mini-progress{
@@ -1312,7 +1296,6 @@ input[type="range"]::-webkit-slider-thumb{
         background-color: var(--yellow);
     }
 
-    /* --- Now Playing layar penuh (tampilan iPhone) --- */
     .now-playing-panel{
         display: none !important;
         width: 100%;
@@ -1335,7 +1318,6 @@ input[type="range"]::-webkit-slider-thumb{
         overflow: hidden;
     }
 
-    /* background: cover lagu yang di-blur */
     .now-playing-panel.mobile-open .np-fullscreen-bg{
         display: block;
         filter: blur(2.5rem) brightness(0.45);
@@ -1351,7 +1333,6 @@ input[type="range"]::-webkit-slider-thumb{
         display: none;
     }
 
-    /* kartu kaca ala iPhone */
     .now-playing-panel.mobile-open .phone-frame{
         position: relative;
         z-index: 1;
@@ -1422,7 +1403,6 @@ input[type="range"]::-webkit-slider-thumb{
         margin-bottom: 0.3rem;
     }
 
-    /* garis progress & volume: pakai rem supaya ketebalannya ikut skala */
     .np-progress-bar,
     #npVolumeBar{
         height: 0.45rem;
@@ -1433,7 +1413,7 @@ input[type="range"]::-webkit-slider-thumb{
         display: none;
     }
 
-    /* --- Menu bawah: Home, Search, About, Support --- */
+    /* --- Menu bawah: WAJIB paling atas (z-index tertinggi di antara elemen fixed bawah) --- */
     .bottom-nav{
         display: flex;
         position: fixed;
@@ -1443,7 +1423,8 @@ input[type="range"]::-webkit-slider-thumb{
         height: 4.2rem;
         background-color: #121212;
         border-top: 1px solid rgba(255, 215, 0, 0.15);
-        z-index: 1600;
+        z-index: 2500;
+        pointer-events: auto;
     }
 
     .bottom-nav-item{
@@ -1458,6 +1439,7 @@ input[type="range"]::-webkit-slider-thumb{
         cursor: pointer;
         transition: 0.2s;
         text-decoration: none;
+        pointer-events: auto;
     }
 
     .bottom-nav-item i{
