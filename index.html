@@ -151,49 +151,74 @@
             </div>
         </div>
 
-        <!-- Khusus mobile: tombol play/pause + garis progress di mini player -->
-        <div class="mini-controls">
-            <i id="miniShuffle" class="fa-solid fa-shuffle"></i>
-            <i id="miniPlay" class="fa-solid fa-play"></i>
-            <i id="miniRepeat" class="fa-solid fa-repeat"></i>
-        </div>
-        <div class="mini-progress">
-            <div class="mini-progress-fill" id="miniProgressFill"></div>
+        <!-- Player -->
+        <div class="player-bar">
+            <div class="now-bar">
+                <img src="" alt="">
+                <div>
+                    <div class="img-title-info"></div>
+                    <div class="img-des-info"></div>
+                </div>
+            </div>
+            <div class="music-controller">
+                <div class="player">
+                    <div><i id="shuffle" class="player-btns fa-solid fa-shuffle"></i></div>
+                    <div><i id="backward" class="player-btns fa-solid fa-backward-step"></i></div>
+                    <div><i id="play" class="player-btns fa-solid fa-circle-play"></i></div>
+                    <div><i id="forward" class="player-btns fa-solid fa-forward-step"></i></div>
+                    <div><i id="repeat" class="player-btns fa-solid fa-repeat"></i></div>
+                </div>
+
+                <div class="progress-wrap">
+                    <span id="currentTime">0:00</span>
+                    <input type="range" id="progressBar" value="0">
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+
+            <!-- Khusus mobile: tombol shuffle/play/repeat + garis progress di mini player -->
+            <div class="mini-controls">
+                <i id="miniShuffle" class="fa-solid fa-shuffle"></i>
+                <i id="miniPlay" class="fa-solid fa-play"></i>
+                <i id="miniRepeat" class="fa-solid fa-repeat"></i>
+            </div>
+            <div class="mini-progress">
+                <div class="mini-progress-fill" id="miniProgressFill"></div>
+            </div>
+
+            <div></div>
         </div>
 
-        <div></div>
-    </div>
-
-    <!-- Modal Notifikasi -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-box">
-            <h3>Fitur Belum Tersedia</h3>
-            <p>Fitur ini sedang dalam tahap pengembangan.</p>
-            <button class="modal-close-btn" id="modalCloseBtn">Tutup</button>
+        <!-- Modal Notifikasi -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-box">
+                <h3>Fitur Belum Tersedia</h3>
+                <p>Fitur ini sedang dalam tahap pengembangan.</p>
+                <button class="modal-close-btn" id="modalCloseBtn">Tutup</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Bottom Nav (khusus mobile) -->
-    <div class="bottom-nav">
-        <div class="bottom-nav-item active" data-target="home">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
+        <!-- Bottom Nav (khusus mobile) -->
+        <div class="bottom-nav">
+            <div class="bottom-nav-item active" data-target="home">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="bottom-nav-item" data-target="history">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>History</span>
+            </div>
+            <a href="about.html" class="bottom-nav-item">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>About</span>
+            </a>
+            <a href="support.html" class="bottom-nav-item">
+                <i class="fa-solid fa-heart"></i>
+                <span>Support</span>
+            </a>
         </div>
-        <div class="bottom-nav-item" data-target="history">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>History</span>
-        </div>
-        <a href="about.html" class="bottom-nav-item">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>About</span>
-        </a>
-        <a href="support.html" class="bottom-nav-item">
-            <i class="fa-solid fa-heart"></i>
-            <span>Support</span>
-        </a>
-    </div>
 
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
 
 </html>
