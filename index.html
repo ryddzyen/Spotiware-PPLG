@@ -83,7 +83,7 @@
         </div>
 
         <!-- Now Playing Panel -->
-        <div class="now-playing-panel">
+        <div class="now-playing-panel" id="nowPlayingPanel">
             <div class="np-fullscreen-bg" id="npFullscreenBg"></div>
             <button class="np-back-btn" id="npBackBtn"><i class="fa-solid fa-arrow-left"></i></button>
             <div class="phone-frame">
@@ -118,7 +118,6 @@
                     <i class="fa-solid fa-wifi"></i> PPLG
                 </div>
             </div>
-            <button class="np-fullscreen-btn" id="npFullscreenBtn"><i class="fa-solid fa-expand"></i></button>
         </div>
     </div>
 
@@ -148,6 +147,8 @@
         </div>
         <div></div>
     </div>
+
+    <!-- Modal Notifikasi -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-box">
             <h3>Fitur Belum Tersedia</h3>
@@ -155,9 +156,28 @@
             <button class="modal-close-btn" id="modalCloseBtn">Tutup</button>
         </div>
     </div>
-    <script src="script.js"></script>
 
-    <!-- Modal Notifikasi -->
+    <!-- Bottom Nav (khusus mobile) -->
+    <div class="bottom-nav">
+        <div class="bottom-nav-item active" data-target="home">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="bottom-nav-item" data-target="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Search</span>
+        </div>
+        <a href="about.html" class="bottom-nav-item">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>About</span>
+        </a>
+        <a href="support.html" class="bottom-nav-item">
+            <i class="fa-solid fa-heart"></i>
+            <span>Support</span>
+        </a>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
