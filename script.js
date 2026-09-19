@@ -100,6 +100,25 @@ const songs = [
 const mobileQuery = window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)');
 const isMobileView = () => mobileQuery.matches;
 
+// Kalau Chrome HP dalam mode "Desktop site", halaman dirender selebar +-980px lalu
+// diperkecil ke layar HP, jadi semuanya terlihat mungil dan kartu lagunya banyak per baris.
+// Di sini ukuran dasar (rem) diperbesar sesuai rasionya supaya tampilan mobile
+// tetap pas di layar. Di mode normal rasionya 1, jadi tidak ada yang berubah.
+function fitMobileScale() {
+    const root = document.documentElement;
+    const ratio = window.innerWidth / window.screen.width;
+
+    if (isMobileView() && ratio > 1.2) {
+        root.style.fontSize = `${16 * ratio}px`;
+    } else {
+        root.style.fontSize = '';
+    }
+}
+
+fitMobileScale();
+window.addEventListener('resize', fitMobileScale);
+window.addEventListener('orientationchange', fitMobileScale);
+
 let order = [...songs];
 let currentIndex = 0;
 let audio = new Audio(order[currentIndex].songPath);
