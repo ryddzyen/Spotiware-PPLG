@@ -135,20 +135,6 @@ let miniProgressFill = document.getElementById('miniProgressFill');
 let miniShuffle = document.getElementById('miniShuffle');
 let miniRepeat = document.getElementById('miniRepeat');
 
-if (miniShuffle) {
-    miniShuffle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (shuffle) shuffle.click();
-    });
-}
-
-if (miniRepeat) {
-    miniRepeat.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (repeat) repeat.click();
-    });
-}
-
 // ===== Now Playing Panel (iPhone style) refs =====
 let npImage = document.getElementById('npImage');
 let npTitle = document.getElementById('npTitle');
@@ -760,7 +746,9 @@ bottomNavItems.forEach((item) => {
 
 // ===== Mini player -> buka Now Playing layar penuh ala iPhone (mobile) =====
 if (playerBar && nowPlayingPanel) {
-    playerBar.addEventListener('click', () => {
+    playerBar.addEventListener('click', (e) => {
+        if (e.target.closest('.mini-controls, .music-controller')) return;
+
         if (isMobileView()) {
             nowPlayingPanel.classList.add('mobile-open');
         }
