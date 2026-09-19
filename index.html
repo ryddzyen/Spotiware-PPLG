@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotiware</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.css"
+        integrity="sha512-NhLySQDkiKSKnT+R795uaHWRQ7D3VuIvgeOLCK8cWq4w5fq4sWF90gj8eURpTqn/f1mFzqClpOz8JPlgVTLfFw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="left-half">
+            <div class="logo"><img src="img/pplglogo.png" alt="PPLG Logo"></div>
+            <div class="home-icon"><i class="fa-solid fa-house"></i></div>
+            <div class="search-bar">
+                <div class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <input type="text" class="input-box" placeholder="Cari lagu">
+                <div class="browse"><i class="fa-solid fa-folder-open"></i></div>
+            </div>
+        </div>
+        <div class="right-half">
+            <div class="right-half-p1">
+                <a href="about.html" class="nav-text" style="text-decoration: none;">About</a>
+                <a href="support.html" class="nav-text" style="text-decoration: none;">Support</a>
+                <p class="nav-text notify-btn">Download</p>
+            </div>
+            <div class="right-half-p2">
+                <div class="nav-text notify-btn"><i class="fa-regular fa-circle-down"></i> Install App</div>
+                <div class="nav-text notify-btn">Sign up</div>
+                <button class="login-btn notify-btn">Log in</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="main-left-part">
+            <div class="library">
+                <p>Riwayat</p>
+            </div>
+
+            <div class="box-container" id="historyList">
+                <!-- Riwayat lagu akan muncul di sini otomatis -->
+            </div>
+        </div>
+
+        <!-- Main: right part -->
+        <div class="main-right-part">
+            <div class="music-section">
+                <h2>Popular Songs - Section 1</h2>
+                <div class="songs-wrapper">
+                    <div class="songs" id="section-1"></div>
+                    <button class="scroll-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="scroll-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="music-section">
+                <h2>Popular Songs - Section 2</h2>
+                <div class="songs-wrapper">
+                    <div class="songs" id="section-2"></div>
+                    <button class="scroll-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="scroll-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="music-section">
+                <h2>Popular Songs - Section 3</h2>
+                <div class="songs-wrapper">
+                    <div class="songs" id="section-3"></div>
+                    <button class="scroll-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="scroll-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Now Playing Panel -->
+        <div class="now-playing-panel">
+            <div class="np-fullscreen-bg" id="npFullscreenBg"></div>
+            <button class="np-back-btn" id="npBackBtn"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="phone-frame">
+                <button class="np-fullscreen-btn" id="npFullscreenBtn">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <div class="np-art">
+                    <img id="npImage" src="" alt="">
+                </div>
+                <div class="np-info">
+                    <h4 class="np-title" id="npTitle">Belum ada lagu diputar</h4>
+                    <p class="np-artist" id="npArtist"></p>
+                </div>
+                <div class="np-progress">
+                    <input type="range" class="np-progress-bar" id="npProgressBar" value="0">
+                </div>
+                <div class="np-time">
+                    <span id="npCurrentTime">0:00</span>
+                    <span id="npDuration">0:00</span>
+                </div>
+                <div class="np-controls">
+                    <i id="npBackward" class="fa-solid fa-backward"></i>
+                    <i id="npPlay" class="fa-solid fa-play"></i>
+                    <i id="npForward" class="fa-solid fa-forward"></i>
+                </div>
+                <div class="np-volume">
+                    <i class="fa-solid fa-volume-low"></i>
+                    <input type="range" id="npVolumeBar" min="0" max="100" value="100">
+                    <i class="fa-solid fa-volume-high"></i>
+                </div>
+                <div class="np-airplay">
+                    <i class="fa-solid fa-wifi"></i> PPLG
+                </div>
+            </div>
+            <button class="np-fullscreen-btn" id="npFullscreenBtn"><i class="fa-solid fa-expand"></i></button>
+        </div>
+    </div>
+
+    <!-- Player -->
+    <div class="player-bar">
+        <div class="now-bar">
+            <img src="" alt="">
+            <div>
+                <div class="img-title-info"></div>
+                <div class="img-des-info"></div>
+            </div>
+        </div>
+        <div class="music-controller">
+            <div class="player">
+                <div><i id="shuffle" class="player-btns fa-solid fa-shuffle"></i></div>
+                <div><i id="backward" class="player-btns fa-solid fa-backward-step"></i></div>
+                <div><i id="play" class="player-btns fa-solid fa-circle-play"></i></div>
+                <div><i id="forward" class="player-btns fa-solid fa-forward-step"></i></div>
+                <div><i id="repeat" class="player-btns fa-solid fa-repeat"></i></div>
+            </div>
+
+            <div class="progress-wrap">
+                <span id="currentTime">0:00</span>
+                <input type="range" id="progressBar" value="0">
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        <div></div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h3>Fitur Belum Tersedia</h3>
+            <p>Fitur ini sedang dalam tahap pengembangan.</p>
+            <button class="modal-close-btn" id="modalCloseBtn">Tutup</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+
+    <!-- Modal Notifikasi -->
+</body>
+
+</html>
