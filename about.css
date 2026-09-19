@@ -169,3 +169,49 @@ body{
     color: var(--yellow) !important;
     margin-top: 1.5rem;
 }
+
+@media (max-width: 768px){
+    .about-nav{
+        padding: 0 1rem;
+        height: 3.5rem;
+    }
+
+    .about-logo img{
+        height: 2rem;
+    }
+
+    .about-logo span{
+        font-size: 1rem;
+    }
+
+    .back-link{
+        font-size: 0.75rem;
+    }
+
+    .about-breadcrumb{
+        padding: 1rem 1rem 0 1rem;
+        font-size: 0.8rem;
+    }
+
+    .about-content{
+        margin: 1rem;
+        padding: 1.2rem;
+    }
+
+    .about-content h1{
+        font-size: 1.5rem;
+    }
+
+    .about-content h2{
+        font-size: 1.1rem;
+    }
+
+    .about-content p,
+    .about-content li{
+        font-size: 0.9rem;
+    }
+
+    .qris-wrapper img{
+        max-width: 9rem;
+    }
+}

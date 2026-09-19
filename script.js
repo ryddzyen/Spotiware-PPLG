@@ -132,6 +132,22 @@ let nowPlayingPanel = document.querySelector('.now-playing-panel');
 // ===== Mini player (mobile) refs =====
 let miniPlay = document.getElementById('miniPlay');
 let miniProgressFill = document.getElementById('miniProgressFill');
+let miniShuffle = document.getElementById('miniShuffle');
+let miniRepeat = document.getElementById('miniRepeat');
+
+if (miniShuffle) {
+    miniShuffle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (shuffle) shuffle.click();
+    });
+}
+
+if (miniRepeat) {
+    miniRepeat.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (repeat) repeat.click();
+    });
+}
 
 // ===== Now Playing Panel (iPhone style) refs =====
 let npImage = document.getElementById('npImage');
@@ -502,10 +518,13 @@ if (shuffle) {
             songOnRepeat = false;
             shuffle.classList.add('active');
             if (repeat) repeat.classList.remove('active');
+            if (miniShuffle) miniShuffle.classList.add('active');
+            if (miniRepeat) miniRepeat.classList.remove('active');
             order = shuffleSongs(songs);
         } else {
             songOnShuffle = false;
             shuffle.classList.remove('active');
+            if (miniShuffle) miniShuffle.classList.remove('active');
             order = [...songs];
         }
 
@@ -523,10 +542,13 @@ if (repeat) {
             songOnShuffle = false;
             repeat.classList.add('active');
             if (shuffle) shuffle.classList.remove('active');
+            if (miniRepeat) miniRepeat.classList.add('active');
+            if (miniShuffle) miniShuffle.classList.remove('active');
             order = [...songs];
         } else {
             songOnRepeat = false;
             repeat.classList.remove('active');
+            if (miniRepeat) miniRepeat.classList.remove('active');
         }
 
         let newPos = order.findIndex((s) => s.id === playingSongId);
@@ -699,6 +721,7 @@ if (modalOverlay) {
 
 // ===== Bottom Nav (mobile): Home, Search, About, Support =====
 let bottomNavItems = document.querySelectorAll('.bottom-nav-item[data-target]');
+let mainLeftPart = document.querySelector('.main-left-part');
 
 bottomNavItems.forEach((item) => {
     item.addEventListener('click', () => {
@@ -708,13 +731,15 @@ bottomNavItems.forEach((item) => {
         item.classList.add('active');
 
         if (target === 'home') {
+            if (mainLeftPart) mainLeftPart.classList.remove('mobile-show');
+            if (mainRightPart) mainRightPart.classList.remove('mobile-hide');
             goHome();
         }
 
-        if (target === 'search') {
+        if (target === 'history') {
+            if (mainLeftPart) mainLeftPart.classList.add('mobile-show');
+            if (mainRightPart) mainRightPart.classList.add('mobile-hide');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            let searchInputEl = document.querySelector('.input-box');
-            if (searchInputEl) searchInputEl.focus();
         }
     });
 });
