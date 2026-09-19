@@ -92,7 +92,13 @@ const songs = [
     { id: 88, songName: "Swim", songDes: "Chase Atlantic", songImage: "Art Cover/swim.jpg", songPath: "Lagu/Swim.mp3" },
     { id: 89, songName: "we can't be friends (wait for your love)", songDes: "Ariana Grande", songImage: "Art Cover/we can't be friend.jpg", songPath: "Lagu/we can't be friends (wait for your love).mp3" },
     { id: 90, songName: "What If I Call", songDes: "Charlie Burg", songImage: "Art Cover/What If I Call.jpg", songPath: "Lagu/What If I Call.mp3" },
+    { id: 91, songName: "worry - Slowed", songDes: "LONOWN", songImage: "Art Cover/worry.jpg", songPath: "Lagu/worry - Slowed.mp3" }
 ];
+
+// Tampilan mobile aktif kalau layar <= 768px ATAU perangkat layar sentuh
+// (sama persis dengan media query di style.css)
+const mobileQuery = window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)');
+const isMobileView = () => mobileQuery.matches;
 
 let order = [...songs];
 let currentIndex = 0;
@@ -103,6 +109,10 @@ let durationEl = document.getElementById('duration');
 let nowBar = document.querySelector('.now-bar');
 let playerBar = document.querySelector('.player-bar');
 let nowPlayingPanel = document.querySelector('.now-playing-panel');
+
+// ===== Mini player (mobile) refs =====
+let miniPlay = document.getElementById('miniPlay');
+let miniProgressFill = document.getElementById('miniProgressFill');
 
 // ===== Now Playing Panel (iPhone style) refs =====
 let npImage = document.getElementById('npImage');
@@ -272,8 +282,10 @@ function updateNowPlayingPanel() {
     if (npTitle) npTitle.innerText = song.songName;
     if (npArtist) npArtist.innerText = song.songDes;
 
+    // Pakai tanda kutip dua + encodeURI supaya nama file yang ada tanda ' (misal "Don't Copy My Flow")
+    // tidak merusak url() background
     let npFullscreenBg = document.getElementById('npFullscreenBg');
-    if (npFullscreenBg) npFullscreenBg.style.backgroundImage = `url('${song.songImage}')`;
+    if (npFullscreenBg) npFullscreenBg.style.backgroundImage = `url("${encodeURI(song.songImage)}")`;
 }
 
 function updateNowBar() {
@@ -368,12 +380,20 @@ audio.addEventListener('play', () => {
         npPlay.classList.remove('fa-play');
         npPlay.classList.add('fa-pause');
     }
+    if (miniPlay) {
+        miniPlay.classList.remove('fa-play');
+        miniPlay.classList.add('fa-pause');
+    }
 });
 
 audio.addEventListener('pause', () => {
     if (npPlay) {
         npPlay.classList.remove('fa-pause');
         npPlay.classList.add('fa-play');
+    }
+    if (miniPlay) {
+        miniPlay.classList.remove('fa-pause');
+        miniPlay.classList.add('fa-play');
     }
 });
 
@@ -390,6 +410,8 @@ audio.addEventListener('timeupdate', () => {
         }
         if (npCurrentTime) npCurrentTime.innerText = formatTime(audio.currentTime);
         if (npDuration) npDuration.innerText = formatRemainingTime(audio.currentTime, audio.duration);
+
+        if (miniProgressFill) miniProgressFill.style.width = `${progress}%`;
     }
 });
 
@@ -413,6 +435,15 @@ if (npProgressBar) {
 
 if (npPlay) {
     npPlay.addEventListener('click', () => {
+        play.click();
+    });
+}
+
+// Tombol play/pause di mini player (mobile).
+// stopPropagation supaya tap tombol ini TIDAK ikut membuka layar Now Playing.
+if (miniPlay) {
+    miniPlay.addEventListener('click', (e) => {
+        e.stopPropagation();
         play.click();
     });
 }
@@ -535,9 +566,12 @@ if (npFullscreenBtn && nowPlayingPanelEl) {
     });
 }
 
+// Tombol kembali: keluar fullscreen (desktop) dan/atau tutup layar Now Playing (mobile)
 if (npBackBtn) {
-    npBackBtn.addEventListener('click', () => {
-        document.exitFullscreen();
+    npBackBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (document.fullscreenElement) document.exitFullscreen();
+        if (nowPlayingPanel) nowPlayingPanel.classList.remove('mobile-open');
     });
 }
 
@@ -554,32 +588,21 @@ document.addEventListener('fullscreenchange', () => {
     }
 });
 
+// ===== Tombol panah kiri/kanan di tiap baris lagu (desktop) =====
 document.querySelectorAll('.songs-wrapper').forEach((wrapper) => {
     let track = wrapper.querySelector('.songs');
     let nextBtn = wrapper.querySelector('.next-btn');
     let prevBtn = wrapper.querySelector('.prev-btn');
 
-    function getCardStep(track) {
-    let card = track.querySelector('.music-card');
-    if (!card) return 700;
-    let style = window.getComputedStyle(card);
-    let marginRight = parseFloat(style.marginRight) || 0;
-    return card.offsetWidth + marginRight + 16; // 16 = kira-kira gap antar kartu
-}
-
-if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-        track.scrollBy({ left: getCardStep(track) * 3, behavior: 'smooth' });
-    });
-}
-
-if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -getCardStep(track) * 3, behavior: 'smooth' });
-    });
-}
-
     if (!track) return;
+
+    function getCardStep() {
+        let card = track.querySelector('.music-card');
+        if (!card) return 700;
+        let style = window.getComputedStyle(card);
+        let marginRight = parseFloat(style.marginRight) || 0;
+        return card.offsetWidth + marginRight + 16; // 16 = kira-kira gap antar kartu
+    }
 
     function updateButtonVisibility() {
         let maxScrollLeft = track.scrollWidth - track.clientWidth;
@@ -593,38 +616,41 @@ if (prevBtn) {
         }
     }
 
-    track.addEventListener('scroll', updateButtonVisibility);
-    setTimeout(updateButtonVisibility, 100);
-
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
-            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            track.scrollBy({ left: getCardStep() * 3, behavior: 'smooth' });
         });
     }
 
     if (prevBtn) {
         prevBtn.addEventListener('click', () => {
-            track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            track.scrollBy({ left: -getCardStep() * 3, behavior: 'smooth' });
         });
     }
+
+    track.addEventListener('scroll', updateButtonVisibility);
+    setTimeout(updateButtonVisibility, 100);
 });
 
-// ===== Home Icon: reset ke tampilan awal =====
-let homeIcon = document.querySelector('.home-icon');
+// ===== Kembali ke tampilan awal (dipakai Home di navbar & Home di menu bawah) =====
 let mainRightPart = document.querySelector('.main-right-part');
 
+function goHome() {
+    let searchInputEl = document.querySelector('.input-box');
+    if (searchInputEl) searchInputEl.value = '';
+
+    renderSongs(songs);
+    toggleSectionTitles(false);
+
+    if (mainRightPart) {
+        mainRightPart.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+let homeIcon = document.querySelector('.home-icon');
 if (homeIcon) {
-    homeIcon.addEventListener('click', () => {
-        let searchInputEl = document.querySelector('.input-box');
-        if (searchInputEl) searchInputEl.value = '';
-
-        renderSongs(songs);
-        toggleSectionTitles(false);
-
-        if (mainRightPart) {
-            mainRightPart.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    });
+    homeIcon.addEventListener('click', goHome);
 }
 
 // ===== Modal Notifikasi =====
@@ -652,7 +678,7 @@ if (modalOverlay) {
     });
 }
 
-// ===== Bottom Nav (mobile) =====
+// ===== Bottom Nav (mobile): Home, Search, About, Support =====
 let bottomNavItems = document.querySelectorAll('.bottom-nav-item[data-target]');
 
 bottomNavItems.forEach((item) => {
@@ -662,25 +688,24 @@ bottomNavItems.forEach((item) => {
         bottomNavItems.forEach((el) => el.classList.remove('active'));
         item.classList.add('active');
 
+        if (target === 'home') {
+            goHome();
+        }
+
         if (target === 'search') {
-            document.querySelector('.input-box').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            let searchInputEl = document.querySelector('.input-box');
+            if (searchInputEl) searchInputEl.focus();
         }
     });
 });
 
-// ===== Mini player -> buka Now Playing full screen (mobile) =====
+// ===== Mini player -> buka Now Playing layar penuh ala iPhone (mobile) =====
 if (playerBar && nowPlayingPanel) {
     playerBar.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
+        if (isMobileView()) {
             nowPlayingPanel.classList.add('mobile-open');
         }
-    });
-}
-
-if (npBackBtn) {
-    npBackBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        nowPlayingPanel.classList.remove('mobile-open');
     });
 }
 

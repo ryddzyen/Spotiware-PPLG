@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
     <title>Spotiware</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.css"
         integrity="sha512-NhLySQDkiKSKnT+R795uaHWRQ7D3VuIvgeOLCK8cWq4w5fq4sWF90gj8eURpTqn/f1mFzqClpOz8JPlgVTLfFw=="
@@ -94,8 +95,12 @@
                     <img id="npImage" src="" alt="">
                 </div>
                 <div class="np-info">
-                    <h4 class="np-title" id="npTitle">Belum ada lagu diputar</h4>
-                    <p class="np-artist" id="npArtist"></p>
+                    <div class="np-info-text">
+                        <p class="np-device">PPLG</p>
+                        <h4 class="np-title" id="npTitle">Belum ada lagu diputar</h4>
+                        <p class="np-artist" id="npArtist"></p>
+                    </div>
+                    <i class="fa-solid fa-tower-broadcast np-info-icon"></i>
                 </div>
                 <div class="np-progress">
                     <input type="range" class="np-progress-bar" id="npProgressBar" value="0">
@@ -145,6 +150,15 @@
                 <span id="duration">0:00</span>
             </div>
         </div>
+
+        <!-- Khusus mobile: tombol play/pause + garis progress di mini player -->
+        <div class="mini-controls">
+            <i id="miniPlay" class="fa-solid fa-play"></i>
+        </div>
+        <div class="mini-progress">
+            <div class="mini-progress-fill" id="miniProgressFill"></div>
+        </div>
+
         <div></div>
     </div>
 
