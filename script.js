@@ -86,7 +86,7 @@ const songs = [
     { id: 82, songName: "My Love Mine All Mine", songDes: "Mitski", songImage: "Art Cover/my love mine all mine.jpg", songPath: "Lagu/My Love Mine All Mine.mp3" },
     { id: 83, songName: "No One Noticed", songDes: "The Marías", songImage: "Art Cover/no one noticed.jpg", songPath: "Lagu/No One Noticed.mp3" },
     { id: 84, songName: "Not Around", songDes: "Nova", songImage: "Art Cover/Not Around.jpg", songPath: "Lagu/Not Around.mp3" },
-    { id: 85, songName: "Past Life", songDes: "Trevor Daniel, Selena Gomez", songImage: "Art Cover/Past life.jpg", songPath: "Lagu/Past Life.mp3" },
+    { id: 85, songName: "Something About You", songDes: "Eyedress, Dent May", songImage: "Art Cover/Something About You.jpg", songPath: "Lagu/Something About You.mp3" },
     { id: 86, songName: "Shadows", songDes: "Pastel Ghost", songImage: "Art Cover/Shadows EP.jpg", songPath: "Lagu/Shadows.mp3" },
     { id: 87, songName: "supernatural", songDes: "Ariana Grande", songImage: "Art Cover/supernatural.jpg", songPath: "Lagu/supernatural.mp3" },
     { id: 88, songName: "Swim", songDes: "Chase Atlantic", songImage: "Art Cover/swim.jpg", songPath: "Lagu/Swim.mp3" },
