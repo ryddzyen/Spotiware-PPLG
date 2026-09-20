@@ -2,7 +2,7 @@ let play = document.getElementById('play');
 let progressBar = document.getElementById('progressBar');
 
 const songs = [
-    { id: 1, songName: "PIXY", songDes: "LEGACY", songImage: "Art Cover/LEGACY.jpg", songPath: "Lagu/LEGACY.mp3" },
+    { id: 1, songName: "PIXY", songDes: "LEGACY", songImage: "Art Cover/LEGACY.jpg", songPath: "Lagu/SpotiDown.App - LEGACY - PIXY.mp3" },
     { id: 2, songName: "2 On (feat. ScHoolboy Q)", songDes: "Tinashe", songImage: "Art Cover/2 On (feat. ScHoolboy Q).jpg", songPath: "Lagu/2 On (feat. ScHoolboy Q).mp3" },
     { id: 3, songName: "After Dark x Sweater Weather", songDes: "mikeeysmind", songImage: "Art Cover/After Dark x Sweater Weather.jpeg", songPath: "Lagu/After Dark x Sweater Weather.mp3" },
     { id: 4, songName: "After Hours", songDes: "The Weeknd", songImage: "Art Cover/After Hours.jpeg", songPath: "Lagu/After Hours.mp3" },
@@ -43,7 +43,7 @@ const songs = [
     { id: 39, songName: "Money Trees", songDes: "Kendrick Lamar", songImage: "Art Cover/good kid, m.A.A.d city.jpg", songPath: "Lagu/Money Trees.mp3" },
     { id: 40, songName: "About You", songDes: "The 1975", songImage: "Art Cover/About You.jpg", songPath: "Lagu/About You.mp3" },
     { id: 41, songName: "Moonlight", songDes: "Kali Uchis", songImage: "Art Cover/Red Moon In Venus.jpg", songPath: "Lagu/Moonlight.mp3" },
-    { id: 42, songName: "MTG MEDICINE", songDes: "DJ Samir", songImage: "Art Cover/MTG MEDICINE.jpeg", songPath: "Lagu/MTG MEDICINE.mp3" },
+    { id: 42, songName: "Iris", songDes: "Pastel Ghost", songImage: "Art Cover/SpotiDown.App - Iris - Pastel Ghost.jpeg", songPath: "Lagu/SpotiDown.App - Iris - Pastel Ghost.mp3" },
     { id: 43, songName: "No. 1 Party Anthem", songDes: "Arctic Monkeys", songImage: "Art Cover/AM.jpeg", songPath: "Lagu/No. 1 Party Anthem.mp3" },
     { id: 44, songName: "nuts (feat. Rainy Bear)", songDes: "Lil Peep", songImage: "Art Cover/nuts (feat. Rainy Bear).jpg", songPath: "Lagu/nuts (feat. Rainy Bear).mp3" },
     { id: 45, songName: "505", songDes: "Arctic Monkeys", songImage: "Art Cover/505.jpg", songPath: "Lagu/obsessed - slowed + reverb.mp3" },
@@ -66,7 +66,7 @@ const songs = [
     { id: 62, songName: "AEAO", songDes: "Dynamicduo, CHEN", songImage: "Art Cover/aeao.jpg", songPath: "Lagu/AEAO.mp3" },
     { id: 63, songName: "Apocalypse", songDes: "Cigarettes After Sex", songImage: "Art Cover/apocallypse.jpg", songPath: "Lagu/Apocalypse.mp3" },
     { id: 64, songName: "Back to Friends", songDes: "sombr", songImage: "Art Cover/back to friends.jpg", songPath: "Lagu/back to friends.mp3" },
-    { id: 65, songName: "Beauty And A Beat", songDes: "Justin Bieber, Nicki Minaj", songImage: "Art Cover/Beaty and a beat.jpg", songPath: "Lagu/Beauty And A Beat.mp3" },
+    { id: 65, songName: "Beauty And A Beat", songDes: "Justin Bieber, Nicki Minaj", songImage: "Art Cover/Believe (Deluxe Edition).jpg", songPath: "Lagu/SpotiDown.App - Beauty And A Beat - Justin Bieber.mp3" },
     { id: 66, songName: "BIRDS OF A FEATHER", songDes: "Billie Eilish", songImage: "Art Cover/birds of feather.jpg", songPath: "Lagu/BIRDS OF A FEATHER.mp3" },
     { id: 67, songName: "boyfriend (with Social House)", songDes: "Ariana Grande, Social House", songImage: "Art Cover/boyfriend.jpg", songPath: "Lagu/boyfriend (with Social House).mp3" },
     { id: 68, songName: "Into You X bye", songDes: "Ariana Grande", songImage: "Art Cover/Into You X bye.jpg", songPath: "Lagu/Into You X bye (altare remix) - Ariana Grande (mashup).mp3" },
