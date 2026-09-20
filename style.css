@@ -1450,3 +1450,53 @@ input[type="range"]::-webkit-slider-thumb{
         color: var(--yellow);
     }
 }
+
+/* ===== FIX: posisi tombol player di desktop (taruh paling bawah file) ===== */
+@media (min-width: 901px) and (hover: hover) {
+    .player-bar{
+        position: relative;
+    }
+
+    /* Tombol + progress dipasang tepat di tengah layar */
+    .music-controller{
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: min(40%, 45rem);
+        margin: 0;
+    }
+
+    /* buang margin-left 7rem dan translateY yang bikin geser */
+    .player{
+        margin: 0 0 0.4rem;
+        transform: none;
+    }
+
+    .player > div{
+        display: flex;
+        align-items: center;
+    }
+
+    .player-btns{
+        margin: 0 0.8rem;
+        transform: none;
+        padding-left: 0;
+    }
+
+    /* progress bar ikut lebar kolom tengah, bukan 390px + translate */
+    #progressBar{
+        flex: 1;
+        min-width: 0;
+        width: auto;
+        transform: none;
+    }
+
+    .progress-wrap span{
+        min-width: 2.5rem;
+        transform: none;
+    }
+
+    #currentTime{ text-align: right; }
+    #duration{ text-align: left; }
+}
