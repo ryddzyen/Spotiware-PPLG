@@ -1318,6 +1318,11 @@ input[type="range"]::-webkit-slider-thumb{
         overflow: hidden;
     }
 
+    /* Sembunyikan menu bawah (Home/History/About/Support) saat Now Playing dibuka */
+    body:has(.now-playing-panel.mobile-open) .bottom-nav{
+        display: none;
+    }
+
     .now-playing-panel.mobile-open .np-fullscreen-bg{
         display: block;
         filter: blur(2.5rem) brightness(0.45);
