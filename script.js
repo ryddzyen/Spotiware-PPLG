@@ -448,7 +448,7 @@ progressBar.addEventListener('input', function () {
 if (npProgressBar) {
     npProgressBar.addEventListener('input', function () {
         let value = this.value;
-        this.style.background = `linear-gradient(to right, var(--yellow) ${value}%, #555 ${value}%)`;
+        this.style.background = `linear-gradient(to right, var(--fg) ${value}%, #555 ${value}%)`;
         if (audio.duration) {
             audio.currentTime = (value * audio.duration) / 100;
         }
