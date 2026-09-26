@@ -13,7 +13,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -32,7 +31,7 @@
             <div class="right-half-p1">
                 <a href="about.html" class="nav-text" style="text-decoration: none;">About</a>
                 <a href="support.html" class="nav-text" style="text-decoration: none;">Support</a>
-                <p class="nav-text notify-btn">Download</p>
+                <p class="nav-text" id="historyNavBtn" style="cursor:pointer;">History</p>
             </div>
             <div class="right-half-p2">
                 <div class="nav-text notify-btn"><i class="fa-regular fa-circle-down"></i> Install App</div>
@@ -46,12 +45,49 @@
     <div class="main">
         <div class="main-left-part">
             <div class="library">
-                <p>Riwayat</p>
+                <p>Your Library</p>
+                <div class="library-icons">
+                    <button class="create-playlist-btn" id="newPlaylistBtn" title="Buat playlist baru">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button class="library-expand-btn" id="libraryExpandBtn" title="Perbesar Your Library">
+                        <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="library-tabs">
+                <button class="library-tab active">Playlists</button>
+            </div>
+            <div class="library-toolbar">
+                <button class="library-search-btn" id="libraryFilterBtn" title="Cari di Library">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <input type="text" id="libraryFilterInput" class="library-search-input"
+                    placeholder="Search in Your Library">
+                <div class="library-sort" id="librarySortBtn">
+                    <span id="librarySortLabel">Recents</span> <i class="fa-solid fa-bars-staggered"></i>
+                </div>
+                <div class="library-sort-menu" id="librarySortMenu">
+                    <p class="sort-menu-title">Sort by</p>
+                    <div class="sort-menu-item active" data-sort="recents">Recents</div>
+                    <div class="sort-menu-item" data-sort="added">Recently Added</div>
+                    <div class="sort-menu-item" data-sort="alpha">Alphabetical</div>
+                    <div class="sort-menu-item" data-sort="creator">Creator</div>
+                    <p class="sort-menu-title">View as</p>
+                    <div class="sort-view-icons">
+                        <button class="view-icon-btn" data-view="list" title="List"><i
+                                class="fa-solid fa-list"></i></button>
+                        <button class="view-icon-btn" data-view="compact" title="Compact"><i
+                                class="fa-solid fa-bars"></i></button>
+                        <button class="view-icon-btn active" data-view="grid" title="Grid"><i
+                                class="fa-solid fa-grip"></i></button>
+                        <button class="view-icon-btn" data-view="gridlarge" title="Grid besar"><i
+                                class="fa-solid fa-table-cells-large"></i></button>
+                    </div>
+                </div>
             </div>
 
-            <div class="box-container" id="historyList">
-                <!-- Riwayat lagu akan muncul di sini otomatis -->
-            </div>
+            <div class="box-container" id="playlistList"></div>
         </div>
 
         <!-- Main: right part -->
@@ -64,6 +100,38 @@
                     <button class="scroll-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
+
+            <div class="playlist-detail-view" id="playlistDetailView">
+                <div class="playlist-detail-header">
+                    <div class="playlist-detail-cover" id="playlistDetailCover"><i class="fa-solid fa-heart"></i></div>
+                    <div class="playlist-detail-info">
+                        <p class="playlist-detail-type">Playlist</p>
+                        <h1 class="playlist-detail-title" id="playlistDetailTitle">Liked Songs</h1>
+                        <p class="playlist-detail-meta" id="playlistDetailMeta">0 songs</p>
+                    </div>
+                </div>
+                <div class="playlist-detail-toolbar">
+                    <button class="playlist-play-btn" id="playlistPlayBtn"><i class="fa-solid fa-play"></i></button>
+                    <i class="fa-solid fa-shuffle playlist-toolbar-icon" id="playlistShuffleBtn"></i>
+                    <div class="playlist-toolbar-spacer"></div>
+                    <div class="playlist-view-toggle" id="playlistViewToggle">
+                        <span id="playlistViewLabel">List</span> <i class="fa-solid fa-list"></i>
+                    </div>
+                </div>
+                <table class="playlist-track-table" id="playlistTrackTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th class="hide-compact">Album</th>
+                            <th><i class="fa-regular fa-clock"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="playlistTrackTableBody"></tbody>
+                </table>
+                <button class="playlist-back-btn" id="playlistDetailBackBtn"><i class="fa-solid fa-arrow-left"></i> Back
+                    to Home</button>
+            </div>  
 
             <div class="music-section">
                 <h2>Trending Now</h2>
@@ -135,6 +203,9 @@
                 <div class="img-title-info"></div>
                 <div class="img-des-info"></div>
             </div>
+            <button class="now-bar-like-btn" id="nowBarLikeBtn" title="Simpan ke Liked Songs">
+                <i class="fa-regular fa-heart"></i>
+            </button>
         </div>
         <div class="music-controller">
             <div class="player">
@@ -174,15 +245,37 @@
         </div>
     </div>
 
+    <!-- Modal Tambah ke Playlist -->
+    <div class="modal-overlay" id="addToPlaylistModal">
+        <div class="modal-box">
+            <h3>Tambah ke Playlist</h3>
+            <div id="addToPlaylistList" class="add-to-playlist-list"></div>
+            <div class="new-playlist-inline">
+                <input type="text" id="newPlaylistNameInput" placeholder="Nama playlist baru">
+                <button id="createPlaylistInlineBtn">Buat</button>
+            </div>
+            <button class="modal-close-btn" id="addToPlaylistCloseBtn">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-box">
+            <h3>Riwayat Diputar</h3>
+            <div id="historyList" class="add-to-playlist-list"></div>
+            <button class="modal-close-btn" id="historyModalCloseBtn">Tutup</button>
+        </div>
+    </div>
+
     <!-- Bottom Nav (khusus mobile) -->
     <div class="bottom-nav">
         <div class="bottom-nav-item active" data-target="home">
             <i class="fa-solid fa-house"></i>
             <span>Home</span>
         </div>
-        <div class="bottom-nav-item" data-target="history">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>History</span>
+        <div class="bottom-nav-item" data-target="library">
+            <i class="fa-solid fa-list"></i>
+            <span>Library</span>
         </div>
         <a href="about.html" class="bottom-nav-item">
             <i class="fa-solid fa-circle-info"></i>
@@ -195,6 +288,11 @@
     </div>
 
     <script src="script.js"></script>
+
+    <div class="context-menu" id="songContextMenu">
+        <div class="context-menu-item" id="ctxAddToLibrary"><i class="fa-solid fa-heart"></i> Add to Your Library</div>
+        <div class="context-menu-item" id="ctxAddToPlaylist"><i class="fa-solid fa-plus"></i> Add to Playlist</div>
+    </div>
 </body>
 
 </html>

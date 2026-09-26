@@ -217,21 +217,22 @@ nav{
     margin-top: 1vh;
     display: flex;
     justify-content: flex-start;
-    gap: 0.6rem;
+    gap: 0;
     color: white;
 }
 
 .main-left-part{
-    width: 20%;
+    width: 23%;
     height: 100%;
     background-color: #121212;
     border-radius: 10px;
+    margin-right: 0.6rem;
 }
 
 .main-right-part{
     flex: 1;
     width: 55%;
-    height: 100%;
+    height: 98.7%;
     background-color: #121212;
     border-radius: 10px;
     overflow: hidden;
@@ -266,28 +267,6 @@ nav{
     margin: 1rem 1.5rem;
 }
 
-.library p{
-    font-weight: 600;
-}
-
-.library div{
-    font-size: 2rem;
-    color: rgb(179, 179, 179);
-    background-color: #2f2f2f;
-    padding: 8px;
-    height: 1.5rem;
-    width: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 30rem;
-    transition: 0.2s;
-}
-
-.library div:hover{
-    color: black;
-    background-color: var(--yellow);
-}
 
 #historyList{
     margin-top: 1rem;
@@ -468,12 +447,11 @@ nav{
 .now-playing-panel{
     width: 22%;
     height: 100%;
-    background-color: #121212;
-    border-radius: 10px;
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: 1rem 1rem 1rem 0.3rem;
+    overflow: hidden;
 }
 
 .now-playing-panel.show{
@@ -601,10 +579,10 @@ nav{
 
 .phone-frame{
     width: 100%;
-    max-width: 15rem;
+    max-width: clamp(14rem, 90%, 18rem);
+    padding: 0.9rem;
     background: linear-gradient(180deg, #2a2a2a, #161616);
     border-radius: 2rem;
-    padding: 1.2rem;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
@@ -839,13 +817,100 @@ input[type="range"]::-webkit-slider-thumb{
     color: white;
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 0.8rem 1rem;
     width: 20%;
+    gap: 0.6rem;
+    overflow: hidden;
 }
 
 .now-bar img[src=""], 
 .now-bar img:not([src]) {
     display: none;
+}
+
+.now-bar > div{
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.img-title-info,
+.img-des-info{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.now-bar-like-btn{
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--gray-mid);
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    transition: 0.2s;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.now-bar-like-btn:hover{
+    color: white;
+    transform: scale(1.1);
+}
+.now-bar-like-btn.liked{
+    color: #1ed760;
+}
+.now-bar-like-btn.liked i{
+    font-weight: 900;
+}
+
+/* Library expand penuh (now playing / phone frame tetap tampil, seperti Spotify) */
+.main.library-expanded .main-right-part{
+    display: none !important;
+}
+.main.library-expanded .main-left-part{
+    width: auto;
+    flex: 1;
+}
+
+/* Context menu ala Spotify */
+.context-menu{
+    position: fixed;
+    display: none;
+    flex-direction: column;
+    background-color: #282828;
+    border-radius: 6px;
+    padding: 0.4rem 0;
+    min-width: 12rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 5000;
+}
+.context-menu.show{
+    display: flex;
+}
+.context-menu-item{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1rem;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.context-menu-item:hover{
+    background-color: #3a3a3a;
+}
+.context-menu-item i{
+    width: 1rem;
+    color: var(--gray-light);
+}
+
+/* Pinned tile Liked Songs & Riwayat */
+.playlist-item.liked-songs .playlist-icon{
+    background: linear-gradient(135deg, #450af5, #c4efd9);
+    color: white;
 }
 
 .player-bar img{
@@ -861,9 +926,6 @@ input[type="range"]::-webkit-slider-thumb{
     font-size: 0.9rem;
     margin-left: 1rem;
     font-weight: 600;
-    margin-top: -10px;
-    margin-bottom: 15px;
-    transform: translateY(14px);
 }
 
 .img-des-info{
@@ -1008,7 +1070,8 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     .main-left-part,
-    .main-right-part {
+    .main-right-part,
+    .now-playing-panel {
         width: 100%;
     }
 
@@ -1309,8 +1372,6 @@ input[type="range"]::-webkit-slider-thumb{
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: #000;
-        border-radius: 0;
         padding: 0;
         z-index: 2000;
         align-items: center;
@@ -1456,10 +1517,21 @@ input[type="range"]::-webkit-slider-thumb{
     }
 }
 
-/* ===== FIX: posisi tombol player di desktop (taruh paling bawah file) ===== */
 @media (min-width: 901px) and (hover: hover) {
     .player-bar{
-        position: relative;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5.2rem;
+        background-color: #181818;
+        border-top: 1px solid rgba(255, 215, 0, 0.15);
+        z-index: 1000;
+        padding: 0 1rem;
+    }
+
+    .main{
+        margin-bottom: 5.2rem;
     }
 
     /* Tombol + progress dipasang tepat di tengah layar */
@@ -1472,7 +1544,6 @@ input[type="range"]::-webkit-slider-thumb{
         margin: 0;
     }
 
-    /* buang margin-left 7rem dan translateY yang bikin geser */
     .player{
         margin: 0 0 0.4rem;
         transform: none;
@@ -1489,7 +1560,6 @@ input[type="range"]::-webkit-slider-thumb{
         padding-left: 0;
     }
 
-    /* progress bar ikut lebar kolom tengah, bukan 390px + translate */
     #progressBar{
         flex: 1;
         min-width: 0;
@@ -1505,3 +1575,586 @@ input[type="range"]::-webkit-slider-thumb{
     #currentTime{ text-align: right; }
     #duration{ text-align: left; }
 }
+
+/* ===== Fitur Playlist ===== */
+.library-tabs{
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 1.5rem 0.5rem;
+}
+
+.library-tab{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.library-tab:hover{
+    color: white;
+}
+
+.library-tab.active{
+    background-color: var(--yellow);
+    color: black;
+}
+
+.library-tab.active{
+    background-color: white;
+    color: black;
+}
+
+.playlist-item{
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    margin: 0 0.5rem;
+    transition: 0.15s;
+}
+.playlist-item:hover{
+    background-color: #1a1a1a;
+}
+
+.playlist-icon{
+    border-radius: 4px;
+}
+
+.playlist-item.liked-songs .playlist-icon i{
+    font-size: 1.1rem;
+}
+
+#riwayatPinnedTile .playlist-icon{
+    background-color: #2a2a2a;
+    color: var(--gray-light);
+}
+
+#playlistPane{
+    padding: 0 0.5rem 1rem;
+}
+
+.new-playlist-btn{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: calc(100% - 1rem);
+    margin: 0 0.5rem 0.8rem;
+    padding: 0.6rem 1rem;
+    background-color: #2a2a2a;
+    color: white;
+    border: 1px dashed rgba(255, 215, 0, 0.4);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.new-playlist-btn:hover{
+    background-color: #333;
+    border-color: var(--yellow);
+}
+
+.playlist-item{
+    position: relative;
+}
+
+.playlist-icon{
+    width: 3rem;
+    height: 3rem;
+    border-radius: 5px;
+    background-color: #2f2f2f;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.playlist-delete-btn{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-size: 0.85rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.playlist-item:hover .playlist-delete-btn{
+    opacity: 1;
+}
+
+.playlist-delete-btn:hover{
+    color: #ff5252;
+}
+
+/* Tombol tambah/hapus dari playlist di tiap kartu lagu (desktop: muncul saat hover) */
+.add-to-playlist-btn,
+.remove-from-playlist-btn{
+    position: absolute;
+    top: 0.9rem;
+    right: 0.9rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.music-card:hover .add-to-playlist-btn,
+.music-card:hover .remove-from-playlist-btn{
+    opacity: 1;
+}
+
+.add-to-playlist-btn:hover{
+    background-color: var(--yellow);
+    color: black;
+}
+
+.remove-from-playlist-btn:hover{
+    background-color: #ff5252;
+}
+
+/* Modal tambah ke playlist */
+.add-to-playlist-list{
+    max-height: 12rem;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.add-to-playlist-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.3rem;
+    border-bottom: 1px solid var(--border);
+    color: white;
+    font-size: 0.85rem;
+}
+
+.playlist-toggle-btn{
+    background-color: var(--yellow);
+    color: black;
+    border: none;
+    padding: 0.35rem 0.8rem;
+    border-radius: 20rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.playlist-toggle-btn.in-playlist{
+    background-color: #2a2a2a;
+    color: var(--gray-light);
+}
+
+.new-playlist-inline{
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.new-playlist-inline input{
+    flex: 1;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background-color: #1f1f1f;
+    color: white;
+    font-size: 0.85rem;
+}
+
+.new-playlist-inline button{
+    background-color: var(--yellow);
+    color: black;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ===== Sidebar Library: header dengan icon (History + Playlist baru) ===== */
+.library-icons{
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Modal Riwayat pakai style yang sama dengan modal Tambah ke Playlist,
+   tapi height-nya perlu ditimpa karena #historyList aslinya didesain
+   untuk sidebar (height: calc(100% - 4rem)), bukan untuk di dalam modal. */
+#historyModal #historyList{
+    height: auto;
+    max-height: 14rem;
+    margin-top: 0;
+    padding: 0;
+}
+
+/* Mobile: tidak ada hover, jadi tombol tambah/hapus playlist selalu kelihatan */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .remove-from-playlist-btn{
+        opacity: 1;
+        top: 0.4rem;
+        right: 0.4rem;
+        width: 1.6rem;
+        height: 1.6rem;
+        font-size: 0.7rem;
+    }
+}
+
+
+/* Baris search + sort di bawah tab */
+.library-toolbar{
+    display: flex;
+    align-items: center;
+    margin: 0.3rem 1.5rem 0.8rem;
+    gap: 0.3rem;
+}
+
+.library-search-btn{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    flex-shrink: 0;
+}
+.library-search-btn:hover{ color: white; }
+.library-search-input{
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    display: none;
+    padding: 0.2rem 0;
+}
+.library-search-input.show{ display: block; }
+
+.library-sort{
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--gray-mid);
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: auto;
+}
+.library-sort:hover{ color: white; }
+
+/* Thumbnail cover playlist (pakai art lagu pertama di playlist) */
+.playlist-thumb{
+    width: 3rem;
+    height: 3rem;
+    border-radius: 5px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background-color: #2f2f2f;
+}
+
+/* ===== Mode Library Fullscreen -> jadi grid kartu ala Spotify ===== */
+.main.library-expanded .main-left-part{
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4d4d4d transparent;
+}
+.main.library-expanded .main-left-part::-webkit-scrollbar{ width: 10px; }
+.main.library-expanded .main-left-part::-webkit-scrollbar-thumb{
+    background-color: #4d4d4d;
+    border-radius: 10px;
+}
+
+.main.library-expanded #playlistList{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1.2rem;
+    padding: 1rem 1.5rem 2rem;
+}
+.main.library-expanded .playlist-item{
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.8rem;
+    margin: 0;
+    border-radius: 8px;
+    background-color: #181818;
+}
+.main.library-expanded .playlist-item:hover{
+    background-color: #222;
+}
+.main.library-expanded .playlist-icon,
+.main.library-expanded .playlist-thumb{
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    border-radius: 6px;
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+}
+.main.library-expanded .history-info{ width: 100%; }
+.main.library-expanded .history-title{
+    white-space: normal;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+}
+.main.library-expanded .playlist-delete-btn{
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background-color: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    opacity: 0;
+}
+.main.library-expanded .playlist-item:hover .playlist-delete-btn{ opacity: 1; }
+
+.library-icons{
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.create-playlist-btn,
+.library-expand-btn{
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    max-width: 2rem;
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--gray-mid);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.create-playlist-btn:hover,
+.library-expand-btn:hover{
+    color: white;
+    background-color: #2a2a2a;
+}
+
+/* Sort menu */
+.library-sort-menu{
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background-color: #282828;
+    border-radius: 8px;
+    padding: 0.6rem 0;
+    min-width: 12rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 200;
+}
+.library-sort-menu.show{ display: block; }
+.sort-menu-title{
+    color: var(--gray-mid);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.4rem 1rem;
+}
+.sort-menu-item{
+    color: white;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+.sort-menu-item:hover{ background-color: #3a3a3a; }
+.sort-menu-item.active{ color: #1ed760; }
+.sort-view-icons{
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem 0.2rem;
+}
+.view-icon-btn{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.view-icon-btn:hover{ color: white; }
+.view-icon-btn.active{ background-color: #3a3a3a; color: #1ed760; }
+
+/* View modes untuk #playlistList */
+#playlistList.view-grid,
+#playlistList.view-gridlarge{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 0.8rem;
+    padding: 0.5rem 1rem 1rem;
+}
+#playlistList.view-gridlarge{
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+#playlistList.view-grid .playlist-item,
+#playlistList.view-gridlarge .playlist-item{
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem;
+    margin: 0;
+    background-color: #181818;
+    border-radius: 8px;
+}
+#playlistList.view-grid .playlist-icon,
+#playlistList.view-grid .playlist-thumb,
+#playlistList.view-gridlarge .playlist-icon,
+#playlistList.view-gridlarge .playlist-thumb{
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1/1;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+#playlistList.view-grid .history-title,
+#playlistList.view-gridlarge .history-title{ white-space: normal; }
+#playlistList.view-compact .playlist-item{ padding: 0.2rem 0.5rem; }
+#playlistList.view-compact .playlist-icon,
+#playlistList.view-compact .playlist-thumb{
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+}
+
+/* Playlist Detail View */
+.playlist-detail-view{ display: none; }
+.playlist-detail-view.show{ display: block; }
+
+.playlist-detail-header{
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: linear-gradient(180deg, #5038a0, #121212);
+}
+.playlist-detail-cover{
+    width: 12rem;
+    height: 12rem;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #450af5, #c4efd9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+.playlist-detail-cover img{ width: 100%; height: 100%; object-fit: cover; }
+.playlist-detail-type{ font-size: 0.85rem; font-weight: 700; }
+.playlist-detail-title{
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0.3rem 0;
+    line-height: 1.1;
+    word-break: break-word;
+}
+.playlist-detail-meta{ font-size: 0.85rem; color: var(--gray-light); }
+
+.playlist-detail-toolbar{
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.2rem 2rem;
+}
+.playlist-play-btn{
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background-color: #1ed760;
+    color: black;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.playlist-play-btn:hover{ transform: scale(1.05); }
+.playlist-toolbar-icon{ font-size: 1.4rem; color: var(--gray-mid); cursor: pointer; }
+.playlist-toolbar-icon:hover{ color: white; }
+.playlist-toolbar-icon.active{ color: #1ed760; }
+.playlist-toolbar-spacer{ flex: 1; }
+.playlist-view-toggle{
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--gray-mid);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.playlist-view-toggle:hover{ color: white; }
+
+.playlist-track-table{
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--gray-light);
+}
+.playlist-track-table thead th{
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--gray-mid);
+    font-weight: 500;
+    padding: 0.5rem 2rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+.playlist-track-table tbody tr{ cursor: pointer; }
+.playlist-track-table tbody tr:hover{ background-color: #2a2a2a; }
+.playlist-track-table td{ padding: 0.6rem 2rem; font-size: 0.85rem; }
+.track-title-cell{ display: flex; align-items: center; gap: 0.8rem; }
+.track-title-cell img{ width: 2.5rem; height: 2.5rem; border-radius: 4px; object-fit: cover; }
+.track-title-text{ display: flex; flex-direction: column; }
+.track-title-text .t-name{ color: white; font-weight: 500; }
+.track-title-text .t-artist{ font-size: 0.78rem; }
+.playlist-track-table.compact-mode .hide-compact{ display: none; }
+.playlist-track-table.compact-mode td,
+.playlist-track-table.compact-mode th{ padding: 0.3rem 2rem; }
+
+.playlist-back-btn{
+    margin: 1rem 2rem 2rem;
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.playlist-back-btn:hover{ color: white; }
+
+.music-section.hide{ display: none !important; }
