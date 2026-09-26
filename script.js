@@ -747,12 +747,18 @@ bottomNavItems.forEach((item) => {
 });
 
 // ===== Mini player -> buka Now Playing layar penuh ala iPhone (mobile) =====
-if (isMobileView()) {
-    nowPlayingPanel.classList.add('mobile-open');
-    document.querySelector('.bottom-nav').style.display = 'none'; 
-    if (nowPlayingPanel.requestFullscreen) {
-        nowPlayingPanel.requestFullscreen().catch(() => {});
-    }
+if (playerBar && nowPlayingPanel) {
+    playerBar.addEventListener('click', (e) => {
+        if (e.target.closest('.mini-controls, .music-controller')) return;
+
+        if (isMobileView()) {
+            nowPlayingPanel.classList.add('mobile-open');
+            document.querySelector('.bottom-nav').style.display = 'none';
+            if (nowPlayingPanel.requestFullscreen) {
+                nowPlayingPanel.requestFullscreen().catch(() => {});
+            }
+        }
+    });
 }
 
 // Inisialisasi Aplikasi
