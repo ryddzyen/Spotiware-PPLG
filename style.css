@@ -262,9 +262,14 @@ nav{
 
 .library{
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin: 1rem 1.5rem;
+}
+
+.library p{
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
 }
 
 
@@ -336,19 +341,12 @@ nav{
     text-align: center;
 }
 
-.music-card img{
-    height: 10rem;
-    width: 10rem;
-    object-fit: cover;
-    object-position: center;
-    border-radius: 5px;
-}
-
 .music-card{
     width: 10rem;
     padding: 0.7rem;
     border-radius: 5px;
     position: relative;
+    flex-shrink: 0;
 }
 
 .music-card:hover{
@@ -418,30 +416,59 @@ nav{
 }
 
 .img-title{
-    margin: 0.7rem 0;
+    margin: 0.7rem 0 0.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .img-description{
     font-size: 0.8rem;
     color: rgb(199, 199, 199);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-card-art{
+    position: relative;
+    width: 100%;
+}
+
+.music-card-art img{
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 5px;
+    display: block;
 }
 
 .music-play-btn{
     color: var(--yellow);
     font-size: 2.7rem;
     position: absolute;
+    right: 0.6rem;
+    bottom: 0.6rem;
     background-color: rgb(0, 0, 0);
     width: 2.7rem;
+    height: 2.7rem;
     display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 20rem;
-    transform: translate(110px, -40px);
     opacity: 0;
+    transform: translateY(4px);
     transition: 0.3s;
 }
 
 .music-card:hover .music-play-btn{
     opacity: 1;
-    transform: translate(110px, -50px);
+    transform: translateY(0);
 }
 
 .now-playing-panel{
@@ -449,8 +476,8 @@ nav{
     height: 100%;
     display: none;
     align-items: center;
-    justify-content: center;
-    padding: 1rem 1rem 1rem 0.3rem;
+    justify-content: flex-start;
+    padding: 0.1rem 0.5rem 0.5rem;
     overflow: hidden;
 }
 
@@ -491,6 +518,7 @@ nav{
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2rem;
     padding: 1.5rem 1.3rem;
 }
 
@@ -579,10 +607,10 @@ nav{
 
 .phone-frame{
     width: 100%;
-    max-width: clamp(14rem, 90%, 18rem);
-    padding: 0.9rem;
+    max-width: clamp(14rem, 95%, 34rem);
+    padding: 0.7rem;
     background: linear-gradient(180deg, #2a2a2a, #161616);
-    border-radius: 2rem;
+    border-radius: 1rem;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
@@ -605,11 +633,15 @@ nav{
 
 .np-art{
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1.20;
     border-radius: 0.8rem;
     overflow: hidden;
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.6rem;
     background-color: #1f1f1f;
+}
+
+.now-playing-panel:fullscreen .np-art{
+    aspect-ratio: 1 / 1;
 }
 
 .np-art img{
@@ -621,7 +653,7 @@ nav{
 .np-info{
     width: 100%;
     text-align: left;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -668,7 +700,7 @@ nav{
     justify-content: space-between;
     font-size: 0.75rem;
     color: var(--gray-mid);
-    margin-bottom: 1.3rem;
+    margin-bottom: 0.6rem;
 }
 
 .np-controls{
@@ -676,7 +708,7 @@ nav{
     align-items: center;
     justify-content: center;
     gap: 2.4rem;
-    margin-bottom: 1.3rem;
+    margin-bottom: 0.4rem;
 }
 
 .np-controls i{
@@ -699,7 +731,7 @@ nav{
 }
 
 .np-airplay{
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.4rem;
     background-color: rgba(255,255,255,0.08);
@@ -711,17 +743,26 @@ nav{
     transition: 0.2s;
 }
 
+.now-playing-panel:fullscreen .np-airplay{
+    display: flex;
+}
+
 .np-airplay:hover{
     background-color: rgba(255, 215, 0, 0.15);
     color: var(--yellow);
 }
 
 .np-volume{
-    display: flex;
+    display: none;          /* default: sembunyi di tampilan normal */
     align-items: center;
     gap: 0.7rem;
     width: 100%;
     margin-bottom: 1.3rem;
+}
+
+.now-playing-panel:fullscreen .np-volume,
+.now-playing-panel.mobile-open .np-volume{
+    display: flex !important;   /* paksa muncul lagi khusus fullscreen & mobile-open */
 }
 
 .np-volume i{
@@ -860,7 +901,7 @@ input[type="range"]::-webkit-slider-thumb{
     transform: scale(1.1);
 }
 .now-bar-like-btn.liked{
-    color: #1ed760;
+    color: var(--yellow);
 }
 .now-bar-like-btn.liked i{
     font-weight: 900;
@@ -1116,6 +1157,20 @@ input[type="range"]::-webkit-slider-thumb{
     .progress-wrap span {
         display: none;
     }
+
+    .queue-panel{
+        position: fixed;
+        right: 1rem;
+        bottom: 6.5rem;
+        width: 22rem;
+        max-width: calc(100% - 2rem);
+        height: auto;
+        max-height: 65vh;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        z-index: 2500;
+    }
+    .queue-body{ flex: none; }
 }
 
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
@@ -1466,6 +1521,7 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     .now-playing-panel.mobile-open .np-volume{
+        display: flex;
         margin-bottom: 0.3rem;
     }
 
@@ -1933,6 +1989,11 @@ input[type="range"]::-webkit-slider-thumb{
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    margin-left: auto;
+}
+
+.main-left-part.collapsed .library-icons{
+    margin-left: 0 !important;
 }
 
 .create-playlist-btn,
@@ -1984,69 +2045,144 @@ input[type="range"]::-webkit-slider-thumb{
     padding: 0.4rem 1rem;
 }
 .sort-menu-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     color: white;
     font-size: 0.85rem;
     padding: 0.5rem 1rem;
     cursor: pointer;
 }
 .sort-menu-item:hover{ background-color: #3a3a3a; }
-.sort-menu-item.active{ color: #1ed760; }
+.sort-menu-item.active{ color: var(--yellow); }
+.sort-check{
+    opacity: 0;
+    color: var(--yellow);
+    font-size: 0.8rem;
+}
+.sort-menu-item.active .sort-check{ opacity: 1; }
 .sort-view-icons{
     display: flex;
-    gap: 0.4rem;
-    padding: 0.4rem 1rem 0.2rem;
-}
-.view-icon-btn{
-    background: none;
-    border: none;
-    color: var(--gray-mid);
-    width: 2rem;
-    height: 2rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.view-icon-btn:hover{ color: white; }
-.view-icon-btn.active{ background-color: #3a3a3a; color: #1ed760; }
-
-/* View modes untuk #playlistList */
-#playlistList.view-grid,
-#playlistList.view-gridlarge{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
-    gap: 0.8rem;
-    padding: 0.5rem 1rem 1rem;
-}
-#playlistList.view-gridlarge{
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-}
-#playlistList.view-grid .playlist-item,
-#playlistList.view-gridlarge .playlist-item{
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.5rem;
-    margin: 0;
+    gap: 0.2rem;
+    margin: 0.4rem 1rem 0.5rem;
+    padding: 0.3rem;
     background-color: #181818;
     border-radius: 8px;
 }
+
+.view-icon-btn{
+    background: none;
+    border: 2px solid transparent;
+    color: var(--gray-mid);
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+.view-icon-btn:hover{ color: white; }
+.view-icon-btn.active{
+    background-color: #2a2a2a;
+    color: var(--yellow);
+}
+
+/* View modes untuk #playlistList */
+/* ===== Compact mode (list dengan teks doang, tanpa gambar) ===== */
+#playlistList.view-compact .playlist-item{ padding: 0.4rem 0.5rem; }
+#playlistList.view-compact .playlist-icon,
+#playlistList.view-compact .playlist-thumb{
+    display: none;
+}
+
+/* ===== Compact Grid (icon "grid") — gambar doang, tanpa teks/tombol ===== */
+#playlistList.view-grid,
+#playlistList.view-gridlarge{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    padding: 0.5rem 0.8rem 1rem;
+}
+
+/* Saat mode "Library expanded" (sidebar jadi lebar penuh), baru pakai auto-fill supaya kolomnya nambah otomatis sesuai ruang */
+.main.library-expanded #playlistList.view-grid,
+.main.library-expanded #playlistList.view-gridlarge{
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+#playlistList.view-grid .playlist-item{
+    padding: 0;
+    margin: 0;
+    background: none;
+}
+#playlistList.view-grid .playlist-item:hover{ background: none; }
 #playlistList.view-grid .playlist-icon,
-#playlistList.view-grid .playlist-thumb,
+#playlistList.view-grid .playlist-thumb{
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 6px;
+    font-size: 1.6rem;
+    margin-bottom: 0;
+}
+#playlistList.view-grid .history-info,
+#playlistList.view-grid .playlist-delete-btn,
+#playlistList.view-grid .grid-play-btn{
+    display: none;
+}
+
+/* ===== Default Grid (icon "grid besar") — gambar + judul + subjudul ===== */
+#playlistList.view-gridlarge .playlist-item{
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+    background: none;
+}
+#playlistList.view-gridlarge .playlist-item:hover{ background: none; }
 #playlistList.view-gridlarge .playlist-icon,
 #playlistList.view-gridlarge .playlist-thumb{
     width: 100%;
     height: auto;
     aspect-ratio: 1/1;
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    font-size: 2rem;
+    margin-bottom: 0.6rem;
 }
-#playlistList.view-grid .history-title,
-#playlistList.view-gridlarge .history-title{ white-space: normal; }
-#playlistList.view-compact .playlist-item{ padding: 0.2rem 0.5rem; }
-#playlistList.view-compact .playlist-icon,
-#playlistList.view-compact .playlist-thumb{
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.8rem;
+#playlistList.view-gridlarge .history-title{
+    white-space: normal;
+    font-size: 0.9rem;
 }
+#playlistList.view-gridlarge .liked-songs .history-title{ color: var(--yellow); }
+#playlistList.view-gridlarge .playlist-delete-btn{ display: none; }
+
+/* Tombol play bulat hijau di pojok kanan bawah cover (muncul saat hover, khusus grid besar) */
+.grid-play-btn{
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background-color: var(--yellow);
+    color: black;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+    z-index: 3;
+}
+.grid-play-btn:hover{ transform: scale(1.06); }
+#playlistList.view-gridlarge .grid-play-btn{ display: flex; }
+#playlistList.view-gridlarge .playlist-item:hover .grid-play-btn{ opacity: 1; transform: translateY(0); }
 
 /* Playlist Detail View */
 .playlist-detail-view{ display: none; }
@@ -2054,10 +2190,11 @@ input[type="range"]::-webkit-slider-thumb{
 
 .playlist-detail-header{
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 1.5rem;
     padding: 2rem;
     background: linear-gradient(180deg, #5038a0, #121212);
+    container-type: inline-size;
 }
 .playlist-detail-cover{
     width: 12rem;
@@ -2076,10 +2213,10 @@ input[type="range"]::-webkit-slider-thumb{
 .playlist-detail-cover img{ width: 100%; height: 100%; object-fit: cover; }
 .playlist-detail-type{ font-size: 0.85rem; font-weight: 700; }
 .playlist-detail-title{
-    font-size: 3rem;
+    font-size: clamp(2rem, 10cqw, 5.5rem);
     font-weight: 900;
     margin: 0.3rem 0;
-    line-height: 1.1;
+    line-height: 1;
     word-break: break-word;
 }
 .playlist-detail-meta{ font-size: 0.85rem; color: var(--gray-light); }
@@ -2091,13 +2228,13 @@ input[type="range"]::-webkit-slider-thumb{
     padding: 1.2rem 2rem;
 }
 .playlist-play-btn{
-    width: 3.2rem;
-    height: 3.2rem;
+    width: 3.8rem;
+    height: 3.8rem;
     border-radius: 50%;
-    background-color: #1ed760;
+    background-color: var(--yellow);
     color: black;
     border: none;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2105,9 +2242,9 @@ input[type="range"]::-webkit-slider-thumb{
     transition: 0.2s;
 }
 .playlist-play-btn:hover{ transform: scale(1.05); }
-.playlist-toolbar-icon{ font-size: 1.4rem; color: var(--gray-mid); cursor: pointer; }
+.playlist-toolbar-icon{ font-size: 1.7rem; color: var(--gray-mid); cursor: pointer; }
 .playlist-toolbar-icon:hover{ color: white; }
-.playlist-toolbar-icon.active{ color: #1ed760; }
+.playlist-toolbar-icon.active{ color: var(--yellow); }
 .playlist-toolbar-spacer{ flex: 1; }
 .playlist-view-toggle{
     display: flex;
@@ -2139,22 +2276,739 @@ input[type="range"]::-webkit-slider-thumb{
 .track-title-cell img{ width: 2.5rem; height: 2.5rem; border-radius: 4px; object-fit: cover; }
 .track-title-text{ display: flex; flex-direction: column; }
 .track-title-text .t-name{ color: white; font-weight: 500; }
-.track-title-text .t-artist{ font-size: 0.78rem; }
-.playlist-track-table.compact-mode .hide-compact{ display: none; }
+.track-title-text .t-artist{ font-size: 0.78rem; display: none; }
 .playlist-track-table.compact-mode td,
-.playlist-track-table.compact-mode th{ padding: 0.3rem 2rem; }
+.playlist-track-table.compact-mode th{ padding: 0.4rem 2rem; }
+
+.playlist-track-table.compact-mode td,
+.playlist-track-table.compact-mode th{
+    padding: 0.35rem 2rem;
+}
+.playlist-track-table.compact-mode .track-title-cell img{
+    display: none;
+}
+.playlist-track-table.compact-mode .t-artist{
+    display: none;
+}
 
 .playlist-back-btn{
     margin: 1rem 2rem 2rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: var(--gray-light);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+.playlist-back-btn:hover{ color: white; background: rgba(255,255,255,0.15); }
+
+.music-section.hide{ display: none !important; }
+
+.playlist-view-toggle{ position: relative; }
+.playlist-view-menu{
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background-color: #282828;
+    border-radius: 8px;
+    padding: 0.4rem 0;
+    min-width: 8rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 200;
+}
+.playlist-view-menu.show{ display: block; }
+.view-menu-item{ color: white; font-size: 0.85rem; padding: 0.5rem 1rem; cursor: pointer; }
+.view-menu-item:hover{ background-color: #3a3a3a; }
+.view-menu-item.active{ color: var(--yellow); }
+
+.library-collapse-btn{
+    width: 0;
+    height: 2rem;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--gray-light);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: width 0.2s ease, opacity 0.15s ease, margin-right 0.2s ease;
+}
+.library-collapse-btn:hover{
+    color: white;
+    background-color: #2a2a2a;
+}
+
+.main-left-part:hover .library-collapse-btn,
+.main-left-part.collapsed .library-collapse-btn{
+    width: 2rem;
+    opacity: 1;
+    margin-right: 0.5rem;
+}
+
+.main.library-expanded .library-collapse-btn{
+    display: none !important;
+}
+
+/* ===== Sidebar Collapsed (mirip Spotify) ===== */
+.main-left-part.collapsed{
+    width: 4.8rem;
+    min-width: 5rem;
+    flex: 0 0 5rem;
+    margin-right: 0.6rem;
+    overflow: hidden;
+}
+.main-left-part.collapsed .library{
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 1rem 0 0.6rem;
+}
+.main-left-part.collapsed #libraryTitleText,
+.main-left-part.collapsed .library-expand-btn,
+.main-left-part.collapsed .library-tabs,
+.main-left-part.collapsed .library-toolbar{
+    display: none !important;
+}
+.main-left-part.collapsed .library-icons{
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.main-left-part.collapsed .create-playlist-btn{
+    background-color: #2a2a2a;
+}
+.main-left-part.collapsed #playlistList{
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.4rem 0 1rem;
+    overflow-y: auto;
+    max-height: calc(100% - 8rem);
+}
+.main-left-part.collapsed .playlist-item{
+    padding: 0;
+    margin: 0;
+    background: none !important;
+    display: flex;
+    justify-content: center;
+}
+.main-left-part.collapsed .playlist-icon,
+.main-left-part.collapsed .playlist-thumb{
+    width: 3rem;
+    height: 3rem;
+    margin: 0;
+    flex-shrink: 0;
+}
+.main-left-part.collapsed .history-info,
+.main-left-part.collapsed .playlist-delete-btn,
+.main-left-part.collapsed .grid-play-btn{
+    display: none !important;
+}
+
+.playlist-track-table tbody tr{ cursor: pointer; }
+
+.track-num-col{
+    width: 2.5rem;
+    text-align: center;
+    position: relative;
+}
+.track-num-play{
+    display: none;
+    color: white;
+    font-size: 0.8rem;
+}
+.playlist-track-table tbody tr:hover .track-num-text{ display: none; }
+.playlist-track-table tbody tr:hover .track-num-play{ display: inline-block; }
+
+.playlist-track-table td:first-child,
+.playlist-track-table th:first-child{
+    width: 2.5rem;
+    text-align: center;
+    padding-left: 1.5rem;
+    padding-right: 0.5rem;
+}
+.playlist-track-table td:nth-child(2),
+.playlist-track-table th:nth-child(2){
+    padding-left: 0.5rem;
+}
+
+.playlist-track-table tbody tr.is-playing .track-num-text{ display: none; }
+.playlist-track-table tbody tr.is-playing .track-num-play{
+    display: inline-block;
+    color: var(--yellow);
+}
+.playlist-track-table tbody tr.is-playing .t-name{ color: var(--yellow); }
+
+/* Date added: cuma tampil di List mode, DAN cuma kalau sidebar Library di-collapse
+   (persis kayak Spotify asli — normal cuma nampilin Album, collapse baru nambahin Date added) */
+.pd-list-only{
+    display: none;
+}
+.main-left-part.collapsed ~ .main-right-part .playlist-track-table:not(.compact-mode) .pd-list-only{
+    display: table-cell;
+}
+
+/* Artist: cuma tampil di Compact mode (tidak terpengaruh collapse) */
+.pd-compact-only{
+    display: none;
+}
+.playlist-track-table.compact-mode .pd-compact-only{
+    display: table-cell;
+}
+
+/* Album: selalu tampil di List mode (apapun status collapse);
+   di Compact mode disembunyikan kecuali sidebar sedang di-collapse */
+.pd-album-col{
+    display: table-cell;
+}
+.playlist-track-table.compact-mode .pd-album-col{
+    display: none;
+}
+.main-left-part.collapsed ~ .main-right-part .playlist-track-table.compact-mode .pd-album-col{
+    display: table-cell;
+}
+
+/* Album: tampil normal di List mode; di Compact mode disembunyikan
+   kecuali sidebar Library sedang di-collapse */
+.playlist-track-table.compact-mode .pd-album-col{
+    display: none;
+}
+.main-left-part.collapsed ~ .main-right-part .playlist-track-table.compact-mode .pd-album-col{
+    display: table-cell;
+}
+
+/* ===== Tombol love di tiap baris lagu — gaya sama seperti hati di player bar ===== */
+.track-actions{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.8rem !important;
+}
+
+.track-like-btn{
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--gray-mid);
+    font-size: 1.1rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
+.playlist-track-table tbody tr:hover .track-like-btn{
+    opacity: 1;
+}
+
+.track-like-btn:hover{
+    color: white;
+    transform: scale(1.1);
+}
+
+.track-like-btn.liked{
+    color: var(--yellow);
+    opacity: 1;
+}
+
+.track-like-btn.liked:hover{
+    color: var(--yellow);
+}
+
+/* ===== Isi modal "Add to Playlist": ikon kecil + nama + tombol centang bulat ===== */
+.add-to-playlist-left{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 0;
+}
+
+.add-to-playlist-name{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.add-to-playlist-icon{
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 4px;
+    background-color: #2f2f2f;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.add-to-playlist-icon.liked{
+    background: linear-gradient(135deg, #450af5, #c4efd9);
+    color: white;
+}
+
+.playlist-check-btn{
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--gray-mid);
+    background: none;
+    color: transparent;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: 0.15s;
+}
+
+.playlist-check-btn:hover{
+    border-color: white;
+}
+
+.playlist-check-btn.checked{
+    background-color: var(--yellow);
+    border-color: var(--yellow);
+    color: black;
+}
+
+.library-compact-table{
+    display: none;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    color: white;
+}
+
+/* Compact biasa (bukan fullscreen): tetap pakai list simpel (view-compact) */
+#playlistList.view-compact{ display: flex; flex-direction: column; }
+
+/* Tabel detail cuma muncul kalau Library lagi di-fullscreen-in DAN compact aktif */
+.main.library-expanded .main-left-part.compact-mode .library-compact-table{
+    display: table;
+}
+.main.library-expanded .main-left-part.compact-mode #playlistList{
+    display: none !important;
+}
+
+.library-compact-table thead th{
+    text-align: left;
+    font-size: 0.7rem;
+    color: var(--gray-mid);
+    font-weight: 500;
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #2a2a2a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.library-compact-table thead th:not(:first-child){
+    text-align: right;
+}
+
+.library-compact-table tbody tr{
+    cursor: pointer;
+}
+.library-compact-table tbody tr:hover{
+    background-color: #1a1a1a;
+}
+
+.library-compact-table td{
+    padding: 0.5rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--gray-light);
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.library-compact-table td:not(:first-child){
+    text-align: right;
+}
+
+.compact-title-cell{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 600;
+    color: white;
+}
+.compact-title-cell i.fa-thumbtack{
+    color: var(--yellow);
+    font-size: 0.7rem;
+    transform: rotate(45deg);
+}
+.compact-title-cell .compact-liked-icon{
+    color: var(--yellow);
+}
+.compact-title-cell .compact-subtype{
+    color: var(--gray-mid);
+    font-weight: 400;
+    font-size: 0.78rem;
+}
+
+/* Perbaikan alignment: pastikan collapse-icon & tombol + benar-benar center */
+.main-left-part.collapsed .library{
+    align-items: center;
+}
+.main-left-part.collapsed .library-icons{
+    align-items: center;
+}
+
+/* PENTING: paksa mode Collapsed selalu menang, apapun view mode aktif
+   (list/compact/grid/gridlarge) — pakai 3 class sekaligus biar spesifisitasnya
+   lebih tinggi dari aturan compact-mode yang letaknya di bawah */
+.main-left-part.collapsed.compact-mode #playlistList{
+    display: flex !important;
+}
+.main-left-part.collapsed .library-compact-table{
+    display: none !important;
+}
+.main-left-part.collapsed #playlistList{
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-left-part.collapsed #playlistList .playlist-icon,
+.main-left-part.collapsed #playlistList .playlist-thumb{
+    display: flex !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    aspect-ratio: 1 / 1 !important;
+    font-size: 1.2rem !important;
+    margin: 0 !important;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.library-compact-table th:nth-child(1),
+.library-compact-table td:nth-child(1){ width: 45%; }
+.library-compact-table th:nth-child(2),
+.library-compact-table td:nth-child(2){ width: 28%; }
+.library-compact-table th:nth-child(3),
+.library-compact-table td:nth-child(3){ width: 27%; }
+
+.player-right-controls{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 0 0 auto;
+}
+.player-right-btn{
     background: none;
     border: none;
     color: var(--gray-mid);
-    font-size: 0.85rem;
+    font-size: 1rem;
     cursor: pointer;
+    transition: 0.2s;
+}
+.player-right-btn:hover{ color: white; }
+.player-right-btn.active{ color: var(--yellow); }
+
+.volume-control{
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
-.playlist-back-btn:hover{ color: white; }
+#mainVolumeBar{
+    appearance: none;
+    width: 6rem;
+    height: 4px;
+    background-color: #555;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-.music-section.hide{ display: none !important; }
+/* Queue panel */
+.queue-panel{
+    display: none;
+    width: 23.25%;
+    height: 100%;
+    background-color: #121212;
+    border-radius: 10px;
+    flex-direction: column;
+    overflow: hidden;
+}
+.queue-panel.show{ display: flex; }
+.queue-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+}
+.queue-header h3{ font-size: 1.3rem; color: white; }
+.queue-header button{ background:none; border:none; color:white; font-size:1rem; cursor:pointer; }
+.queue-body{
+    flex: 1;
+    padding: 0 1.2rem 1.2rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4d4d4d transparent;
+}
+
+.queue-body::-webkit-scrollbar{
+    width: 8px;
+}
+
+.queue-body::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.queue-body::-webkit-scrollbar-thumb{
+    background-color: #4d4d4d;
+    border-radius: 10px;
+}
+
+.queue-body::-webkit-scrollbar-thumb:hover{
+    background-color: #6b6b6b;
+}
+.queue-section-title{ font-size: 0.95rem; font-weight: 700; color: white; margin: 0.5rem 0; display:block; }
+.queue-next-header{ display:flex; align-items:center; justify-content:space-between; margin-top: 1rem; }
+.queue-clear-btn{ font-size: 0.8rem; color: var(--gray-mid); cursor: pointer; }
+.queue-clear-btn:hover{ color: white; text-decoration: underline; }
+.queue-item{
+    display:flex;
+    align-items:center;
+    gap:0.8rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius:6px;
+}
+.queue-item:hover{ background-color:#1f1f1f; }
+.queue-item img{ width:2.8rem; height:2.8rem; border-radius:4px; object-fit:cover; flex-shrink: 0; }
+.queue-item-title{ color:white; font-size:0.85rem; font-weight:500; }
+.queue-item-title.now-playing{ color:var(--yellow); }
+.queue-item-artist{ color: var(--gray-mid); font-size:0.78rem; }
+
+
+
+/* Mini player popup */
+.mini-player-popup{
+    display: none;
+    position: fixed;
+    bottom: 6rem;
+    right: 1.5rem;
+    width: 16rem;
+    background-color: #181818;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    z-index: 2600;
+    padding: 0.8rem;
+    color: white;
+}
+.mini-player-popup.show{ display: block; }
+.mini-player-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:0.75rem;
+    color: var(--gray-mid);
+    margin-bottom: 0.5rem;
+}
+.mini-player-header-btns{ display:flex; gap:0.5rem; }
+.mini-player-header-btns button{ background:none;border:none;color:var(--gray-mid);cursor:pointer;font-size:0.8rem; }
+.mini-player-header-btns button:hover{ color:white; }
+.mini-player-art{ width:100%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-bottom:0.6rem; background:#2f2f2f; }
+.mini-player-art img{ width:100%;height:100%;object-fit:cover; }
+.mini-player-controls{ display:flex; align-items:center; justify-content:center; gap:1.2rem; margin-bottom:0.6rem; }
+.mini-player-controls i{ color:white; cursor:pointer; font-size:0.95rem; }
+.mini-player-controls i.active{ color: var(--yellow); }
+.mini-player-controls button i{
+    color: black;
+}
+.mini-player-controls button{ background:white;color:black;border:none;width:2.2rem;height:2.2rem;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+.mini-player-progress{ margin-bottom:0.6rem; }
+#miniPopupProgressBar{ appearance:none; width:100%; height:4px; background:#555; border-radius:5px; cursor:pointer; }
+.mini-player-info{ display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.mini-player-info .mp-title{ font-size:0.85rem; font-weight:600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-player-info .mp-artist{ font-size:0.75rem; color:var(--gray-mid); }
+.mini-player-like-btn{
+    background: none; border: none; color: var(--gray-mid);
+    font-size: 1rem; cursor: pointer; flex-shrink: 0;
+}
+.mini-player-like-btn:hover{ color: white; }
+.mini-player-like-btn.liked{ color: var(--yellow); }
+
+.player-bar > .player-right-controls{
+    width: auto !important;
+    margin-left: auto;
+    padding-right: 3rem;
+    gap: 1.2rem;
+}
+
+/* Override khusus waktu mini player dipindah ke window PiP asli */
+.mini-player-popup.pip-mode{
+    position: static;
+    inset: auto;
+    bottom: auto;
+    right: auto;
+    width: 100%;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+.mini-player-popup.pip-mode .mini-player-art{
+    aspect-ratio: auto;
+    height: 45vh;
+}
+
+/* Modal buat/hapus playlist */
+.modal-btn-row{
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+}
+
+.modal-secondary-btn{
+    background: none;
+    border: 1px solid var(--gray-dark);
+    color: white;
+    padding: 0.6rem 1.4rem;
+    border-radius: 20rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.modal-secondary-btn:hover{
+    border-color: white;
+    transform: scale(1.03);
+}
+
+.modal-danger-btn{
+    background-color: #f15e6c;
+    color: black;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 20rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.modal-danger-btn:hover{
+    background-color: #ff7b87;
+    transform: scale(1.05);
+}
+
+.create-playlist-modal-box{
+    text-align: left;
+}
+.create-playlist-modal-box h3{
+    text-align: center;
+}
+.create-playlist-modal-box p{
+    text-align: center;
+    margin-bottom: 1.2rem;
+}
+
+.create-playlist-modal-input{
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background-color: #2a2a2a;
+    color: white;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    outline: none;
+}
+.create-playlist-modal-input:focus{
+    border-color: var(--yellow);
+}
+
+/* Cegah teks tabel track playlist meluber jadi banyak baris */
+.track-title-text{
+    min-width: 0;
+}
+.track-title-text .t-name,
+.track-title-text .t-artist{
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 16rem;
+}
+
+.pd-album-col,
+.pd-list-only,
+.pd-compact-only{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10rem;
+}
+
+.music-section-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 2rem;
+}
+.show-all-link{
+    color: var(--gray-mid);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.show-all-link:hover{
+    color: white;
+    text-decoration: underline;
+}
+
+.show-all-view{
+    display: none;
+    padding: 1.5rem 2rem;
+}
+.show-all-view.show{ display: block; }
+.show-all-header{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.show-all-header h1{
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: white;
+}
+.show-all-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 1.2rem;
+}
+.show-all-grid .music-card{
+    width: 100%;
+}
+.show-all-grid .music-card img{
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+}

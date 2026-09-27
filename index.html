@@ -23,7 +23,7 @@
             <div class="home-icon"><i class="fa-solid fa-house"></i></div>
             <div class="search-bar">
                 <div class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-                <input type="text" class="input-box" placeholder="Cari lagu">
+                <input type="text" class="input-box" placeholder="Search songs">
                 <div class="browse"><i class="fa-solid fa-folder-open"></i></div>
             </div>
         </div>
@@ -45,7 +45,10 @@
     <div class="main">
         <div class="main-left-part">
             <div class="library">
-                <p>Your Library</p>
+                <button class="library-collapse-btn" id="libraryCollapseBtn" title="Collapse Your Library">
+                    <i class="fa-solid fa-table-columns"></i>
+                </button>
+                <p id="libraryTitleText">Your Library</p>
                 <div class="library-icons">
                     <button class="create-playlist-btn" id="newPlaylistBtn" title="Buat playlist baru">
                         <i class="fa-solid fa-plus"></i>
@@ -65,35 +68,54 @@
                 <input type="text" id="libraryFilterInput" class="library-search-input"
                     placeholder="Search in Your Library">
                 <div class="library-sort" id="librarySortBtn">
-                    <span id="librarySortLabel">Recents</span> <i class="fa-solid fa-bars-staggered"></i>
-                </div>
-                <div class="library-sort-menu" id="librarySortMenu">
-                    <p class="sort-menu-title">Sort by</p>
-                    <div class="sort-menu-item active" data-sort="recents">Recents</div>
-                    <div class="sort-menu-item" data-sort="added">Recently Added</div>
-                    <div class="sort-menu-item" data-sort="alpha">Alphabetical</div>
-                    <div class="sort-menu-item" data-sort="creator">Creator</div>
-                    <p class="sort-menu-title">View as</p>
-                    <div class="sort-view-icons">
-                        <button class="view-icon-btn" data-view="list" title="List"><i
-                                class="fa-solid fa-list"></i></button>
-                        <button class="view-icon-btn" data-view="compact" title="Compact"><i
-                                class="fa-solid fa-bars"></i></button>
-                        <button class="view-icon-btn active" data-view="grid" title="Grid"><i
-                                class="fa-solid fa-grip"></i></button>
-                        <button class="view-icon-btn" data-view="gridlarge" title="Grid besar"><i
-                                class="fa-solid fa-table-cells-large"></i></button>
+                    <span id="librarySortLabel">Recents</span> <i class="fa-solid fa-bars-staggered"
+                        id="librarySortIcon"></i>
+                    <div class="library-sort-menu" id="librarySortMenu">
+                        <p class="sort-menu-title">Sort by</p>
+                        <div class="sort-menu-item active" data-sort="recents">Recents <i
+                                class="fa-solid fa-check sort-check"></i></div>
+                        <div class="sort-menu-item" data-sort="added">Recently Added <i
+                                class="fa-solid fa-check sort-check"></i></div>
+                        <div class="sort-menu-item" data-sort="alpha">Alphabetical <i
+                                class="fa-solid fa-check sort-check"></i></div>
+                        <div class="sort-menu-item" data-sort="creator">Creator <i
+                                class="fa-solid fa-check sort-check"></i></div>
+                        <p class="sort-menu-title">View as</p>
+                        <div class="sort-view-icons">
+                            <button class="view-icon-btn active" data-view="list" title="List"><i
+                                    class="fa-solid fa-list"></i></button>
+                            <button class="view-icon-btn" data-view="compact" title="Compact"><i
+                                    class="fa-solid fa-bars"></i></button>
+                            <button class="view-icon-btn" data-view="grid" title="Compact grid"><i
+                                    class="fa-solid fa-grip"></i></button>
+                            <button class="view-icon-btn" data-view="gridlarge" title="Grid"><i
+                                    class="fa-solid fa-table-cells-large"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="box-container" id="playlistList"></div>
+            <table class="library-compact-table" id="libraryCompactTable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date added</th>
+                        <th>Played</th>
+                    </tr>
+                </thead>
+                <tbody id="libraryCompactTableBody"></tbody>
+            </table>
         </div>
 
         <!-- Main: right part -->
         <div class="main-right-part">
             <div class="music-section">
-                <h2>Chill & Aesthetic Vibes</h2>
+                <div class="music-section-header">
+                    <h2>Chill & Aesthetic Vibes</h2>
+                    <span class="show-all-link" data-title="Chill & Aesthetic Vibes" data-start="0" data-end="30">Show
+                        all</span>
+                </div>
                 <div class="songs-wrapper">
                     <div class="songs" id="section-1"></div>
                     <button class="scroll-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
@@ -110,12 +132,18 @@
                         <p class="playlist-detail-meta" id="playlistDetailMeta">0 songs</p>
                     </div>
                 </div>
+
+
                 <div class="playlist-detail-toolbar">
                     <button class="playlist-play-btn" id="playlistPlayBtn"><i class="fa-solid fa-play"></i></button>
                     <i class="fa-solid fa-shuffle playlist-toolbar-icon" id="playlistShuffleBtn"></i>
                     <div class="playlist-toolbar-spacer"></div>
                     <div class="playlist-view-toggle" id="playlistViewToggle">
                         <span id="playlistViewLabel">List</span> <i class="fa-solid fa-list"></i>
+                        <div class="playlist-view-menu" id="playlistViewMenu">
+                            <div class="view-menu-item active" data-mode="list">List</div>
+                            <div class="view-menu-item" data-mode="compact">Compact</div>
+                        </div>
                     </div>
                 </div>
                 <table class="playlist-track-table" id="playlistTrackTable">
@@ -123,18 +151,33 @@
                         <tr>
                             <th>#</th>
                             <th>Title</th>
-                            <th class="hide-compact">Album</th>
+                            <th class="pd-compact-only">Artist</th>
+                            <th class="pd-album-col">Album</th>
+                            <th class="pd-list-only">Date added</th>
+                            <th></th>
                             <th><i class="fa-regular fa-clock"></i></th>
                         </tr>
                     </thead>
                     <tbody id="playlistTrackTableBody"></tbody>
                 </table>
-                <button class="playlist-back-btn" id="playlistDetailBackBtn"><i class="fa-solid fa-arrow-left"></i> Back
-                    to Home</button>
-            </div>  
+                <button class="playlist-back-btn" id="playlistDetailBackBtn" title="Back to Home"><i
+                        class="fa-solid fa-arrow-left"></i></button>
+            </div>
+
+            <div class="show-all-view" id="showAllView">
+                <div class="show-all-header">
+                    <button class="playlist-back-btn" id="showAllBackBtn" title="Back"><i
+                            class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="showAllTitle"></h1>
+                </div>
+                <div class="show-all-grid" id="showAllGrid"></div>
+            </div>
 
             <div class="music-section">
-                <h2>Trending Now</h2>
+                <div class="music-section-header">
+                    <h2>Trending Now</h2>
+                    <span class="show-all-link" data-title="Trending Now" data-start="30" data-end="60">Show all</span>
+                </div>
                 <div class="songs-wrapper">
                     <div class="songs" id="section-2"></div>
                     <button class="scroll-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
@@ -143,7 +186,11 @@
             </div>
 
             <div class="music-section">
-                <h2>Sweet & Melancholy</h2>
+                <div class="music-section-header">
+                    <h2>Sweet & Melancholy</h2>
+                    <span class="show-all-link" data-title="Sweet & Melancholy" data-start="60" data-end="">Show
+                        all</span>
+                </div>
                 <div class="songs-wrapper">
                     <div class="songs" id="section-3"></div>
                     <button class="scroll-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
@@ -166,7 +213,7 @@
                 <div class="np-info">
                     <div class="np-info-text">
                         <p class="np-device">PPLG</p>
-                        <h4 class="np-title" id="npTitle">Belum ada lagu diputar</h4>
+                        <h4 class="np-title" id="npTitle">No songs have been played yet.</h4>
                         <p class="np-artist" id="npArtist"></p>
                     </div>
                     <i class="fa-solid fa-tower-broadcast np-info-icon"></i>
@@ -191,6 +238,23 @@
                 <div class="np-airplay">
                     <i class="fa-solid fa-wifi"></i> PPLG
                 </div>
+            </div>
+        </div>
+
+        <!-- Queue Panel (menggantikan slot Now Playing Panel saat dibuka) -->
+        <div class="queue-panel" id="queuePanel">
+            <div class="queue-header">
+                <h3>Queue</h3>
+                <button id="queueCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="queue-body">
+                <span class="queue-section-title">Now playing</span>
+                <div id="queueNowPlaying"></div>
+                <div class="queue-next-header">
+                    <span class="queue-section-title">Next in queue</span>
+                    <span class="queue-clear-btn" id="queueClearBtn">Clear queue</span>
+                </div>
+                <div id="queueNextList"></div>
             </div>
         </div>
     </div>
@@ -233,7 +297,18 @@
             <div class="mini-progress-fill" id="miniProgressFill"></div>
         </div>
 
-        <div style="pointer-events: none; flex: 0;"></div>
+        <div class="player-right-controls">
+            <button class="player-right-btn" id="queueBtn" title="Queue"><i class="fa-solid fa-list"></i></button>
+            <div class="volume-control">
+                <button class="player-right-btn" id="volumeBtn" title="Mute"><i
+                        class="fa-solid fa-volume-high"></i></button>
+                <input type="range" id="mainVolumeBar" min="0" max="100" value="100">
+            </div>
+            <button class="player-right-btn" id="miniPlayerBtn" title="Mini player"><i
+                    class="fa-regular fa-window-restore"></i></button>
+            <button class="player-right-btn" id="fullscreenPlayerBtn" title="Full screen"><i
+                    class="fa-solid fa-expand"></i></button>
+        </div>
     </div>
 
     <!-- Modal Notif -->
@@ -267,6 +342,32 @@
         </div>
     </div>
 
+    <!-- Modal Buat Playlist -->
+    <div class="modal-overlay" id="createPlaylistModal">
+        <div class="modal-box create-playlist-modal-box">
+            <h3>Create a playlist</h3>
+            <p>Give your new playlist a name.</p>
+            <input type="text" id="createPlaylistModalInput" class="create-playlist-modal-input"
+                placeholder="My playlist name" maxlength="60">
+            <div class="modal-btn-row">
+                <button class="modal-secondary-btn" id="createPlaylistModalCancel">Cancel</button>
+                <button class="modal-close-btn" id="createPlaylistModalConfirm">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus Playlist -->
+    <div class="modal-overlay" id="deletePlaylistModal">
+        <div class="modal-box">
+            <h3>Remove from Your Library?</h3>
+            <p id="deletePlaylistModalText">This playlist will be removed from Your Library.</p>
+            <div class="modal-btn-row">
+                <button class="modal-secondary-btn" id="deletePlaylistModalCancel">Cancel</button>
+                <button class="modal-danger-btn" id="deletePlaylistModalConfirm">Remove</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Nav (khusus mobile) -->
     <div class="bottom-nav">
         <div class="bottom-nav-item active" data-target="home">
@@ -286,13 +387,45 @@
             <span>Support</span>
         </a>
     </div>
+    <div class="context-menu" id="songContextMenu">
+        <div class="context-menu-item" id="ctxAddToLibrary"><i class="fa-solid fa-heart"></i> Save to your Liked Songs
+        </div>
+        <div class="context-menu-item" id="ctxAddToQueue"><i class="fa-solid fa-layer-group"></i> Add to Queue</div>
+        <div class="context-menu-item" id="ctxAddToPlaylist"><i class="fa-solid fa-plus"></i> Add to Playlist</div>
+    </div>
+
+    <!-- Mini Player Popup -->
+    <div class="mini-player-popup" id="miniPlayerPopup">
+        <div class="mini-player-header">
+            <span>spotiware</span>
+            <div class="mini-player-header-btns">
+                <button id="miniPlayerExpandBtn" title="Full screen"><i
+                        class="fa-solid fa-up-right-and-down-left-from-center"></i></button>
+                <button id="miniPlayerCloseBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="mini-player-art"><img id="miniPlayerImage" src="" alt=""></div>
+        <div class="mini-player-controls">
+            <i class="fa-solid fa-shuffle" id="miniPopupShuffle"></i>
+            <i class="fa-solid fa-backward-step" id="miniPopupBackward"></i>
+            <button id="miniPopupPlay"><i class="fa-solid fa-play"></i></button>
+            <i class="fa-solid fa-forward-step" id="miniPopupForward"></i>
+            <i class="fa-solid fa-repeat" id="miniPopupRepeat"></i>
+        </div>
+        <div class="mini-player-progress">
+            <input type="range" id="miniPopupProgressBar" value="0">
+        </div>
+        <div class="mini-player-info">
+            <div>
+                <div class="mp-title" id="miniPopupTitle"></div>
+                <div class="mp-artist" id="miniPopupArtist"></div>
+            </div>
+            <button class="mini-player-like-btn" id="miniPopupLikeBtn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 
-    <div class="context-menu" id="songContextMenu">
-        <div class="context-menu-item" id="ctxAddToLibrary"><i class="fa-solid fa-heart"></i> Add to Your Library</div>
-        <div class="context-menu-item" id="ctxAddToPlaylist"><i class="fa-solid fa-plus"></i> Add to Playlist</div>
-    </div>
 </body>
 
 </html>
