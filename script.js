@@ -1099,6 +1099,7 @@ let mainRightPart = document.querySelector('.main-right-part');
 
 function goHome() {
     closePlaylistDetailView();
+    closeShowAllView();
     let searchInputEl = document.querySelector('.input-box');
     if (searchInputEl) searchInputEl.value = '';
 
@@ -1590,6 +1591,8 @@ function renderLibraryCompactTable() {
 
 // ===== Playlist Detail View (ala Spotify) =====
 function openPlaylistDetailView(playlist, isLiked) {
+    closeShowAllView();
+
     // [BARU] Catat waktu playlist ini terakhir dibuka, dipakai untuk sort "Recents"
     pdCurrentPlaylistId = playlist.id;
     pdCurrentIsLiked = isLiked;
