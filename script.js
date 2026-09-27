@@ -459,6 +459,16 @@ function attachPlaylistButtonEvents() {
     });
 }
 
+function attachAddToPlaylistButtonEvents() {
+    document.querySelectorAll('.add-to-playlist-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const songId = parseInt(btn.dataset.songId);
+            openAddToPlaylistModal(songId);
+        });
+    });
+}
+
 function renderSongs(songsToRender, options = {}) {
     const { playlistId = null } = options;
 
@@ -473,7 +483,7 @@ function renderSongs(songsToRender, options = {}) {
     songsToRender.forEach((song, index) => {
         const playlistBtnHTML = playlistId
             ? `<button class="remove-from-playlist-btn" data-song-id="${song.id}" data-playlist-id="${playlistId}" title="Hapus dari playlist"><i class="fa-solid fa-xmark"></i></button>`
-            : '';
+            : `<button class="add-to-playlist-btn" data-song-id="${song.id}" title="Tambah ke Playlist"><i class="fa-solid fa-plus"></i></button>`;
 
         let cardHTML = `
             <div class="music-card" data-song-id="${song.id}">
@@ -508,6 +518,7 @@ function renderSongs(songsToRender, options = {}) {
 
     attachPlayEvents();
     attachPlaylistButtonEvents();
+    attachAddToPlaylistButtonEvents();
 }
 
 function attachPlayEvents() {
@@ -1714,12 +1725,14 @@ function openShowAllView(title, songsList) {
                     <i id="${song.id}" class="playMusic fa-solid fa-circle-play" data-audio="${song.songPath}"></i>
                 </div>
             </div>
+            <button class="add-to-playlist-btn" data-song-id="${song.id}" title="Tambah ke Playlist"><i class="fa-solid fa-plus"></i></button>
             <div class="img-title">${song.songName}</div>
             <div class="img-description">${song.songDes}</div>
         </div>
     `).join('');
 
     attachPlayEvents();
+    attachAddToPlaylistButtonEvents();
 
     document.getElementById('showAllView').classList.add('show');
     if (mainRightPart) mainRightPart.scrollTo({ top: 0, behavior: 'smooth' });

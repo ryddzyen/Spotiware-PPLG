@@ -1182,6 +1182,10 @@ input[type="range"]::-webkit-slider-thumb{
         -webkit-tap-highlight-color: transparent;
     }
 
+    .show-all-link{
+        display: none;
+    }
+
     nav{
         height: auto;
         min-height: 3.5rem;
@@ -1772,6 +1776,10 @@ input[type="range"]::-webkit-slider-thumb{
     transition: 0.2s;
 }
 
+.add-to-playlist-btn{
+    display: none;
+}
+
 .music-card:hover .add-to-playlist-btn,
 .music-card:hover .remove-from-playlist-btn{
     opacity: 1;
@@ -1865,7 +1873,9 @@ input[type="range"]::-webkit-slider-thumb{
 
 /* Mobile: tidak ada hover, jadi tombol tambah/hapus playlist selalu kelihatan */
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
-    .remove-from-playlist-btn{
+    .remove-from-playlist-btn,
+    .add-to-playlist-btn{
+        display: flex;
         opacity: 1;
         top: 0.4rem;
         right: 0.4rem;
