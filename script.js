@@ -1005,6 +1005,23 @@ if (repeat) {
     });
 }
 
+function loadAndPlayCurrent() {
+    const song = getCurrentSong();
+    audio.src = song.songPath;
+    audio.load();
+
+    const p = audio.play();
+    if (p !== undefined) {
+        p.catch((err) => {
+            console.warn('play() ditolak, coba lagi:', err);
+            // coba lagi begitu audio siap
+            audio.addEventListener('canplay', () => {
+                audio.play().catch(() => {});
+            }, { once: true });
+        });
+    }
+}
+
 const playNextSong = () => {
     if (queue.length > 0) {
         const nextSong = queue.shift();
@@ -1017,9 +1034,7 @@ const playNextSong = () => {
     } else {
         currentIndex = (currentIndex + 1) % order.length;
     }
-    audio.src = getCurrentSong().songPath;
-    audio.currentTime = 0;
-    audio.play();
+    loadAndPlayCurrent();
     addToHistory(getCurrentSong());
     highlightCurrentSong();
     updateNowBar();
@@ -1027,9 +1042,7 @@ const playNextSong = () => {
 
 const playPrevSong = () => {
     currentIndex = (currentIndex - 1 + order.length) % order.length;
-    audio.src = getCurrentSong().songPath;
-    audio.currentTime = 0;
-    audio.play();
+    loadAndPlayCurrent();
     addToHistory(getCurrentSong());
     highlightCurrentSong();
     updateNowBar();
@@ -1050,6 +1063,11 @@ audio.addEventListener('ended', () => {
     } else {
         playNextSong();
     }
+});
+
+audio.addEventListener('stalled', () => {
+    console.warn('audio stalled');
+    if (!audio.paused) audio.load();
 });
 
 let npFullscreenBtn = document.getElementById('npFullscreenBtn');
