@@ -858,7 +858,7 @@ audio.addEventListener('pause', () => {
     updatePlaylistRowIcons();
     updateMiniPlayerPopup();
     updateMiniPlayerPopup();
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
 });
 
 audio.addEventListener('timeupdate', () => {

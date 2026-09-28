@@ -1185,120 +1185,6 @@ input[type="range"]::-webkit-slider-thumb{
     .show-all-link{
         display: none;
     }
-
-        html, body{
-        overflow-x: hidden;
-        max-width: 100%;
-    }
-
-    .playlist-detail-header{
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1.2rem;
-    }
-
-    .playlist-detail-cover{
-        width: 10rem;
-        height: 10rem;
-    }
-
-    .playlist-detail-toolbar{
-        padding: 1rem 1.2rem;
-    }
-
-    .playlist-track-table{
-        table-layout: fixed;
-    }
-
-    .playlist-track-table th,
-    .playlist-track-table td,
-    .playlist-track-table.compact-mode th,
-    .playlist-track-table.compact-mode td{
-        padding: 0.5rem 0.4rem;
-    }
-
-    .playlist-track-table td:first-child,
-    .playlist-track-table th:first-child{
-        width: 2rem;
-        padding-left: 0.6rem;
-        padding-right: 0.2rem;
-    }
-
-    .playlist-track-table .pd-album-col,
-    .playlist-track-table .pd-list-only,
-    .playlist-track-table .pd-compact-only{
-        display: none !important;
-    }
-
-    /* Kolom yang tampil di HP: 1 (#), 2 (Title), 6 (love), 7 (durasi) */
-    .playlist-track-table th:nth-child(1){ width: 2.2rem; }
-    .playlist-track-table th:nth-child(2){ width: auto; }
-    .playlist-track-table th:nth-child(6){ width: 2.4rem; }
-    .playlist-track-table th:nth-child(7){ width: 3.4rem; }
-
-    .playlist-track-table th:last-child,
-    .playlist-track-table td:last-child{
-        text-align: right;
-        padding-right: 0.8rem;
-    }
-
-    .playlist-track-table td.track-actions{
-        display: table-cell;
-        width: 2.4rem;
-        padding-left: 0;
-        padding-right: 0.2rem;
-        text-align: center;
-    }
-
-    .playlist-track-table .track-like-btn{
-        display: inline-flex;
-        opacity: 1;
-    }
-
-    .track-like-btn{
-        opacity: 1;
-    }
-
-    .track-title-cell{
-        min-width: 0;
-    }
-
-        .playlist-track-table td:nth-child(2){
-        overflow: hidden;
-    }
-
-    .track-title-cell{
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        min-width: 0;
-    }
-
-    .track-title-cell img{
-        flex-shrink: 0;
-    }
-
-    .track-title-text{
-        flex: 1 1 0;
-        min-width: 0;
-        overflow: hidden;
-    }
-
-    .track-title-text .t-name,
-    .track-title-text .t-artist{
-        display: block;
-        max-width: none;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .track-title-text .t-artist{
-        display: block;
-        font-size: 0.75rem;
-        color: var(--gray-mid);
-    }
-
     .show-all-view{
         padding: 1rem;
     }
@@ -1427,8 +1313,8 @@ input[type="range"]::-webkit-slider-thumb{
 
     .music-card .music-play-btn,
     .music-card:hover .music-play-btn{
-        top: 0.7rem;
-        left: 0.7rem;
+        top: 0;
+        left: 0;
         width: 8.5rem;
         height: 8.5rem;
         border-radius: 0.3rem;
