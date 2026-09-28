@@ -1255,16 +1255,6 @@ input[type="range"]::-webkit-slider-thumb{
         opacity: 1;
     }
 
-    .track-title-cell{
-        min-width: 0;
-        overflow: hidden;
-    }
-
-    .track-title-text{
-        min-width: 0;
-        flex: 1;
-    }
-
     .track-like-btn{
         opacity: 1;
     }
@@ -1273,9 +1263,40 @@ input[type="range"]::-webkit-slider-thumb{
         min-width: 0;
     }
 
+        .playlist-track-table td:nth-child(2){
+        overflow: hidden;
+    }
+
+    .track-title-cell{
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-width: 0;
+    }
+
+    .track-title-cell img{
+        flex-shrink: 0;
+    }
+
+    .track-title-text{
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+    }
+
     .track-title-text .t-name,
     .track-title-text .t-artist{
-        max-width: 100%;
+        display: block;
+        max-width: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .track-title-text .t-artist{
+        display: block;
+        font-size: 0.75rem;
+        color: var(--gray-mid);
     }
 
     .show-all-view{
