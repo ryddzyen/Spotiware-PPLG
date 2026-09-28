@@ -1198,7 +1198,15 @@ input[type="range"]::-webkit-slider-thumb{
         margin: 1rem;
     }
 
-        .playlist-detail-header{
+        html, body{
+        overflow-x: hidden;
+    }
+
+    .playlist-detail-view{
+        overflow-x: hidden;
+    }
+
+    .playlist-detail-header{
         padding: 1.2rem;
         gap: 1rem;
     }
@@ -1211,6 +1219,11 @@ input[type="range"]::-webkit-slider-thumb{
 
     .playlist-detail-toolbar{
         padding: 1rem 1.2rem;
+    }
+
+    .playlist-track-table{
+        table-layout: fixed;
+        width: 100%;
     }
 
     .playlist-track-table th,
@@ -1226,7 +1239,47 @@ input[type="range"]::-webkit-slider-thumb{
         display: none !important;
     }
 
-        .track-duration{
+    /* lebar kolom: # | Title (sisa ruang) | love | durasi */
+    .playlist-track-table th:nth-child(1),
+    .playlist-track-table td:nth-child(1){
+        width: 2.5rem;
+        padding-left: 0.6rem;
+    }
+
+    .playlist-track-table th:nth-child(6),
+    .playlist-track-table td:nth-child(6){
+        width: 2.6rem;
+    }
+
+    .playlist-track-table th:nth-child(7),
+    .playlist-track-table td:nth-child(7){
+        width: 3.6rem;
+    }
+
+    .playlist-track-table td:nth-child(2){
+        overflow: hidden;
+    }
+
+    .track-title-cell{
+        min-width: 0;
+    }
+
+    .track-title-text{
+        min-width: 0;
+    }
+
+    .playlist-track-table td.track-actions{
+        display: table-cell;
+        text-align: center;
+        padding-right: 0.2rem !important;
+    }
+
+    .track-like-btn{
+        opacity: 1;
+        display: inline-flex;
+    }
+
+    .track-duration{
         white-space: nowrap;
     }
 
