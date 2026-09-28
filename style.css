@@ -1198,6 +1198,38 @@ input[type="range"]::-webkit-slider-thumb{
         margin: 1rem;
     }
 
+        .playlist-detail-header{
+        padding: 1.2rem;
+        gap: 1rem;
+    }
+
+    .playlist-detail-cover{
+        width: 8rem;
+        height: 8rem;
+        font-size: 3rem;
+    }
+
+    .playlist-detail-toolbar{
+        padding: 1rem 1.2rem;
+    }
+
+    .playlist-track-table th,
+    .playlist-track-table td,
+    .playlist-track-table.compact-mode th,
+    .playlist-track-table.compact-mode td{
+        padding: 0.5rem 0.4rem;
+    }
+
+    .playlist-track-table .pd-album-col,
+    .playlist-track-table .pd-list-only,
+    .playlist-track-table .pd-compact-only{
+        display: none !important;
+    }
+
+        .track-duration{
+        white-space: nowrap;
+    }
+
     nav{
         height: auto;
         min-height: 3.5rem;
