@@ -1198,7 +1198,7 @@ input[type="range"]::-webkit-slider-thumb{
         margin: 1rem;
     }
 
-        html, body{
+    html, body{
         overflow-x: hidden;
     }
 
@@ -1207,57 +1207,91 @@ input[type="range"]::-webkit-slider-thumb{
     }
 
     .playlist-detail-header{
-        padding: 1.2rem;
-        gap: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 20px 16px;
     }
 
     .playlist-detail-cover{
-        width: 8rem;
-        height: 8rem;
-        font-size: 3rem;
+        width: 42vw;
+        height: 42vw;
+        max-width: 180px;
+        max-height: 180px;
+        font-size: 2.5rem;
+    }
+
+    .playlist-detail-title{
+        font-size: 1.6rem;
+        word-break: normal;
+        overflow-wrap: anywhere;
     }
 
     .playlist-detail-toolbar{
-        padding: 1rem 1.2rem;
+        padding: 12px 16px;
+        gap: 16px;
     }
 
-    .playlist-track-table{
-        table-layout: fixed;
+    .playlist-play-btn{
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.2rem;
+    }
+
+    /* tabel diubah jadi baris flex di HP */
+    .playlist-track-table,
+    .playlist-track-table tbody{
+        display: block;
         width: 100%;
     }
 
-    .playlist-track-table th,
+    .playlist-track-table thead{
+        display: none;
+    }
+
+    .playlist-track-table tbody tr{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+    }
+
     .playlist-track-table td,
-    .playlist-track-table.compact-mode th,
     .playlist-track-table.compact-mode td{
-        padding: 0.5rem 0.4rem;
+        display: block;
+        padding: 0 !important;
     }
 
-    .playlist-track-table .pd-album-col,
-    .playlist-track-table .pd-list-only,
-    .playlist-track-table .pd-compact-only{
-        display: none !important;
-    }
-
-    /* lebar kolom: # | Title (sisa ruang) | love | durasi */
-    .playlist-track-table th:nth-child(1),
     .playlist-track-table td:nth-child(1){
-        width: 2.5rem;
-        padding-left: 0.6rem;
-    }
-
-    .playlist-track-table th:nth-child(6),
-    .playlist-track-table td:nth-child(6){
-        width: 2.6rem;
-    }
-
-    .playlist-track-table th:nth-child(7),
-    .playlist-track-table td:nth-child(7){
-        width: 3.6rem;
+        flex: 0 0 1.5rem;
+        text-align: center;
     }
 
     .playlist-track-table td:nth-child(2){
+        flex: 1 1 0;
+        min-width: 0;
         overflow: hidden;
+    }
+
+    .playlist-track-table .pd-compact-only,
+    .playlist-track-table .pd-album-col,
+    .playlist-track-table .pd-list-only{
+        display: none !important;
+    }
+
+    .playlist-track-table td.track-actions{
+        flex: 0 0 auto;
+        display: flex;
+    }
+
+    .track-like-btn{
+        opacity: 1;
+    }
+
+    .playlist-track-table td.track-duration{
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 0.8rem;
     }
 
     .track-title-cell{
@@ -1266,21 +1300,21 @@ input[type="range"]::-webkit-slider-thumb{
 
     .track-title-text{
         min-width: 0;
+        flex: 1;
     }
 
-    .playlist-track-table td.track-actions{
-        display: table-cell;
-        text-align: center;
-        padding-right: 0.2rem !important;
-    }
-
-    .track-like-btn{
-        opacity: 1;
-        display: inline-flex;
-    }
-
-    .track-duration{
+    .track-title-text .t-name,
+    .track-title-text .t-artist{
+        display: block;
+        max-width: none;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .track-title-text .t-artist{
+        font-size: 0.75rem;
+        color: var(--gray-mid);
     }
 
     nav{
