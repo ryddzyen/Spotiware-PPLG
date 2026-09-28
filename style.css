@@ -1230,15 +1230,39 @@ input[type="range"]::-webkit-slider-thumb{
         display: none !important;
     }
 
+    /* Kolom yang tampil di HP: 1 (#), 2 (Title), 6 (love), 7 (durasi) */
+    .playlist-track-table th:nth-child(1){ width: 2.2rem; }
+    .playlist-track-table th:nth-child(2){ width: auto; }
+    .playlist-track-table th:nth-child(6){ width: 2.4rem; }
+    .playlist-track-table th:nth-child(7){ width: 3.4rem; }
+
     .playlist-track-table th:last-child,
     .playlist-track-table td:last-child{
-        width: 3rem;
         text-align: right;
         padding-right: 0.8rem;
     }
 
-    .playlist-track-table .track-actions{
-        width: 2.5rem;
+    .playlist-track-table td.track-actions{
+        display: table-cell;
+        width: 2.4rem;
+        padding-left: 0;
+        padding-right: 0.2rem;
+        text-align: center;
+    }
+
+    .playlist-track-table .track-like-btn{
+        display: inline-flex;
+        opacity: 1;
+    }
+
+    .track-title-cell{
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .track-title-text{
+        min-width: 0;
+        flex: 1;
     }
 
     .track-like-btn{
