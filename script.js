@@ -101,9 +101,16 @@ const isMobileView = () => mobileQuery.matches;
 
 function fitMobileScale() {
     const root = document.documentElement;
+
+    if (!isMobileView()) {
+        root.style.fontSize = '';
+        return;
+    }
+
     const ratio = window.innerWidth / window.screen.width;
 
-    if (isMobileView() && ratio > 1.2) {
+    // Batasi rasio biar nggak pernah "kabur" jadi terlalu besar
+    if (ratio > 1.2 && ratio <= 1.6) {
         root.style.fontSize = `${16 * ratio}px`;
     } else {
         root.style.fontSize = '';
@@ -111,7 +118,6 @@ function fitMobileScale() {
 }
 
 fitMobileScale();
-window.addEventListener('resize', fitMobileScale);
 window.addEventListener('orientationchange', fitMobileScale);
 
 let order = [...songs];
@@ -122,7 +128,7 @@ function addToQueue(song) {
 }
 let currentIndex = 0;
 let audio = new Audio(order[currentIndex].songPath);
-audio.preload = "none";
+audio.preload = "auto";
 
 let currentTimeEl = document.getElementById('currentTime');
 let durationEl = document.getElementById('duration');
@@ -705,6 +711,33 @@ function updateNowPlayingPanel() {
     if (npFullscreenBg) npFullscreenBg.style.backgroundImage = `url("${encodeURI(song.songImage)}")`;
 }
 
+// ===== Media Session (biar lagu tetap jalan di background & ada kontrol di notifikasi) =====
+function updateMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+    const song = getCurrentSong();
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.songName,
+        artist: song.songDes,
+        album: 'Spotiware',
+        artwork: [
+            { src: new URL(song.songImage, location.href).href, sizes: '512x512', type: 'image/webp' }
+        ]
+    });
+}
+
+function setupMediaSessionHandlers() {
+    if (!('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.setActionHandler('play', () => audio.play());
+    navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+    navigator.mediaSession.setActionHandler('previoustrack', playPrevSong);
+    navigator.mediaSession.setActionHandler('nexttrack', playNextSong);
+    navigator.mediaSession.setActionHandler('seekto', (d) => {
+        if (d.seekTime != null) audio.currentTime = d.seekTime;
+    });
+}
+
 function updateNowBar() {
     let song = getCurrentSong();
     nowBar.getElementsByTagName('img')[0].src = song.songImage;
@@ -714,6 +747,7 @@ function updateNowBar() {
     updateNowBarLikeIcon();
     renderQueuePanel();
     updateMiniPlayerPopup();
+    updateMediaSession();
 }
 
 // ===== History functions =====
@@ -807,6 +841,8 @@ audio.addEventListener('play', () => {
     updatePlaylistPlayIcon();
     updatePlaylistRowIcons();
     updateMiniPlayerPopup();
+    updateMiniPlayerPopup();
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
 });
 
 audio.addEventListener('pause', () => {
@@ -821,6 +857,8 @@ audio.addEventListener('pause', () => {
     updatePlaylistPlayIcon();
     updatePlaylistRowIcons();
     updateMiniPlayerPopup();
+    updateMiniPlayerPopup();
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
 });
 
 audio.addEventListener('timeupdate', () => {
@@ -2040,6 +2078,8 @@ async function openRealMiniPlayer() {
         pipWindow = null;
     });
 }
+
+setupMediaSessionHandlers();
 
 // Inisialisasi Aplikasi
 renderSongs(songs);

@@ -1186,6 +1186,87 @@ input[type="range"]::-webkit-slider-thumb{
         display: none;
     }
 
+        html, body{
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    .playlist-detail-header{
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.2rem;
+    }
+
+    .playlist-detail-cover{
+        width: 10rem;
+        height: 10rem;
+    }
+
+    .playlist-detail-toolbar{
+        padding: 1rem 1.2rem;
+    }
+
+    .playlist-track-table{
+        table-layout: fixed;
+    }
+
+    .playlist-track-table th,
+    .playlist-track-table td,
+    .playlist-track-table.compact-mode th,
+    .playlist-track-table.compact-mode td{
+        padding: 0.5rem 0.4rem;
+    }
+
+    .playlist-track-table td:first-child,
+    .playlist-track-table th:first-child{
+        width: 2rem;
+        padding-left: 0.6rem;
+        padding-right: 0.2rem;
+    }
+
+    .playlist-track-table .pd-album-col,
+    .playlist-track-table .pd-list-only,
+    .playlist-track-table .pd-compact-only{
+        display: none !important;
+    }
+
+    .playlist-track-table th:last-child,
+    .playlist-track-table td:last-child{
+        width: 3rem;
+        text-align: right;
+        padding-right: 0.8rem;
+    }
+
+    .playlist-track-table .track-actions{
+        width: 2.5rem;
+    }
+
+    .track-like-btn{
+        opacity: 1;
+    }
+
+    .track-title-cell{
+        min-width: 0;
+    }
+
+    .track-title-text .t-name,
+    .track-title-text .t-artist{
+        max-width: 100%;
+    }
+
+    .show-all-view{
+        padding: 1rem;
+    }
+
+    .show-all-grid{
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+        gap: 0.6rem;
+    }
+
+    .playlist-back-btn{
+        margin: 1rem;
+    }
+
     nav{
         height: auto;
         min-height: 3.5rem;
