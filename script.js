@@ -106,6 +106,7 @@ const songs = [
     { id: 102, songName: "Tek It", songDes: "Cafuné", songImage: "Art Cover/SpotiDown.App - Tek It - Cafuné.webp", songPath: "Lagu/SpotiDown.App - Tek It - Cafuné.mp3" },
     { id: 103, songName: "Sesi Potret", songDes: "eńau", songImage: "Art Cover/SpotiDown.App - Sesi Potret - eńau.webp", songPath: "Lagu/SpotiDown.App - Sesi Potret - eńau.mp3" },
     { id: 104, songName: "Bertaut", songDes: "Nadin Amizah", songImage: "Art Cover/SpotiDown.App - Bertaut - Nadin Amizah.webp", songPath: "Lagu/SpotiDown.App - Bertaut - Nadin Amizah.mp3" },
+    { id: 105, songName: "Somebody's Pleasure", songDes: "Aziz Hedra", songImage: "Art Cover/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.webp", songPath: "Lagu/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.mp3" },
 ];
 
 // Tampilan mobile aktif kalau layar <= 768px ATAU perangkat layar sentuh
