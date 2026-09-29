@@ -19,7 +19,7 @@ const songs = [
     { id: 15, songName: "Dark Beach", songDes: "Pastel Ghost", songImage: "Art Cover/Abyss.webp", songPath: "Lagu/Dark Beach.mp3" },
     { id: 16, songName: "Die For You", songDes: "The Weeknd", songImage: "Art Cover/Starboy.webp", songPath: "Lagu/Die For You.mp3" },
     { id: 17, songName: "Flatline", songDes: "Justin Bieber", songImage: "Art Cover/Journals.webp", songPath: "Lagu/Flatline.mp3" },
-    { id: 18, songName: "Floki x Lost Soul", songDes: "NBSPLV", songImage: "Art Cover/Floki x Lost Soul.webp", songPath: "Lagu/Floki x Lost Soul.mp3" },
+    { id: 18, songName: "Snowman", songDes: "Sia", songImage: "Art Cover/snowman.webp", songPath: "Lagu/Snowman.mp3" },
     { id: 19, songName: "Fluxxwave", songDes: "Clovis Reyes", songImage: "Art Cover/Fluxxwave.webp", songPath: "Lagu/Fluxxwave.mp3" },
     { id: 20, songName: "Gata Only", songDes: "FloyyMenor, Cris Mj", songImage: "Art Cover/Gata Only.webp", songPath: "Lagu/Gata Only.mp3" },
     { id: 21, songName: "Girl You Loud", songDes: "Chris Brown, Tyga", songImage: "Art Cover/Girl You Loud.webp", songPath: "Lagu/Girl You Loud.mp3" },
@@ -92,7 +92,20 @@ const songs = [
     { id: 88, songName: "Swim", songDes: "Chase Atlantic", songImage: "Art Cover/swim.webp", songPath: "Lagu/Swim.mp3" },
     { id: 89, songName: "we can't be friends (wait for your love)", songDes: "Ariana Grande", songImage: "Art Cover/supernatural.webp", songPath: "Lagu/we can't be friends (wait for your love).mp3" },
     { id: 90, songName: "What If I Call", songDes: "Charlie Burg", songImage: "Art Cover/What If I Call.webp", songPath: "Lagu/What If I Call.mp3" },
-    { id: 91, songName: "worry - Slowed", songDes: "LONOWN, riserayss", songImage: "Art Cover/worry.webp", songPath: "Lagu/worry - Slowed.mp3" }
+    { id: 91, songName: "worry - Slowed", songDes: "LONOWN, riserayss", songImage: "Art Cover/worry.webp", songPath: "Lagu/worry - Slowed.mp3" },
+    { id: 92, songName: "FLY", songDes: "Spectrum", songImage: "Art Cover/FLY.webp", songPath: "Lagu/F L Y.mp3" },
+    { id: 93, songName: "Surabaya", songDes: "Crayon Case", songImage: "Art Cover/surabaya.webp", songPath: "Lagu/Surabaya.mp3" },
+    { id: 94, songName: "siapkah kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!,Andi Rianto", songImage: "Art Cover/siapkah kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau Tuk Jatuh Cinta Lagi.mp3" },
+    { id: 95, songName: "8 Letters", songDes: "Why Don't We", songImage: "Art Cover/8letters.webp", songPath: "Lagu/8 Letters.mp3" },
+    { id: 96, songName: "20 Min", songDes: "Lil Uzi Vert", songImage: "Art Cover/20min.webp", songPath: "Lagu/20 Min.mp3" },
+    { id: 97, songName: "Breakin'Dishes", songDes: "Rihanna", songImage: "Art Cover/breakin'dishes.webp", songPath: "Lagu/Breakin Dishes.mp3" },
+    { id: 98, songName: "Bring Me To Life", songDes: "Evanescence", songImage: "Art Cover/bringmetolife.webp", songPath: "Lagu/Bring Me To Life.mp3" },
+    { id: 99, songName: "Foto kita blur", songDes: "Sal Priadi", songImage: "Art Cover/fotokitablur.webp", songPath: "Lagu/Foto kita blur.mp3" },
+    { id: 100, songName: "Goodluck,Babe!", songDes: "Chappell Roan", songImage: "Art Cover/goodluckbabe.webp", songPath: "Lagu/Good Luck Babe.mp3" },
+    { id: 101, songName: "Lovely with Khalid", songDes: "Billie Eilish,Khalid", songImage: "Art Cover/lovely.webp", songPath: "Lagu/lovely with Khalid.mp3" },
+    { id: 102, songName: "Tek It", songDes: "Cafuné", songImage: "Art Cover/SpotiDown.App - Tek It - Cafuné.webp", songPath: "Lagu/SpotiDown.App - Tek It - Cafuné.mp3" },
+    { id: 103, songName: "Sesi Potret", songDes: "eńau", songImage: "Art Cover/SpotiDown.App - Sesi Potret - eńau.webp", songPath: "Lagu/SpotiDown.App - Sesi Potret - eńau.mp3" },
+    { id: 104, songName: "Bertaut", songDes: "Nadin Amizah", songImage: "Art Cover/SpotiDown.App - Bertaut - Nadin Amizah.webp", songPath: "Lagu/SpotiDown.App - Bertaut - Nadin Amizah.mp3" },
 ];
 
 // Tampilan mobile aktif kalau layar <= 768px ATAU perangkat layar sentuh
@@ -121,6 +134,7 @@ fitMobileScale();
 window.addEventListener('orientationchange', fitMobileScale);
 
 let order = [...songs];
+let homeSongsOrder = [...songs];
 let queue = [];
 
 function addToQueue(song) {
@@ -481,10 +495,12 @@ function renderSongs(songsToRender, options = {}) {
     let sec1 = document.getElementById('section-1');
     let sec2 = document.getElementById('section-2');
     let sec3 = document.getElementById('section-3');
+    let sec4 = document.getElementById('section-4');
 
     if (sec1) sec1.innerHTML = '';
     if (sec2) sec2.innerHTML = '';
     if (sec3) sec3.innerHTML = '';
+    if (sec4) sec4.innerHTML = '';
 
     songsToRender.forEach((song, index) => {
         const playlistBtnHTML = playlistId
@@ -511,15 +527,18 @@ function renderSongs(songsToRender, options = {}) {
             if (sec1) sec1.innerHTML += cardHTML;
         } else if (index < 60) {
             if (sec2) sec2.innerHTML += cardHTML;
-        } else {
+        } else if (index < 90) {
             if (sec3) sec3.innerHTML += cardHTML;
+        } else {
+            if (sec4) sec4.innerHTML += cardHTML;
         }
     });
 
     const allSections = document.querySelectorAll('.music-section');
-    if (allSections.length >= 3) {
+    if (allSections.length >= 4) {
         allSections[1].style.display = playlistId ? 'none' : '';
         allSections[2].style.display = playlistId ? 'none' : '';
+        allSections[3].style.display = playlistId ? 'none' : '';
     }
 
     attachPlayEvents();
@@ -588,6 +607,9 @@ function setupSearch() {
 function toggleSectionTitles(isSearching) {
     document.querySelectorAll('.music-section h2').forEach((h2) => {
         h2.style.display = isSearching ? 'none' : 'block';
+    });
+    document.querySelectorAll('.show-all-link').forEach((link) => {
+        link.style.display = isSearching ? 'none' : '';
     });
 }
 
@@ -1159,7 +1181,7 @@ function goHome() {
     let searchInputEl = document.querySelector('.input-box');
     if (searchInputEl) searchInputEl.value = '';
 
-    renderSongs(songs);
+    renderSongs(homeSongsOrder);
     toggleSectionTitles(false);
 
     const sec1Title = document.querySelector('#section-1')?.closest('.music-section')?.querySelector('h2');
@@ -1806,8 +1828,8 @@ function closeShowAllView() {
 document.querySelectorAll('.show-all-link').forEach(link => {
     link.addEventListener('click', () => {
         const start = parseInt(link.dataset.start);
-        const end = link.dataset.end ? parseInt(link.dataset.end) : songs.length;
-        const sectionSongs = songs.slice(start, end);
+        const end = link.dataset.end ? parseInt(link.dataset.end) : homeSongsOrder.length;
+        const sectionSongs = homeSongsOrder.slice(start, end);
         openShowAllView(link.dataset.title, sectionSongs);
     });
 });
@@ -1860,6 +1882,7 @@ function showNowPlayingPanel() {
         if (queueBtn) queueBtn.classList.remove('active');
     }
     if (nowPlayingPanel) nowPlayingPanel.classList.add('show');
+    document.body.classList.add('player-active');
 }
 
 if (queueBtn) {
@@ -2100,7 +2123,8 @@ async function openRealMiniPlayer() {
 setupMediaSessionHandlers();
 
 // Inisialisasi Aplikasi
-renderSongs(songs);
+homeSongsOrder = shuffleSongs(songs);
+renderSongs(homeSongsOrder);
 setupSearch();
 renderHistory();
 renderPlaylistList();

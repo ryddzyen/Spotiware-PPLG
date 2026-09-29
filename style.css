@@ -1376,6 +1376,10 @@ input[type="range"]::-webkit-slider-thumb{
         height: auto;
         margin: 0.5rem 0 0;
         gap: 0;
+        padding-bottom: 5rem;
+    }
+
+    body.player-active .main{
         padding-bottom: 9.5rem;
     }
 
