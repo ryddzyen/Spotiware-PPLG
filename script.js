@@ -107,6 +107,7 @@ const songs = [
     { id: 103, songName: "Sesi Potret", songDes: "eńau", songImage: "Art Cover/SpotiDown.App - Sesi Potret - eńau.webp", songPath: "Lagu/SpotiDown.App - Sesi Potret - eńau.mp3" },
     { id: 104, songName: "Bertaut", songDes: "Nadin Amizah", songImage: "Art Cover/SpotiDown.App - Bertaut - Nadin Amizah.webp", songPath: "Lagu/SpotiDown.App - Bertaut - Nadin Amizah.mp3" },
     { id: 105, songName: "Somebody's Pleasure", songDes: "Aziz Hedra", songImage: "Art Cover/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.webp", songPath: "Lagu/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.mp3" },
+    { id: 106, songName: "Good Luck Babe", songDes: "Chappell Roan", songImage: "Art Cover/SpotiDown.App - Good Luck_ Babe_ - Chappell Roan.webp", songPath: "Lagu/SpotiDown.App - Good Luck_ Babe_ - Chappell Roan.mp3" },
 ];
 
 // Tampilan mobile aktif kalau layar <= 768px ATAU perangkat layar sentuh
@@ -136,6 +137,7 @@ window.addEventListener('orientationchange', fitMobileScale);
 
 let order = [...songs];
 let homeSongsOrder = [...songs];
+let lastRenderedSongs = homeSongsOrder;
 let queue = [];
 
 function addToQueue(song) {
@@ -492,6 +494,7 @@ function attachAddToPlaylistButtonEvents() {
 
 function renderSongs(songsToRender, options = {}) {
     const { playlistId = null } = options;
+    lastRenderedSongs = songsToRender;
 
     let sec1 = document.getElementById('section-1');
     let sec2 = document.getElementById('section-2');
@@ -570,6 +573,7 @@ function attachPlayEvents() {
                 return;
             }
 
+            order = [...lastRenderedSongs];
             let pos = order.findIndex((s) => s.id === clickedId);
             currentIndex = pos !== -1 ? pos : 0;
 
@@ -1794,6 +1798,7 @@ function closePlaylistDetailView() {
 
 function openShowAllView(title, songsList) {
     closePlaylistDetailView();
+    lastRenderedSongs = songsList;
     document.querySelectorAll('.music-section').forEach(sec => sec.classList.add('hide'));
 
     document.getElementById('showAllTitle').textContent = title;
