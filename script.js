@@ -46,7 +46,7 @@ const songs = [
     { id: 42, songName: "Iris", songDes: "Pastel Ghost", songImage: "Art Cover/SpotiDown.App - Iris - Pastel Ghost.webp", songPath: "Lagu/SpotiDown.App - Iris - Pastel Ghost.mp3" },
     { id: 43, songName: "No. 1 Party Anthem", songDes: "Arctic Monkeys", songImage: "Art Cover/AM.webp", songPath: "Lagu/No. 1 Party Anthem.mp3" },
     { id: 44, songName: "nuts (feat. Rainy Bear)", songDes: "Lil Peep", songImage: "Art Cover/nuts (feat. Rainy Bear).webp", songPath: "Lagu/nuts (feat. Rainy Bear).mp3" },
-    { id: 45, songName: "505", songDes: "Arctic Monkeys", songImage: "Art Cover/505.webp", songPath: "Lagu/obsessed - slowed + reverb.mp3" },
+    { id: 45, songName: "505", songDes: "Arctic Monkeys", songImage: "Art Cover/505.webp", songPath: "Lagu/505.mp3" },
     { id: 46, songName: "Obsessed", songDes: "Mariah Carey", songImage: "Art Cover/Memoirs of an imperfect Angel (International Version).webp", songPath: "Lagu/Obsessed.mp3" },
     { id: 47, songName: "Paparazzi (Dubstep)", songDes: "Lady Gaga", songImage: "Art Cover/The Fame.webp", songPath: "Lagu/SpotiDown.App - Paparazzi _Dubstep_ - Alximo.mp3" },
     { id: 48, songName: "PELIGROSA", songDes: "J Balvin, Wisin & Yandel", songImage: "Art Cover/EL COMIENZO.webp", songPath: "Lagu/PELIGROSA.mp3" },
