@@ -351,7 +351,7 @@ function renderPlaylistList() {
     } else {
         html += others.map(p => {
             const songsInP = getSongsInPlaylist(p);
-            const coverImg = songsInP.length > 0 ? songsInP[0].songImage : null;
+            const coverImg = p.coverImage || (songsInP.length > 0 ? songsInP[0].songImage : null);
             const thumbHTML = coverImg
                 ? `<img class="playlist-thumb" src="${coverImg}" alt="${p.name}">`
                 : `<div class="playlist-icon"><i class="fa-solid fa-music"></i></div>`;
@@ -1454,6 +1454,210 @@ document.getElementById('addToPlaylistCloseBtn')?.addEventListener('click', () =
     document.getElementById('addToPlaylistModal').classList.remove('show');
 });
 
+// ===== Update nama & cover custom playlist =====
+function updatePlaylistName(playlistId, newName) {
+    const playlists = getPlaylists();
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist) {
+        playlist.name = newName;
+        savePlaylists(playlists);
+    }
+}
+
+function updatePlaylistCover(playlistId, dataUrl) {
+    const playlists = getPlaylists();
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist) {
+        playlist.coverImage = dataUrl;
+        savePlaylists(playlists);
+    }
+}
+
+// ===== Update nama/deskripsi & cover custom playlist =====
+function updatePlaylistName(playlistId, newName) {
+    const playlists = getPlaylists();
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist) { playlist.name = newName; savePlaylists(playlists); }
+}
+
+function updatePlaylistDescription(playlistId, desc) {
+    const playlists = getPlaylists();
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist) { playlist.description = desc; savePlaylists(playlists); }
+}
+
+function updatePlaylistCover(playlistId, dataUrl) {
+    const playlists = getPlaylists();
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist) { playlist.coverImage = dataUrl; savePlaylists(playlists); }
+}
+
+function resizeImageToDataUrl(file, maxSize, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } }
+            else { if (h > maxSize) { w *= maxSize / h; h = maxSize; } }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ===== Modal Edit Details (nama + deskripsi + cover) =====
+let editDetailsModal = document.getElementById('editDetailsModal');
+let editDetailsNameInput = document.getElementById('editDetailsNameInput');
+let editDetailsDescInput = document.getElementById('editDetailsDescInput');
+let editDetailsCover = document.getElementById('editDetailsCover');
+let editDetailsCoverImg = document.getElementById('editDetailsCoverImg');
+let editDetailsCoverInput = document.getElementById('editDetailsCoverInput');
+let pdEditDetailsBtn = document.getElementById('pdEditDetailsBtn');
+let pendingEditCoverDataUrl = null;
+
+function openEditDetailsModal() {
+    if (!pdCurrentPlaylistId || pdCurrentIsLiked) return;
+    const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+    if (!playlist) return;
+
+    pendingEditCoverDataUrl = null;
+    editDetailsNameInput.value = playlist.name;
+    editDetailsDescInput.value = playlist.description || '';
+
+    const songsInP = getSongsInPlaylist(playlist);
+    const coverSrc = playlist.coverImage || (songsInP.length > 0 ? songsInP[0].songImage : null);
+    if (coverSrc) {
+        editDetailsCoverImg.src = coverSrc;
+        editDetailsCoverImg.style.display = 'block';
+    } else {
+        editDetailsCoverImg.style.display = 'none';
+    }
+
+    editDetailsModal.classList.add('show');
+}
+
+function closeEditDetailsModal() {
+    editDetailsModal.classList.remove('show');
+}
+
+function confirmEditDetails() {
+    if (!pdCurrentPlaylistId) return closeEditDetailsModal();
+    const newName = editDetailsNameInput.value.trim();
+    if (newName) {
+        updatePlaylistName(pdCurrentPlaylistId, newName);
+        document.getElementById('playlistDetailTitle').textContent = newName;
+    }
+    updatePlaylistDescription(pdCurrentPlaylistId, editDetailsDescInput.value.trim());
+    document.getElementById('playlistDetailDescription').textContent = editDetailsDescInput.value.trim();
+
+    if (pendingEditCoverDataUrl) {
+        updatePlaylistCover(pdCurrentPlaylistId, pendingEditCoverDataUrl);
+        document.getElementById('playlistDetailCover').innerHTML = `<img src="${pendingEditCoverDataUrl}" alt="">`;
+        document.getElementById('playlistDetailCover').style.background = '#2f2f2f';
+    }
+
+    renderPlaylistList();
+    closeEditDetailsModal();
+}
+
+if (pdEditDetailsBtn) pdEditDetailsBtn.addEventListener('click', openEditDetailsModal);
+if (editDetailsCover) {
+    editDetailsCover.addEventListener('click', () => editDetailsCoverInput.click());
+}
+if (editDetailsCoverInput) {
+    editDetailsCoverInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        resizeImageToDataUrl(file, 300, (dataUrl) => {
+            pendingEditCoverDataUrl = dataUrl;
+            editDetailsCoverImg.src = dataUrl;
+            editDetailsCoverImg.style.display = 'block';
+        });
+        editDetailsCoverInput.value = '';
+    });
+}
+document.getElementById('editDetailsSave')?.addEventListener('click', confirmEditDetails);
+document.getElementById('editDetailsCancel')?.addEventListener('click', closeEditDetailsModal);
+document.getElementById('editDetailsCloseX')?.addEventListener('click', closeEditDetailsModal);
+editDetailsModal?.addEventListener('click', (e) => {
+    if (e.target === editDetailsModal) closeEditDetailsModal();
+});
+
+// ===== Panel Add Songs ke playlist (gantiin slot Now Playing/Queue) =====
+let addSongsPanel = document.getElementById('addSongsPanel');
+let addSongsSearchInput = document.getElementById('addSongsSearchInput');
+let addSongsList = document.getElementById('addSongsList');
+let pdAddSongsBtn = document.getElementById('pdAddSongsBtn');
+
+function renderAddSongsList(query) {
+    const q = (query || '').toLowerCase().trim();
+    const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+    if (!playlist) return;
+
+    const filtered = q
+        ? songs.filter(s => s.songName.toLowerCase().includes(q) || s.songDes.toLowerCase().includes(q))
+        : songs.slice(0, 50);
+
+    addSongsList.innerHTML = filtered.map(song => {
+        const already = playlist.songIds.includes(song.id);
+        return `
+            <div class="add-songs-row">
+                <img src="${song.songImage}" alt="">
+                <div class="add-songs-row-info">
+                    <div class="add-songs-row-name">${song.songName}</div>
+                    <div class="add-songs-row-artist">${song.songDes}</div>
+                </div>
+                <button class="playlist-check-btn ${already ? 'checked' : ''}" data-song-id="${song.id}">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        `;
+    }).join('');
+
+    addSongsList.querySelectorAll('.playlist-check-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const songId = parseInt(btn.dataset.songId);
+            const current = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+            if (current.songIds.includes(songId)) {
+                removeSongFromPlaylist(pdCurrentPlaylistId, songId);
+            } else {
+                addSongToPlaylist(pdCurrentPlaylistId, songId);
+            }
+            btn.classList.toggle('checked');
+        });
+    });
+}
+
+function openAddSongsPanel() {
+    if (!pdCurrentPlaylistId) return;
+    addSongsSearchInput.value = '';
+    renderAddSongsList('');
+
+    if (queuePanel) { queuePanel.classList.remove('show'); if (queueBtn) queueBtn.classList.remove('active'); }
+    if (nowPlayingPanel) nowPlayingPanel.classList.remove('show');
+    addSongsPanel.classList.add('show');
+}
+
+function closeAddSongsPanel() {
+    addSongsPanel.classList.remove('show');
+    const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+    if (playlist) openPlaylistDetailView(playlist, pdCurrentIsLiked);
+    if (nowPlayingPanel && playerBar.classList.contains('show')) {
+        nowPlayingPanel.classList.add('show');
+    }
+}
+
+if (pdAddSongsBtn) pdAddSongsBtn.addEventListener('click', openAddSongsPanel);
+if (addSongsSearchInput) {
+    addSongsSearchInput.addEventListener('input', (e) => renderAddSongsList(e.target.value));
+}
+document.getElementById('addSongsCloseBtn')?.addEventListener('click', closeAddSongsPanel);
+
 // ===== Modal Riwayat (History) =====
 let historyNavBtn = document.getElementById('historyNavBtn');
 let historyModal = document.getElementById('historyModal');
@@ -1725,15 +1929,35 @@ function openPlaylistDetailView(playlist, isLiked) {
     title.textContent = playlist.name;
     meta.textContent = `${songsInPlaylist.length} song${songsInPlaylist.length !== 1 ? 's' : ''}`;
 
+    const overlayHTML = isLiked ? '' : `<div class="cover-upload-overlay" id="coverUploadOverlay"><i class="fa-solid fa-camera"></i><span>Choose photo</span></div>`;
+
     if (isLiked) {
         cover.innerHTML = '<i class="fa-solid fa-heart"></i>';
         cover.style.background = 'linear-gradient(135deg, #450af5, #c4efd9)';
+    } else if (playlist.coverImage) {
+        cover.innerHTML = `<img src="${playlist.coverImage}" alt="">`;
+        cover.style.background = '#2f2f2f';
     } else if (songsInPlaylist.length > 0) {
         cover.innerHTML = `<img src="${songsInPlaylist[0].songImage}" alt="">`;
         cover.style.background = '#2f2f2f';
     } else {
         cover.innerHTML = '<i class="fa-solid fa-music"></i>';
         cover.style.background = '#2f2f2f';
+    }
+
+    document.getElementById('playlistDetailDescription').textContent = playlist.description || '';
+
+    if (pdAddSongsBtn) pdAddSongsBtn.style.display = 'flex';
+    if (pdEditDetailsBtn) pdEditDetailsBtn.style.display = isLiked ? 'none' : 'flex';
+
+    if (!isLiked) {
+        const ov = document.getElementById('coverUploadOverlay');
+        if (ov) {
+            ov.addEventListener('click', (e) => {
+                e.stopPropagation();
+                coverUploadInput.click();
+            });
+        }
     }
 
     tbody.innerHTML = songsInPlaylist.map((song, idx) => `

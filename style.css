@@ -3180,3 +3180,220 @@ input[type="range"]::-webkit-slider-thumb{
     height: auto;
     aspect-ratio: 1 / 1;
 }
+
+.playlist-detail-cover{
+    position: relative;
+    cursor: pointer;
+}
+
+.cover-upload-overlay{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: 0.2s;
+    text-align: center;
+    padding: 0.5rem;
+}
+.cover-upload-overlay i{
+    font-size: 1.6rem;
+}
+.playlist-detail-cover:hover .cover-upload-overlay{
+    opacity: 1;
+}
+
+.playlist-title-row{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.playlist-edit-name-btn{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+.playlist-title-row:hover .playlist-edit-name-btn,
+.playlist-edit-name-btn:focus{
+    opacity: 1;
+}
+.playlist-edit-name-btn:hover{
+    color: white;
+    transform: scale(1.1);
+}
+
+.pd-pill-btn{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: 1px solid var(--gray-dark);
+    color: var(--gray-light);
+    padding: 0.5rem 1.1rem;
+    border-radius: 20rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+.pd-pill-btn:hover{
+    border-color: white;
+    color: white;
+    transform: scale(1.03);
+}
+
+.playlist-detail-description{
+    font-size: 0.85rem;
+    color: var(--gray-light);
+    margin: 0.3rem 0;
+    max-width: 40rem;
+}
+.playlist-detail-description:empty{
+    display: none;
+}
+
+/* Modal Edit details */
+.edit-details-modal-box{
+    max-width: 30rem;
+    text-align: left;
+}
+.edit-details-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+}
+.edit-details-header h3{
+    margin-bottom: 0;
+}
+.modal-x-btn{
+    background: none;
+    border: none;
+    color: var(--gray-light);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.modal-x-btn:hover{ color: white; }
+
+.edit-details-body{
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.edit-details-cover{
+    position: relative;
+    width: 9rem;
+    height: 9rem;
+    flex-shrink: 0;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #450af5, #c4efd9);
+    overflow: hidden;
+    cursor: pointer;
+}
+.edit-details-cover img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.edit-details-fields{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    min-width: 0;
+}
+.edit-details-desc-input{
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 6rem;
+    resize: vertical;
+    padding: 0.7rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background-color: #2a2a2a;
+    color: white;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+}
+.edit-details-desc-input:focus{
+    border-color: var(--yellow);
+}
+
+/* Modal Add Songs */
+.add-songs-row{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0.3rem;
+    border-bottom: 1px solid var(--border);
+}
+.add-songs-row img{
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.add-songs-row-info{
+    flex: 1;
+    min-width: 0;
+}
+.add-songs-row-name{
+    color: white;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.add-songs-row-artist{
+    color: var(--gray-mid);
+    font-size: 0.75rem;
+}
+
+.add-songs-panel{
+    display: none;
+    width: 23.25%;
+    height: 100%;
+    background-color: #121212;
+    border-radius: 10px;
+    flex-direction: column;
+    overflow: hidden;
+}
+.add-songs-panel.show{ display: flex; }
+
+.add-songs-search-wrap{
+    padding: 0 1.2rem 0.8rem;
+}
+.add-songs-search-wrap .create-playlist-modal-input{
+    margin-bottom: 0;
+}
+
+@media (max-width: 900px){
+    .add-songs-panel{
+        position: fixed;
+        right: 1rem;
+        bottom: 6.5rem;
+        width: 22rem;
+        max-width: calc(100% - 2rem);
+        height: auto;
+        max-height: 65vh;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        z-index: 2500;
+    }
+}

@@ -129,6 +129,7 @@
                     <div class="playlist-detail-info">
                         <p class="playlist-detail-type">Playlist</p>
                         <h1 class="playlist-detail-title" id="playlistDetailTitle">Liked Songs</h1>
+                        <p class="playlist-detail-description" id="playlistDetailDescription"></p>
                         <p class="playlist-detail-meta" id="playlistDetailMeta">0 songs</p>
                     </div>
                 </div>
@@ -137,6 +138,9 @@
                 <div class="playlist-detail-toolbar">
                     <button class="playlist-play-btn" id="playlistPlayBtn"><i class="fa-solid fa-play"></i></button>
                     <i class="fa-solid fa-shuffle playlist-toolbar-icon" id="playlistShuffleBtn"></i>
+                    <button class="pd-pill-btn" id="pdAddSongsBtn"><i class="fa-solid fa-plus"></i> Add</button>
+                    <button class="pd-pill-btn" id="pdEditDetailsBtn"><i class="fa-solid fa-pen"></i> Name and
+                        details</button>
                     <div class="playlist-toolbar-spacer"></div>
                     <div class="playlist-view-toggle" id="playlistViewToggle">
                         <span id="playlistViewLabel">List</span> <i class="fa-solid fa-list"></i>
@@ -275,6 +279,20 @@
                 <div id="queueNextList"></div>
             </div>
         </div>
+
+        <!-- Add Songs Panel (gantiin slot Now Playing / Queue saat dibuka) -->
+        <div class="add-songs-panel" id="addSongsPanel">
+            <div class="queue-header">
+                <h3>Add to playlist</h3>
+                <button id="addSongsCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="add-songs-search-wrap">
+                <input type="text" id="addSongsSearchInput" class="create-playlist-modal-input"
+                    placeholder="Search songs">
+            </div>
+            <div class="queue-body" id="addSongsList"></div>
+        </div>
+
     </div>
 
     <!-- Player -->
@@ -386,6 +404,32 @@
         </div>
     </div>
 
+    <!-- Modal Edit Details (Name and details) -->
+    <div class="modal-overlay" id="editDetailsModal">
+        <div class="modal-box edit-details-modal-box">
+            <div class="edit-details-header">
+                <h3>Edit details</h3>
+                <button class="modal-x-btn" id="editDetailsCloseX"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="edit-details-body">
+                <div class="edit-details-cover" id="editDetailsCover">
+                    <img id="editDetailsCoverImg" src="" alt="" style="display:none;">
+                </div>
+                <input type="file" id="editDetailsCoverInput" accept="image/*" style="display:none;">
+                <div class="edit-details-fields">
+                    <input type="text" id="editDetailsNameInput" class="create-playlist-modal-input"
+                        placeholder="Playlist name" maxlength="60">
+                    <textarea id="editDetailsDescInput" class="edit-details-desc-input"
+                        placeholder="Add an optional description"></textarea>
+                </div>
+            </div>
+            <div class="modal-btn-row">
+                <button class="modal-secondary-btn" id="editDetailsCancel">Cancel</button>
+                <button class="modal-close-btn" id="editDetailsSave">Save</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Nav (khusus mobile) -->
     <div class="bottom-nav">
         <div class="bottom-nav-item active" data-target="home">
@@ -442,7 +486,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
     <script src="script.js" defer></script>
 
 </body>
