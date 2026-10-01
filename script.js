@@ -281,6 +281,54 @@ function getSongsInPlaylist(playlist) {
         .filter(Boolean);
 }
 
+function getPlaylistCoverSrc(playlist) {
+    if (playlist.coverImage) return playlist.coverImage;
+    if (playlist.id === LIKED_PLAYLIST_ID) return null;
+    const songsInP = getSongsInPlaylist(playlist);
+    return songsInP.length > 0 ? songsInP[0].songImage : null;
+}
+
+function renderDetailCover(playlist, isLiked) {
+    const cover = document.getElementById('playlistDetailCover');
+    const src = getPlaylistCoverSrc(playlist);
+    if (src) {
+        cover.innerHTML = `<img src="${src}" alt="">`;
+        cover.style.background = '#2f2f2f';
+    } else if (isLiked) {
+        cover.innerHTML = '<i class="fa-solid fa-heart"></i>';
+        cover.style.background = 'linear-gradient(135deg, #450af5, #c4efd9)';
+    } else {
+        cover.innerHTML = '<i class="fa-solid fa-music"></i>';
+        cover.style.background = '#2f2f2f';
+    }
+    cover.insertAdjacentHTML('beforeend',
+        `<div class="cover-upload-overlay"><i class="fa-solid fa-pencil"></i><span>Choose photo</span></div>`);
+}
+
+function getPlaylistCoverSrc(playlist) {
+    if (playlist.coverImage) return playlist.coverImage;
+    if (playlist.id === LIKED_PLAYLIST_ID) return null;
+    const songsInP = getSongsInPlaylist(playlist);
+    return songsInP.length > 0 ? songsInP[0].songImage : null;
+}
+
+function renderDetailCover(playlist, isLiked) {
+    const cover = document.getElementById('playlistDetailCover');
+    const src = getPlaylistCoverSrc(playlist);
+    if (src) {
+        cover.innerHTML = `<img src="${src}" alt="">`;
+        cover.style.background = '#2f2f2f';
+    } else if (isLiked) {
+        cover.innerHTML = '<i class="fa-solid fa-heart"></i>';
+        cover.style.background = 'linear-gradient(135deg, #450af5, #c4efd9)';
+    } else {
+        cover.innerHTML = '<i class="fa-solid fa-music"></i>';
+        cover.style.background = '#2f2f2f';
+    }
+    cover.insertAdjacentHTML('beforeend',
+        `<div class="cover-upload-overlay"><i class="fa-solid fa-pencil"></i><span>Choose photo</span></div>`);
+}
+
 function ensureLikedPlaylist() {
     const playlists = getPlaylists();
     if (!playlists.find(p => p.id === LIKED_PLAYLIST_ID)) {
@@ -322,9 +370,12 @@ function renderPlaylistList() {
     let html = '';
 
     if (liked && (!libraryFilterQuery || 'liked songs'.includes(libraryFilterQuery))) {
+        const likedThumb = liked.coverImage
+            ? `<img class="playlist-thumb" src="${liked.coverImage}" alt="Liked Songs">`
+            : `<div class="playlist-icon"><i class="fa-solid fa-heart"></i></div>`;
         html += `
             <div class="history-item playlist-item liked-songs" data-playlist-id="${liked.id}">
-                <div class="playlist-icon"><i class="fa-solid fa-heart"></i></div>
+                ${likedThumb}
                 <button class="grid-play-btn" data-playlist-id="${liked.id}" title="Play"><i class="fa-solid fa-play"></i></button>
                 <div class="history-info">
                     <div class="history-title">Liked Songs</div>
@@ -1454,25 +1505,6 @@ document.getElementById('addToPlaylistCloseBtn')?.addEventListener('click', () =
     document.getElementById('addToPlaylistModal').classList.remove('show');
 });
 
-// ===== Update nama & cover custom playlist =====
-function updatePlaylistName(playlistId, newName) {
-    const playlists = getPlaylists();
-    const playlist = playlists.find(p => p.id === playlistId);
-    if (playlist) {
-        playlist.name = newName;
-        savePlaylists(playlists);
-    }
-}
-
-function updatePlaylistCover(playlistId, dataUrl) {
-    const playlists = getPlaylists();
-    const playlist = playlists.find(p => p.id === playlistId);
-    if (playlist) {
-        playlist.coverImage = dataUrl;
-        savePlaylists(playlists);
-    }
-}
-
 // ===== Update nama/deskripsi & cover custom playlist =====
 function updatePlaylistName(playlistId, newName) {
     const playlists = getPlaylists();
@@ -1489,9 +1521,11 @@ function updatePlaylistDescription(playlistId, desc) {
 function updatePlaylistCover(playlistId, dataUrl) {
     const playlists = getPlaylists();
     const playlist = playlists.find(p => p.id === playlistId);
-    if (playlist) { playlist.coverImage = dataUrl; savePlaylists(playlists); }
+    if (!playlist) return;
+    if (dataUrl) playlist.coverImage = dataUrl;
+    else delete playlist.coverImage;
+    savePlaylists(playlists);
 }
-
 function resizeImageToDataUrl(file, maxSize, callback) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -1510,81 +1544,165 @@ function resizeImageToDataUrl(file, maxSize, callback) {
     reader.readAsDataURL(file);
 }
 
+// ===== Upload cover langsung dari halaman utama playlist =====
+let coverUploadInput = document.getElementById('coverUploadInput');
+
+document.getElementById('playlistDetailCover')?.addEventListener('click', () => {
+    if (pdCurrentPlaylistId && coverUploadInput) coverUploadInput.click();
+});
+
+coverUploadInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file || !pdCurrentPlaylistId) return;
+    resizeImageToDataUrl(file, 300, (dataUrl) => {
+        updatePlaylistCover(pdCurrentPlaylistId, dataUrl);
+        const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+        if (playlist) renderDetailCover(playlist, pdCurrentIsLiked);
+        renderPlaylistList();
+    });
+    coverUploadInput.value = '';
+});
+
 // ===== Modal Edit Details (nama + deskripsi + cover) =====
 let editDetailsModal = document.getElementById('editDetailsModal');
 let editDetailsNameInput = document.getElementById('editDetailsNameInput');
 let editDetailsDescInput = document.getElementById('editDetailsDescInput');
 let editDetailsCover = document.getElementById('editDetailsCover');
 let editDetailsCoverImg = document.getElementById('editDetailsCoverImg');
+let editDetailsCoverPlaceholder = document.getElementById('editDetailsCoverPlaceholder');
 let editDetailsCoverInput = document.getElementById('editDetailsCoverInput');
+let editCoverMoreBtn = document.getElementById('editCoverMoreBtn');
+let editCoverMenu = document.getElementById('editCoverMenu');
+let editCoverChange = document.getElementById('editCoverChange');
+let editCoverRemove = document.getElementById('editCoverRemove');
 let pdEditDetailsBtn = document.getElementById('pdEditDetailsBtn');
 let pendingEditCoverDataUrl = null;
+let pendingEditCoverRemove = false;
+
+function refreshEditCoverPreview() {
+    const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+    if (!playlist) return;
+
+    let src;
+    if (pendingEditCoverDataUrl) {
+        src = pendingEditCoverDataUrl;
+    } else if (pendingEditCoverRemove) {
+        if (pdCurrentIsLiked) {
+            src = null;
+        } else {
+            const s = getSongsInPlaylist(playlist);
+            src = s.length ? s[0].songImage : null;
+        }
+    } else {
+        src = getPlaylistCoverSrc(playlist);
+    }
+
+    if (src) {
+        editDetailsCoverImg.src = src;
+        editDetailsCoverImg.style.display = 'block';
+        editDetailsCoverPlaceholder.style.display = 'none';
+        editDetailsCover.style.background = '#2f2f2f';
+    } else {
+        editDetailsCoverImg.style.display = 'none';
+        editDetailsCoverPlaceholder.style.display = 'flex';
+        editDetailsCoverPlaceholder.className = 'edit-cover-placeholder fa-solid ' +
+            (pdCurrentIsLiked ? 'fa-heart' : 'fa-music');
+        editDetailsCover.style.background = pdCurrentIsLiked
+            ? 'linear-gradient(135deg, #450af5, #c4efd9)' : '#2f2f2f';
+    }
+
+    // "Remove photo" cuma aktif kalau memang ada foto custom
+    const hasCustom = !!pendingEditCoverDataUrl || (!pendingEditCoverRemove && !!playlist.coverImage);
+    editCoverRemove.classList.toggle('disabled', !hasCustom);
+}
 
 function openEditDetailsModal() {
-    if (!pdCurrentPlaylistId || pdCurrentIsLiked) return;
+    if (!pdCurrentPlaylistId) return;
     const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
     if (!playlist) return;
 
     pendingEditCoverDataUrl = null;
+    pendingEditCoverRemove = false;
     editDetailsNameInput.value = playlist.name;
+    editDetailsNameInput.disabled = pdCurrentIsLiked; // nama Liked Songs dikunci
     editDetailsDescInput.value = playlist.description || '';
-
-    const songsInP = getSongsInPlaylist(playlist);
-    const coverSrc = playlist.coverImage || (songsInP.length > 0 ? songsInP[0].songImage : null);
-    if (coverSrc) {
-        editDetailsCoverImg.src = coverSrc;
-        editDetailsCoverImg.style.display = 'block';
-    } else {
-        editDetailsCoverImg.style.display = 'none';
-    }
+    editCoverMenu.classList.remove('show');
+    refreshEditCoverPreview();
 
     editDetailsModal.classList.add('show');
 }
 
 function closeEditDetailsModal() {
+    if (editCoverMenu) editCoverMenu.classList.remove('show');
     editDetailsModal.classList.remove('show');
 }
 
 function confirmEditDetails() {
     if (!pdCurrentPlaylistId) return closeEditDetailsModal();
-    const newName = editDetailsNameInput.value.trim();
-    if (newName) {
-        updatePlaylistName(pdCurrentPlaylistId, newName);
-        document.getElementById('playlistDetailTitle').textContent = newName;
-    }
-    updatePlaylistDescription(pdCurrentPlaylistId, editDetailsDescInput.value.trim());
-    document.getElementById('playlistDetailDescription').textContent = editDetailsDescInput.value.trim();
 
-    if (pendingEditCoverDataUrl) {
-        updatePlaylistCover(pdCurrentPlaylistId, pendingEditCoverDataUrl);
-        document.getElementById('playlistDetailCover').innerHTML = `<img src="${pendingEditCoverDataUrl}" alt="">`;
-        document.getElementById('playlistDetailCover').style.background = '#2f2f2f';
+    if (!pdCurrentIsLiked) {
+        const newName = editDetailsNameInput.value.trim();
+        if (newName) {
+            updatePlaylistName(pdCurrentPlaylistId, newName);
+            document.getElementById('playlistDetailTitle').textContent = newName;
+        }
     }
+
+    const desc = editDetailsDescInput.value.trim();
+    updatePlaylistDescription(pdCurrentPlaylistId, desc);
+    document.getElementById('playlistDetailDescription').textContent = desc;
+
+    if (pendingEditCoverDataUrl) updatePlaylistCover(pdCurrentPlaylistId, pendingEditCoverDataUrl);
+    else if (pendingEditCoverRemove) updatePlaylistCover(pdCurrentPlaylistId, null);
+
+    const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+    if (playlist) renderDetailCover(playlist, pdCurrentIsLiked);
 
     renderPlaylistList();
     closeEditDetailsModal();
 }
 
 if (pdEditDetailsBtn) pdEditDetailsBtn.addEventListener('click', openEditDetailsModal);
-if (editDetailsCover) {
-    editDetailsCover.addEventListener('click', () => editDetailsCoverInput.click());
-}
-if (editDetailsCoverInput) {
-    editDetailsCoverInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        resizeImageToDataUrl(file, 300, (dataUrl) => {
-            pendingEditCoverDataUrl = dataUrl;
-            editDetailsCoverImg.src = dataUrl;
-            editDetailsCoverImg.style.display = 'block';
-        });
-        editDetailsCoverInput.value = '';
+
+// klik gambar = pilih foto
+editDetailsCover?.addEventListener('click', () => editDetailsCoverInput.click());
+
+// menu "..."
+editCoverMoreBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    editCoverMenu.classList.toggle('show');
+});
+editCoverChange?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    editCoverMenu.classList.remove('show');
+    editDetailsCoverInput.click();
+});
+editCoverRemove?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    editCoverMenu.classList.remove('show');
+    pendingEditCoverDataUrl = null;
+    pendingEditCoverRemove = true;
+    refreshEditCoverPreview();
+});
+
+editDetailsCoverInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    resizeImageToDataUrl(file, 300, (dataUrl) => {
+        pendingEditCoverDataUrl = dataUrl;
+        pendingEditCoverRemove = false;
+        refreshEditCoverPreview();
     });
-}
+    editDetailsCoverInput.value = '';
+});
+
 document.getElementById('editDetailsSave')?.addEventListener('click', confirmEditDetails);
 document.getElementById('editDetailsCancel')?.addEventListener('click', closeEditDetailsModal);
 document.getElementById('editDetailsCloseX')?.addEventListener('click', closeEditDetailsModal);
 editDetailsModal?.addEventListener('click', (e) => {
+    if (!e.target.closest('.edit-cover-menu, .edit-cover-more-btn')) {
+        if (editCoverMenu) editCoverMenu.classList.remove('show');
+    }
     if (e.target === editDetailsModal) closeEditDetailsModal();
 });
 
@@ -1929,36 +2047,12 @@ function openPlaylistDetailView(playlist, isLiked) {
     title.textContent = playlist.name;
     meta.textContent = `${songsInPlaylist.length} song${songsInPlaylist.length !== 1 ? 's' : ''}`;
 
-    const overlayHTML = isLiked ? '' : `<div class="cover-upload-overlay" id="coverUploadOverlay"><i class="fa-solid fa-camera"></i><span>Choose photo</span></div>`;
-
-    if (isLiked) {
-        cover.innerHTML = '<i class="fa-solid fa-heart"></i>';
-        cover.style.background = 'linear-gradient(135deg, #450af5, #c4efd9)';
-    } else if (playlist.coverImage) {
-        cover.innerHTML = `<img src="${playlist.coverImage}" alt="">`;
-        cover.style.background = '#2f2f2f';
-    } else if (songsInPlaylist.length > 0) {
-        cover.innerHTML = `<img src="${songsInPlaylist[0].songImage}" alt="">`;
-        cover.style.background = '#2f2f2f';
-    } else {
-        cover.innerHTML = '<i class="fa-solid fa-music"></i>';
-        cover.style.background = '#2f2f2f';
-    }
+    renderDetailCover(playlist, isLiked);
 
     document.getElementById('playlistDetailDescription').textContent = playlist.description || '';
 
     if (pdAddSongsBtn) pdAddSongsBtn.style.display = 'flex';
-    if (pdEditDetailsBtn) pdEditDetailsBtn.style.display = isLiked ? 'none' : 'flex';
-
-    if (!isLiked) {
-        const ov = document.getElementById('coverUploadOverlay');
-        if (ov) {
-            ov.addEventListener('click', (e) => {
-                e.stopPropagation();
-                coverUploadInput.click();
-            });
-        }
-    }
+    if (pdEditDetailsBtn) pdEditDetailsBtn.style.display = 'flex';
 
     tbody.innerHTML = songsInPlaylist.map((song, idx) => `
         <tr data-song-id="${song.id}">

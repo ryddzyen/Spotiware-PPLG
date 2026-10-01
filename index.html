@@ -412,8 +412,23 @@
                 <button class="modal-x-btn" id="editDetailsCloseX"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="edit-details-body">
-                <div class="edit-details-cover" id="editDetailsCover">
-                    <img id="editDetailsCoverImg" src="" alt="" style="display:none;">
+                <div class="edit-details-cover-wrap">
+                    <div class="edit-details-cover" id="editDetailsCover">
+                        <i class="fa-solid fa-music edit-cover-placeholder" id="editDetailsCoverPlaceholder"></i>
+                        <img id="editDetailsCoverImg" src="" alt="" style="display:none;">
+                        <div class="cover-upload-overlay">
+                            <i class="fa-solid fa-pencil"></i><span>Choose photo</span>
+                        </div>
+                    </div>
+                    <button type="button" class="edit-cover-more-btn" id="editCoverMoreBtn" title="More options">
+                        <i class="fa-solid fa-ellipsis"></i>
+                    </button>
+                    <div class="edit-cover-menu" id="editCoverMenu">
+                        <div class="edit-cover-menu-item" id="editCoverChange"><i class="fa-regular fa-image"></i>
+                            Change photo</div>
+                        <div class="edit-cover-menu-item" id="editCoverRemove"><i class="fa-regular fa-trash-can"></i>
+                            Remove photo</div>
+                    </div>
                 </div>
                 <input type="file" id="editDetailsCoverInput" accept="image/*" style="display:none;">
                 <div class="edit-details-fields">
@@ -485,6 +500,8 @@
             <button class="mini-player-like-btn" id="miniPopupLikeBtn"><i class="fa-regular fa-heart"></i></button>
         </div>
     </div>
+
+    <input type="file" id="coverUploadInput" accept="image/*" style="display:none;">
 
     <script src="script.js" defer></script>
 

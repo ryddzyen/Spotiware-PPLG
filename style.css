@@ -3397,3 +3397,85 @@ input[type="range"]::-webkit-slider-thumb{
         z-index: 2500;
     }
 }
+
+/* Cover di modal Edit details: overlay "Choose photo" + tombol "..." */
+.edit-details-cover-wrap{
+    position: relative;
+    width: 9rem;
+    height: 9rem;
+    flex-shrink: 0;
+}
+.edit-details-cover-wrap .edit-details-cover{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.edit-cover-placeholder{
+    font-size: 3rem;
+    color: white;
+    align-items: center;
+    justify-content: center;
+}
+.edit-details-cover:hover .cover-upload-overlay{ opacity: 1; }
+
+.edit-cover-more-btn{
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.65);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s;
+    z-index: 3;
+}
+.edit-details-cover-wrap:hover .edit-cover-more-btn,
+.edit-cover-more-btn:focus,
+.edit-cover-menu.show ~ .edit-cover-more-btn{ opacity: 1; }
+.edit-cover-more-btn:hover{ background: rgba(0,0,0,0.85); transform: scale(1.05); }
+
+.edit-cover-menu{
+    display: none;
+    position: absolute;
+    top: 2.9rem;
+    left: 5.5rem;
+    min-width: 11.5rem;
+    background-color: #282828;
+    border-radius: 8px;
+    padding: 0.4rem 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 20;
+    text-align: left;
+}
+.edit-cover-menu.show{ display: block; }
+.edit-cover-menu-item{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1rem;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.edit-cover-menu-item i{ width: 1rem; color: var(--gray-light); }
+.edit-cover-menu-item:hover{ background-color: #3a3a3a; }
+.edit-cover-menu-item.disabled{ opacity: 0.4; pointer-events: none; }
+
+.create-playlist-modal-input:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Di HP tidak ada hover, jadi tombol "..." selalu kelihatan */
+@media (hover: none) and (pointer: coarse){
+    .edit-cover-more-btn{ opacity: 1; }
+}
