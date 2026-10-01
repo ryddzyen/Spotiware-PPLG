@@ -611,6 +611,9 @@ function setupSearch() {
     if (!searchInputEl) return;
 
     searchInputEl.addEventListener('input', (e) => {
+        closeShowAllView();
+        closePlaylistDetailView();
+
         let query = e.target.value.toLowerCase().trim();
 
         let filtered = songs.filter((song) => {
