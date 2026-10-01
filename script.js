@@ -572,7 +572,7 @@ function attachPlayEvents() {
                 return;
             }
 
-            order = [...lastRenderedSongs];
+            order = [...homeSongsOrder];
             let pos = order.findIndex((s) => s.id === clickedId);
             currentIndex = pos !== -1 ? pos : 0;
 
