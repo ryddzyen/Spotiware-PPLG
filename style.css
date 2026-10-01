@@ -779,6 +779,29 @@ nav{
     cursor: pointer;
 }
 
+.np-queue-btn{
+    display: none; /* hanya tampil di mobile-open */
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    color: var(--gray-light);
+    border: none;
+    padding: 0.6rem;
+    border-radius: 20rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.3rem;
+}
+.np-queue-btn:hover{
+    background-color: rgba(255, 215, 0, 0.15);
+    color: var(--yellow);
+}
+.now-playing-panel.mobile-open .np-queue-btn{
+    display: flex;
+}
+
 .player-bar{
     width: 100%;
     height: 5.2rem;

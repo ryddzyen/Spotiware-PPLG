@@ -4,99 +4,127 @@ let progressBar = document.getElementById('progressBar');
 const songs = [
     { id: 1, songName: "LEGACY", songDes: "PIXY", songImage: "Art Cover/LEGACY.webp", songPath: "Lagu/SpotiDown.App - LEGACY - PIXY.mp3" },
     { id: 2, songName: "2 On (feat. ScHoolboy Q)", songDes: "Tinashe", songImage: "Art Cover/2 On (feat. ScHoolboy Q).webp", songPath: "Lagu/2 On (feat. ScHoolboy Q).mp3" },
-    { id: 4, songName: "After Hours", songDes: "The Weeknd", songImage: "Art Cover/After Hours.webp", songPath: "Lagu/After Hours.mp3" },
-    { id: 5, songName: "Baby By Me", songDes: "50 Cent", songImage: "Art Cover/Before I Self-Destruct.webp", songPath: "Lagu/Baby By Me.mp3" },
-    { id: 7, songName: "Harvey", songDes: "Her's", songImage: "Art Cover/SpotiDown.App - Harvey - Her_s.webp", songPath: "Lagu/SpotiDown.App - Harvey - Her_s.mp3" },
-    { id: 8, songName: "bloodline", songDes: "Ariana Grande", songImage: "Art Cover/thank u, next.webp", songPath: "Lagu/bloodline.mp3" },
-    { id: 9, songName: "Brooklyn Baby", songDes: "Lana Del Rey", songImage: "Art Cover/Ultraviolence (Deluxe).webp", songPath: "Lagu/Brooklyn Baby.mp3" },
-    { id: 10, songName: "Call Out My Name", songDes: "The Weeknd", songImage: "Art Cover/My Dear Melancholy,.webp", songPath: "Lagu/Call Out My Name.mp3" },
-    { id: 12, songName: "Collide (feat. Tyga)", songDes: "Justine Skye", songImage: "Art Cover/Dark Side.webp", songPath: "Lagu/Collide (feat. Tyga).mp3" },
-    { id: 13, songName: "Coming Down", songDes: "The Weeknd", songImage: "Art Cover/House Of Balloons (Original).webp", songPath: "Lagu/Coming Down.mp3" },
-    { id: 14, songName: "Confident", songDes: "Justin Bieber, Chance the Rapper", songImage: "Art Cover/Journals.webp", songPath: "Lagu/Confident.mp3" },
-    { id: 15, songName: "Dark Beach", songDes: "Pastel Ghost", songImage: "Art Cover/Abyss.webp", songPath: "Lagu/Dark Beach.mp3" },
-    { id: 16, songName: "Die For You", songDes: "The Weeknd", songImage: "Art Cover/Starboy.webp", songPath: "Lagu/Die For You.mp3" },
-    { id: 17, songName: "Flatline", songDes: "Justin Bieber", songImage: "Art Cover/Journals.webp", songPath: "Lagu/Flatline.mp3" },
-    { id: 18, songName: "Snowman", songDes: "Sia", songImage: "Art Cover/snowman.webp", songPath: "Lagu/Snowman.mp3.mpeg" },
-    { id: 20, songName: "Gata Only", songDes: "FloyyMenor, Cris Mj", songImage: "Art Cover/Gata Only.webp", songPath: "Lagu/Gata Only.mp3" },
-    { id: 21, songName: "Girl You Loud", songDes: "Chris Brown, Tyga", songImage: "Art Cover/Girl You Loud.webp", songPath: "Lagu/Girl You Loud.mp3" },
-    { id: 22, songName: "intro (end of the world)", songDes: "Ariana Grande", songImage: "Art Cover/intro (end of the world).webp", songPath: "Lagu/intro (end of the world).mp3" },
-    { id: 23, songName: "Good For You", songDes: "Selena Gomez", songImage: "Art Cover/Revival (Deluxe).webp", songPath: "Lagu/Good For You.mp3" },
-    { id: 24, songName: "Hotel Room", songDes: "Pitbull", songImage: "Art Cover/Hotel Room.webp", songPath: "Lagu/Hotel Room.mp3" },
-    { id: 26, songName: "I Wanna Be Yours", songDes: "Arctic Monkeys", songImage: "Art Cover/AM.webp", songPath: "Lagu/I Wanna Be Yours.mp3" },
-    { id: 27, songName: "I Was Never There", songDes: "The Weeknd", songImage: "Art Cover/My Dear Melancholy,.webp", songPath: "Lagu/I Was Never There.mp3" },
-    { id: 28, songName: "Innocence", songDes: "NERO", songImage: "Art Cover/Innocence.webp", songPath: "Lagu/Innocence.mp3" },
-    { id: 29, songName: "Let Me Love You", songDes: "Mario", songImage: "Art Cover/Encore.webp", songPath: "Lagu/Let Me Love You.mp3" },
-    { id: 30, songName: "do you think you could love me", songDes: "yung kai", songImage: "Art Cover/do you think you could love me_.webp", songPath: "Lagu/do you think you could love me_.mp3" },
-    { id: 31, songName: "love for you", songDes: "Joji", songImage: "Art Cover/love for you.webp", songPath: "Lagu/love for you.mp3" },
-    { id: 32, songName: "Love Me Not", songDes: "Ravyn Lenae, Rex Orange County", songImage: "Art Cover/Love Me Not (feat. Rex Orange County).webp", songPath: "Lagu/Love Me Not (feat. Rex Orange County).mp3" },
-    { id: 33, songName: "Love Potions", songDes: "BJ Lips, princess paparazzi", songImage: "Art Cover/Cum n Cocaine.webp", songPath: "Lagu/Love Potions.mp3" },
-    { id: 34, songName: "Lovers Rock", songDes: "TV Girl", songImage: "Art Cover/French Exit.webp", songPath: "Lagu/Lovers Rock.mp3" },
-    { id: 35, songName: "M a k e I t T o T h e M o r n i n g", songDes: "PARTYNEXTDOOR", songImage: "Art Cover/make it to morning.webp", songPath: "Lagu/M a k e I t T o T h e M o r n i n g.mp3" },
-    { id: 37, songName: "Mimosa 2000", songDes: "Furacão 2000, Nyasia", songImage: "Art Cover/April Mixtape 3.webp", songPath: "Lagu/Mimosa 2000.mp3" },
-    { id: 38, songName: "Mind Games", songDes: "Sickick", songImage: "Art Cover/Mind Games.webp", songPath: "Lagu/Mind Games.mp3" },
-    { id: 39, songName: "Money Trees", songDes: "Kendrick Lamar, Jay Rock", songImage: "Art Cover/good kid, m.A.A.d city.webp", songPath: "Lagu/Money Trees.mp3" },
-    { id: 40, songName: "About You", songDes: "The 1975", songImage: "Art Cover/About You.webp", songPath: "Lagu/About You.mp3" },
-    { id: 41, songName: "Moonlight", songDes: "Kali Uchis", songImage: "Art Cover/Red Moon In Venus.webp", songPath: "Lagu/Moonlight.mp3" },
-    { id: 42, songName: "Iris", songDes: "Pastel Ghost", songImage: "Art Cover/SpotiDown.App - Iris - Pastel Ghost.webp", songPath: "Lagu/SpotiDown.App - Iris - Pastel Ghost.mp3" },
-    { id: 43, songName: "No. 1 Party Anthem", songDes: "Arctic Monkeys", songImage: "Art Cover/AM.webp", songPath: "Lagu/No. 1 Party Anthem.mp3" },
-    { id: 44, songName: "nuts (feat. Rainy Bear)", songDes: "Lil Peep", songImage: "Art Cover/nuts (feat. Rainy Bear).webp", songPath: "Lagu/nuts (feat. Rainy Bear).mp3" },
-    { id: 45, songName: "505", songDes: "Arctic Monkeys", songImage: "Art Cover/505.webp", songPath: "Lagu/505.mp3" },
-    { id: 46, songName: "Obsessed", songDes: "Mariah Carey", songImage: "Art Cover/Memoirs of an imperfect Angel (International Version).webp", songPath: "Lagu/Obsessed.mp3" },
-    { id: 47, songName: "Paparazzi (Dubstep)", songDes: "Lady Gaga", songImage: "Art Cover/The Fame.webp", songPath: "Lagu/SpotiDown.App - Paparazzi _Dubstep_ - Alximo.mp3" },
-    { id: 50, songName: "Imposter Sydrome", songDes: "Sidney Gish", songImage: "Art Cover/Imposter Sydrome.webp", songPath: "Lagu/Impostor Syndrome.mp3" },
-    { id: 51, songName: "Tip Toe", songDes: "HYBS", songImage: "Art Cover/Tip Toe.webp", songPath: "Lagu/Tip Toe.mp3" },
-    { id: 52, songName: "Good Looking", songDes: "Suki Waterhouse", songImage: "Art Cover/Good Looking.webp", songPath: "Lagu/Good Looking.mp3" },
-    { id: 53, songName: "Say Yes To Heaven", songDes: "Lana Del Rey", songImage: "Art Cover/Say Yes To Heaven.webp", songPath: "Lagu/Say Yes To Heaven.mp3" },
-    { id: 56, songName: "That's What I Like", songDes: "Bruno Mars", songImage: "Art Cover/24K Magic.webp", songPath: "Lagu/That's What I Like.mp3" },
-    { id: 57, songName: "Timeless (feat Playboi Carti)", songDes: "The Weeknd, Playboi Carti", songImage: "Art Cover/After Hours.webp", songPath: "Lagu/Timeless (feat Playboi Carti).mp3" },
-    { id: 58, songName: "Under Your Spell", songDes: "Desire", songImage: "Art Cover/under your spell.webp", songPath: "Lagu/Under Your Spell.mp3" },
-    { id: 59, songName: "VISION", songDes: "VALORANT, Grabbitz", songImage: "Art Cover/Dark Side.webp", songPath: "Lagu/VISION.mp3" },
-    { id: 60, songName: "West Coast", songDes: "Lana Del Rey", songImage: "Art Cover/AM.webp", songPath: "Lagu/West Coast.mp3" },
-    { id: 61, songName: "Wutiwant X Love Potions LQ", songDes: "Potions, Auralyx, Evangeline <3", songImage: "Art Cover/Wutiwant X Love Potions LQ.webp", songPath: "Lagu/Wutiwant X Love Potions LQ.mp3" },
-    { id: 62, songName: "AEAO", songDes: "Dynamicduo, CHEN", songImage: "Art Cover/aeao.webp", songPath: "Lagu/AEAO.mp3" },
-    { id: 63, songName: "Apocalypse", songDes: "Cigarettes After Sex", songImage: "Art Cover/apocallypse.webp", songPath: "Lagu/Apocalypse.mp3" },
-    { id: 64, songName: "Back to Friends", songDes: "sombr", songImage: "Art Cover/back to friends.webp", songPath: "Lagu/back to friends.mp3" },
-    { id: 65, songName: "Beauty And A Beat", songDes: "Justin Bieber, Nicki Minaj", songImage: "Art Cover/Believe (Deluxe Edition).webp", songPath: "Lagu/SpotiDown.App - Beauty And A Beat - Justin Bieber.mp3" },
-    { id: 66, songName: "BIRDS OF A FEATHER", songDes: "Billie Eilish", songImage: "Art Cover/birds of feather.webp", songPath: "Lagu/BIRDS OF A FEATHER.mp3" },
-    { id: 67, songName: "boyfriend (with Social House)", songDes: "Ariana Grande, Social House", songImage: "Art Cover/boyfriend.webp", songPath: "Lagu/boyfriend (with Social House).mp3" },
-    { id: 68, songName: "Into You X bye", songDes: "Ariana Grande", songImage: "Art Cover/Into You X bye.webp", songPath: "Lagu/Into You X bye (altare remix) - Ariana Grande (mashup).mp3" },
-    { id: 69, songName: "bye", songDes: "Ariana Grande", songImage: "Art Cover/bye.webp", songPath: "Lagu/bye.mp3" },
-    { id: 70, songName: "Don't Copy My Flow", songDes: "Snoop Dogg", songImage: "Art Cover/Don't Copy My Flow.webp", songPath: "Lagu/Don't Copy My Flow.mp3" },
-    { id: 71, songName: "Earrings", songDes: "Malcolm Todd", songImage: "Art Cover/earnings.webp", songPath: "Lagu/Earrings.mp3" },
-    { id: 72, songName: "End of Beginning", songDes: "Djo", songImage: "Art Cover/end of beggining.webp", songPath: "Lagu/End of Beginning.mp3" },
-    { id: 73, songName: "Everyday", songDes: "Ariana Grande, Future", songImage: "Art Cover/everyday.webp", songPath: "Lagu/Everyday.mp3" },
-    { id: 74, songName: "Heaven Sent", songDes: "Keyshia Cole", songImage: "Art Cover/heaven sent.webp", songPath: "Lagu/Heaven Sent.mp3" },
-    { id: 75, songName: "NVMD", songDes: "Denise Julia", songImage: "Art Cover/SpotiDown.App - NVMD - Denise Julia.webp", songPath: "Lagu/SpotiDown.App - NVMD - Denise Julia.mp3" },
-    { id: 76, songName: "Into It", songDes: "Chase Atlantic", songImage: "Art Cover/Into it.webp", songPath: "Lagu/Into It.mp3" },
-    { id: 77, songName: "Love Me Harder", songDes: "Ariana Grande, The Weeknd", songImage: "Art Cover/love me harder.webp", songPath: "Lagu/Love Me Harder.mp3" },
-    { id: 78, songName: "Love Me", songDes: "Justin Bieber", songImage: "Art Cover/love me.webp", songPath: "Lagu/Love Me.mp3" },
-    { id: 79, songName: "love.", songDes: "wave to earth", songImage: "Art Cover/love..webp", songPath: "Lagu/love..mp3" },
-    { id: 80, songName: "M.", songDes: "Anıl Emre Daldal", songImage: "Art Cover/M_.webp", songPath: "Lagu/M..mp3" },
-    { id: 81, songName: "Merry Christmas, Please Don't Call", songDes: "Bleachers", songImage: "Art Cover/Merry Christmas, Please Don't Call.webp", songPath: "Lagu/Merry Christmas, Please Don't Call.mp3" },
-    { id: 82, songName: "My Love Mine All Mine", songDes: "Mitski", songImage: "Art Cover/my love mine all mine.webp", songPath: "Lagu/My Love Mine All Mine.mp3" },
-    { id: 83, songName: "No One Noticed", songDes: "The Marías", songImage: "Art Cover/no one noticed.webp", songPath: "Lagu/No One Noticed.mp3" },
-    { id: 84, songName: "Not Around", songDes: "Nova", songImage: "Art Cover/Not Around.webp", songPath: "Lagu/Not Around.mp3" },
-    { id: 85, songName: "Something About You", songDes: "Eyedress, Dent May", songImage: "Art Cover/Something About You.webp", songPath: "Lagu/Something About You.mp3" },
-    { id: 86, songName: "Shadows", songDes: "Pastel Ghost", songImage: "Art Cover/Shadows EP.webp", songPath: "Lagu/Shadows.mp3" },
-    { id: 87, songName: "supernatural", songDes: "Ariana Grande", songImage: "Art Cover/supernatural.webp", songPath: "Lagu/supernatural.mp3" },
-    { id: 88, songName: "Swim", songDes: "Chase Atlantic", songImage: "Art Cover/swim.webp", songPath: "Lagu/Swim.mp3" },
-    { id: 89, songName: "we can't be friends (wait for your love)", songDes: "Ariana Grande", songImage: "Art Cover/supernatural.webp", songPath: "Lagu/we can't be friends (wait for your love).mp3" },
-    { id: 90, songName: "What If I Call", songDes: "Charlie Burg", songImage: "Art Cover/What If I Call.webp", songPath: "Lagu/What If I Call.mp3" },
-    { id: 91, songName: "worry - Slowed", songDes: "LONOWN, riserayss", songImage: "Art Cover/worry.webp", songPath: "Lagu/worry - Slowed.mp3" },
-    { id: 92, songName: "FLY", songDes: "Spectrum", songImage: "Art Cover/FLY.webp", songPath: "Lagu/F L Y.mp3.mpeg" },
-    { id: 93, songName: "Surabaya", songDes: "Crayon Case", songImage: "Art Cover/surabaya.webp", songPath: "Lagu/Surabaya.mp3.mpeg" },
-    { id: 94, songName: "siapkah kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!,Andi Rianto", songImage: "Art Cover/siapkah kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau Tuk Jatuh Cinta Lagi.mp3.mpeg" },
-    { id: 95, songName: "8 Letters", songDes: "Why Don't We", songImage: "Art Cover/8letters.webp", songPath: "Lagu/8 Letters.mp3.mpeg" },
-    { id: 96, songName: "20 Min", songDes: "Lil Uzi Vert", songImage: "Art Cover/20min.webp", songPath: "Lagu/20 Min.mp3.mpeg" },
-    { id: 97, songName: "Breakin'Dishes", songDes: "Rihanna", songImage: "Art Cover/breakin'dishes.webp", songPath: "Lagu/Breakin Dishes.mp3.mpeg" },
-    { id: 98, songName: "Bring Me To Life", songDes: "Evanescence", songImage: "Art Cover/bringmetolife.webp", songPath: "Lagu/Bring Me To Life.mp3.mpeg" },
-    { id: 99, songName: "Foto kita blur", songDes: "Sal Priadi", songImage: "Art Cover/fotokitablur.webp", songPath: "Lagu/Foto kita blur.mp3.mpeg" },
-    { id: 100, songName: "Goodluck,Babe!", songDes: "Chappell Roan", songImage: "Art Cover/goodluckbabe.webp", songPath: "Lagu/Good Luck Babe.mp3.mpeg" },
-    { id: 101, songName: "Lovely with Khalid", songDes: "Billie Eilish,Khalid", songImage: "Art Cover/lovely.webp", songPath: "Lagu/lovely with Khalid.mp3.mpeg" },
-    { id: 102, songName: "Tek It", songDes: "Cafuné", songImage: "Art Cover/SpotiDown.App - Tek It - Cafuné.webp", songPath: "Lagu/SpotiDown.App - Tek It - Cafuné.mp3" },
-    { id: 103, songName: "Sesi Potret", songDes: "eńau", songImage: "Art Cover/SpotiDown.App - Sesi Potret - eńau.webp", songPath: "Lagu/SpotiDown.App - Sesi Potret - eńau.mp3" },
-    { id: 104, songName: "Bertaut", songDes: "Nadin Amizah", songImage: "Art Cover/SpotiDown.App - Bertaut - Nadin Amizah.webp", songPath: "Lagu/SpotiDown.App - Bertaut - Nadin Amizah.mp3" },
-    { id: 105, songName: "Somebody's Pleasure", songDes: "Aziz Hedra", songImage: "Art Cover/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.webp", songPath: "Lagu/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.mp3" },
+    { id: 3, songName: "After Hours", songDes: "The Weeknd", songImage: "Art Cover/After Hours.webp", songPath: "Lagu/After Hours.mp3" },
+    { id: 4, songName: "Baby By Me", songDes: "50 Cent", songImage: "Art Cover/Before I Self-Destruct.webp", songPath: "Lagu/Baby By Me.mp3" },
+    { id: 5, songName: "Harvey", songDes: "Her's", songImage: "Art Cover/SpotiDown.App - Harvey - Her_s.webp", songPath: "Lagu/SpotiDown.App - Harvey - Her_s.mp3" },
+    { id: 6, songName: "bloodline", songDes: "Ariana Grande", songImage: "Art Cover/thank u, next.webp", songPath: "Lagu/bloodline.mp3" },
+    { id: 7, songName: "Brooklyn Baby", songDes: "Lana Del Rey", songImage: "Art Cover/Ultraviolence (Deluxe).webp", songPath: "Lagu/Brooklyn Baby.mp3" },
+    { id: 8, songName: "Call Out My Name", songDes: "The Weeknd", songImage: "Art Cover/My Dear Melancholy,.webp", songPath: "Lagu/Call Out My Name.mp3" },
+    { id: 9, songName: "Collide (feat. Tyga)", songDes: "Justine Skye", songImage: "Art Cover/Dark Side.webp", songPath: "Lagu/Collide (feat. Tyga).mp3" },
+    { id: 10, songName: "Coming Down", songDes: "The Weeknd", songImage: "Art Cover/House Of Balloons (Original).webp", songPath: "Lagu/Coming Down.mp3" },
+    { id: 11, songName: "Confident", songDes: "Justin Bieber, Chance the Rapper", songImage: "Art Cover/Journals.webp", songPath: "Lagu/Confident.mp3" },
+    { id: 12, songName: "Dark Beach", songDes: "Pastel Ghost", songImage: "Art Cover/Abyss.webp", songPath: "Lagu/Dark Beach.mp3" },
+    { id: 13, songName: "Die For You", songDes: "The Weeknd", songImage: "Art Cover/Starboy.webp", songPath: "Lagu/Die For You.mp3" },
+    { id: 14, songName: "Flatline", songDes: "Justin Bieber", songImage: "Art Cover/Journals.webp", songPath: "Lagu/Flatline.mp3" },
+    { id: 15, songName: "Snowman", songDes: "Sia", songImage: "Art Cover/snowman.webp", songPath: "Lagu/Snowman.mp3.mpeg" },
+    { id: 16, songName: "Gata Only", songDes: "FloyyMenor, Cris Mj", songImage: "Art Cover/Gata Only.webp", songPath: "Lagu/Gata Only.mp3" },
+    { id: 17, songName: "Girl You Loud", songDes: "Chris Brown, Tyga", songImage: "Art Cover/Girl You Loud.webp", songPath: "Lagu/Girl You Loud.mp3" },
+    { id: 18, songName: "intro (end of the world)", songDes: "Ariana Grande", songImage: "Art Cover/intro (end of the world).webp", songPath: "Lagu/intro (end of the world).mp3" },
+    { id: 19, songName: "Good For You", songDes: "Selena Gomez", songImage: "Art Cover/Revival (Deluxe).webp", songPath: "Lagu/Good For You.mp3" },
+    { id: 20, songName: "Hotel Room", songDes: "Pitbull", songImage: "Art Cover/Hotel Room.webp", songPath: "Lagu/Hotel Room.mp3" },
+    { id: 21, songName: "I Wanna Be Yours", songDes: "Arctic Monkeys", songImage: "Art Cover/AM.webp", songPath: "Lagu/I Wanna Be Yours.mp3" },
+    { id: 22, songName: "I Was Never There", songDes: "The Weeknd", songImage: "Art Cover/My Dear Melancholy,.webp", songPath: "Lagu/I Was Never There.mp3" },
+    { id: 23, songName: "Innocence", songDes: "NERO", songImage: "Art Cover/Innocence.webp", songPath: "Lagu/Innocence.mp3" },
+    { id: 24, songName: "Let Me Love You", songDes: "Mario", songImage: "Art Cover/Encore.webp", songPath: "Lagu/Let Me Love You.mp3" },
+    { id: 25, songName: "do you think you could love me", songDes: "yung kai", songImage: "Art Cover/do you think you could love me_.webp", songPath: "Lagu/do you think you could love me_.mp3" },
+    { id: 26, songName: "love for you", songDes: "Joji", songImage: "Art Cover/love for you.webp", songPath: "Lagu/love for you.mp3" },
+    { id: 27, songName: "Love Me Not", songDes: "Ravyn Lenae, Rex Orange County", songImage: "Art Cover/Love Me Not (feat. Rex Orange County).webp", songPath: "Lagu/Love Me Not (feat. Rex Orange County).mp3" },
+    { id: 28, songName: "Love Potions", songDes: "BJ Lips, princess paparazzi", songImage: "Art Cover/Cum n Cocaine.webp", songPath: "Lagu/Love Potions.mp3" },
+    { id: 29, songName: "Lovers Rock", songDes: "TV Girl", songImage: "Art Cover/French Exit.webp", songPath: "Lagu/Lovers Rock.mp3" },
+    { id: 30, songName: "M a k e I t T o T h e M o r n i n g", songDes: "PARTYNEXTDOOR", songImage: "Art Cover/make it to morning.webp", songPath: "Lagu/M a k e I t T o T h e M o r n i n g.mp3" },
+    { id: 31, songName: "Mimosa 2000", songDes: "Furacão 2000, Nyasia", songImage: "Art Cover/April Mixtape 3.webp", songPath: "Lagu/Mimosa 2000.mp3" },
+    { id: 32, songName: "Mind Games", songDes: "Sickick", songImage: "Art Cover/Mind Games.webp", songPath: "Lagu/Mind Games.mp3" },
+    { id: 33, songName: "Money Trees", songDes: "Kendrick Lamar, Jay Rock", songImage: "Art Cover/good kid, m.A.A.d city.webp", songPath: "Lagu/Money Trees.mp3" },
+    { id: 34, songName: "About You", songDes: "The 1975", songImage: "Art Cover/About You.webp", songPath: "Lagu/About You.mp3" },
+    { id: 35, songName: "Moonlight", songDes: "Kali Uchis", songImage: "Art Cover/Red Moon In Venus.webp", songPath: "Lagu/Moonlight.mp3" },
+    { id: 36, songName: "Iris", songDes: "Pastel Ghost", songImage: "Art Cover/SpotiDown.App - Iris - Pastel Ghost.webp", songPath: "Lagu/SpotiDown.App - Iris - Pastel Ghost.mp3" },
+    { id: 37, songName: "No. 1 Party Anthem", songDes: "Arctic Monkeys", songImage: "Art Cover/AM.webp", songPath: "Lagu/No. 1 Party Anthem.mp3" },
+    { id: 38, songName: "nuts (feat. Rainy Bear)", songDes: "Lil Peep", songImage: "Art Cover/nuts (feat. Rainy Bear).webp", songPath: "Lagu/nuts (feat. Rainy Bear).mp3" },
+    { id: 39, songName: "505", songDes: "Arctic Monkeys", songImage: "Art Cover/505.webp", songPath: "Lagu/505.mp3" },
+    { id: 40, songName: "Obsessed", songDes: "Mariah Carey", songImage: "Art Cover/Memoirs of an imperfect Angel (International Version).webp", songPath: "Lagu/Obsessed.mp3" },
+    { id: 41, songName: "Paparazzi (Dubstep)", songDes: "Lady Gaga", songImage: "Art Cover/The Fame.webp", songPath: "Lagu/SpotiDown.App - Paparazzi _Dubstep_ - Alximo.mp3" },
+    { id: 42, songName: "Imposter Sydrome", songDes: "Sidney Gish", songImage: "Art Cover/Imposter Sydrome.webp", songPath: "Lagu/Impostor Syndrome.mp3" },
+    { id: 43, songName: "Tip Toe", songDes: "HYBS", songImage: "Art Cover/Tip Toe.webp", songPath: "Lagu/Tip Toe.mp3" },
+    { id: 44, songName: "Good Looking", songDes: "Suki Waterhouse", songImage: "Art Cover/Good Looking.webp", songPath: "Lagu/Good Looking.mp3" },
+    { id: 45, songName: "Say Yes To Heaven", songDes: "Lana Del Rey", songImage: "Art Cover/Say Yes To Heaven.webp", songPath: "Lagu/Say Yes To Heaven.mp3" },
+    { id: 46, songName: "That's What I Like", songDes: "Bruno Mars", songImage: "Art Cover/24K Magic.webp", songPath: "Lagu/That's What I Like.mp3" },
+    { id: 47, songName: "Timeless (feat Playboi Carti)", songDes: "The Weeknd, Playboi Carti", songImage: "Art Cover/After Hours.webp", songPath: "Lagu/Timeless (feat Playboi Carti).mp3" },
+    { id: 48, songName: "Under Your Spell", songDes: "Desire", songImage: "Art Cover/under your spell.webp", songPath: "Lagu/Under Your Spell.mp3" },
+    { id: 49, songName: "VISION", songDes: "VALORANT, Grabbitz", songImage: "Art Cover/Dark Side.webp", songPath: "Lagu/VISION.mp3" },
+    { id: 50, songName: "West Coast", songDes: "Lana Del Rey", songImage: "Art Cover/AM.webp", songPath: "Lagu/West Coast.mp3" },
+    { id: 51, songName: "Wutiwant X Love Potions LQ", songDes: "Potions, Auralyx, Evangeline <3", songImage: "Art Cover/Wutiwant X Love Potions LQ.webp", songPath: "Lagu/Wutiwant X Love Potions LQ.mp3" },
+    { id: 52, songName: "AEAO", songDes: "Dynamicduo, CHEN", songImage: "Art Cover/aeao.webp", songPath: "Lagu/AEAO.mp3" },
+    { id: 53, songName: "Apocalypse", songDes: "Cigarettes After Sex", songImage: "Art Cover/apocallypse.webp", songPath: "Lagu/Apocalypse.mp3" },
+    { id: 54, songName: "Back to Friends", songDes: "sombr", songImage: "Art Cover/back to friends.webp", songPath: "Lagu/back to friends.mp3" },
+    { id: 55, songName: "Beauty And A Beat", songDes: "Justin Bieber, Nicki Minaj", songImage: "Art Cover/Believe (Deluxe Edition).webp", songPath: "Lagu/SpotiDown.App - Beauty And A Beat - Justin Bieber.mp3" },
+    { id: 56, songName: "BIRDS OF A FEATHER", songDes: "Billie Eilish", songImage: "Art Cover/birds of feather.webp", songPath: "Lagu/BIRDS OF A FEATHER.mp3" },
+    { id: 57, songName: "boyfriend (with Social House)", songDes: "Ariana Grande, Social House", songImage: "Art Cover/boyfriend.webp", songPath: "Lagu/boyfriend (with Social House).mp3" },
+    { id: 58, songName: "Into You X bye", songDes: "Ariana Grande", songImage: "Art Cover/Into You X bye.webp", songPath: "Lagu/Into You X bye (altare remix) - Ariana Grande (mashup).mp3" },
+    { id: 59, songName: "bye", songDes: "Ariana Grande", songImage: "Art Cover/bye.webp", songPath: "Lagu/bye.mp3" },
+    { id: 60, songName: "Don't Copy My Flow", songDes: "Snoop Dogg", songImage: "Art Cover/Don't Copy My Flow.webp", songPath: "Lagu/Don't Copy My Flow.mp3" },
+    { id: 61, songName: "Earrings", songDes: "Malcolm Todd", songImage: "Art Cover/earnings.webp", songPath: "Lagu/Earrings.mp3" },
+    { id: 62, songName: "End of Beginning", songDes: "Djo", songImage: "Art Cover/end of beggining.webp", songPath: "Lagu/End of Beginning.mp3" },
+    { id: 63, songName: "Everyday", songDes: "Ariana Grande, Future", songImage: "Art Cover/everyday.webp", songPath: "Lagu/Everyday.mp3" },
+    { id: 64, songName: "Heaven Sent", songDes: "Keyshia Cole", songImage: "Art Cover/heaven sent.webp", songPath: "Lagu/Heaven Sent.mp3" },
+    { id: 65, songName: "NVMD", songDes: "Denise Julia", songImage: "Art Cover/SpotiDown.App - NVMD - Denise Julia.webp", songPath: "Lagu/SpotiDown.App - NVMD - Denise Julia.mp3" },
+    { id: 66, songName: "Into It", songDes: "Chase Atlantic", songImage: "Art Cover/Into it.webp", songPath: "Lagu/Into It.mp3" },
+    { id: 67, songName: "Love Me Harder", songDes: "Ariana Grande, The Weeknd", songImage: "Art Cover/love me harder.webp", songPath: "Lagu/Love Me Harder.mp3" },
+    { id: 68, songName: "Love Me", songDes: "Justin Bieber", songImage: "Art Cover/love me.webp", songPath: "Lagu/Love Me.mp3" },
+    { id: 69, songName: "love.", songDes: "wave to earth", songImage: "Art Cover/love..webp", songPath: "Lagu/love..mp3" },
+    { id: 70, songName: "M.", songDes: "Anıl Emre Daldal", songImage: "Art Cover/M_.webp", songPath: "Lagu/M..mp3" },
+    { id: 71, songName: "Merry Christmas, Please Don't Call", songDes: "Bleachers", songImage: "Art Cover/Merry Christmas, Please Don't Call.webp", songPath: "Lagu/Merry Christmas, Please Don't Call.mp3" },
+    { id: 72, songName: "My Love Mine All Mine", songDes: "Mitski", songImage: "Art Cover/my love mine all mine.webp", songPath: "Lagu/My Love Mine All Mine.mp3" },
+    { id: 73, songName: "No One Noticed", songDes: "The Marías", songImage: "Art Cover/no one noticed.webp", songPath: "Lagu/No One Noticed.mp3" },
+    { id: 74, songName: "Not Around", songDes: "Nova", songImage: "Art Cover/Not Around.webp", songPath: "Lagu/Not Around.webp", songPath: "Lagu/Not Around.mp3" },
+    { id: 75, songName: "Something About You", songDes: "Eyedress, Dent May", songImage: "Art Cover/Something About You.webp", songPath: "Lagu/Something About You.mp3" },
+    { id: 76, songName: "Shadows", songDes: "Pastel Ghost", songImage: "Art Cover/Shadows EP.webp", songPath: "Lagu/Shadows.mp3" },
+    { id: 77, songName: "supernatural", songDes: "Ariana Grande", songImage: "Art Cover/supernatural.webp", songPath: "Lagu/supernatural.mp3" },
+    { id: 78, songName: "Swim", songDes: "Chase Atlantic", songImage: "Art Cover/swim.webp", songPath: "Lagu/Swim.mp3" },
+    { id: 79, songName: "What If I Call", songDes: "Charlie Burg", songImage: "Art Cover/What If I Call.webp", songPath: "Lagu/What If I Call.mp3" },
+    { id: 80, songName: "worry - Slowed", songDes: "LONOWN, riserayss", songImage: "Art Cover/worry.webp", songPath: "Lagu/worry - Slowed.mp3" },
+    { id: 81, songName: "FLY", songDes: "Spectrum", songImage: "Art Cover/FLY.webp", songPath: "Lagu/F L Y.mp3.mpeg" },
+    { id: 82, songName: "Surabaya", songDes: "Crayon Case", songImage: "Art Cover/surabaya.webp", songPath: "Lagu/Surabaya.mp3.mpeg" },
+    { id: 83, songName: "siapkah kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!,Andi Rianto", songImage: "Art Cover/siapkah kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau Tuk Jatuh Cinta Lagi.mp3.mpeg" },
+    { id: 84, songName: "8 Letters", songDes: "Why Don't We", songImage: "Art Cover/8letters.webp", songPath: "Lagu/SpotiDown.App - 8 Letters - Why Don_t We.mp3" },
+    { id: 85, songName: "20 Min", songDes: "Lil Uzi Vert", songImage: "Art Cover/20min.webp", songPath: "Lagu/20 Min.mp3.mpeg" },
+    { id: 86, songName: "Breakin'Dishes", songDes: "Rihanna", songImage: "Art Cover/breakin'dishes.webp", songPath: "Lagu/Breakin Dishes.mp3.mpeg" },
+    { id: 87, songName: "Bring Me To Life", songDes: "Evanescence", songImage: "Art Cover/bringmetolife.webp", songPath: "Lagu/Bring Me To Life.mp3.mpeg" },
+    { id: 88, songName: "Foto kita blur", songDes: "Sal Priadi", songImage: "Art Cover/fotokitablur.webp", songPath: "Lagu/Foto kita blur.mp3.mpeg" },
+    { id: 89, songName: "Goodluck,Babe!", songDes: "Chappell Roan", songImage: "Art Cover/goodluckbabe.webp", songPath: "Lagu/SpotiDown.App - Good Luck_ Babe_ - Chappell Roan.mp3" },
+    { id: 90, songName: "Lovely with Khalid", songDes: "Billie Eilish,Khalid", songImage: "Art Cover/lovely.webp", songPath: "Lagu/lovely with Khalid.mp3.mpeg" },
+    { id: 91, songName: "Tek It", songDes: "Cafuné", songImage: "Art Cover/SpotiDown.App - Tek It - Cafuné.webp", songPath: "Lagu/SpotiDown.App - Tek It - Cafuné.mp3" },
+    { id: 92, songName: "Sesi Potret", songDes: "eńau", songImage: "Art Cover/SpotiDown.App - Sesi Potret - eńau.webp", songPath: "Lagu/SpotiDown.App - Sesi Potret - eńau.mp3" },
+    { id: 93, songName: "Bertaut", songDes: "Nadin Amizah", songImage: "Art Cover/SpotiDown.App - Bertaut - Nadin Amizah.webp", songPath: "Lagu/SpotiDown.App - Bertaut - Nadin Amizah.mp3" },
+    { id: 94, songName: "Somebody's Pleasure", songDes: "Aziz Hedra", songImage: "Art Cover/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.webp", songPath: "Lagu/SpotiDown.App - Somebody_s Pleasure - Aziz Hedra.mp3" },
+    { id: 95, songName: "we can't be friends (wait for your love)", songDes: "Ariana Grande", songImage: "Art Cover/supernatural.webp", songPath: "Lagu/we can't be friends (wait for your love).mp3" },
+    { id: 96, songName: "Golden Brown", songDes: "The Stranglers", songImage: "Art Cover/Golden Brown.webp", songPath: "Lagu/Golden Brown.mp3" },
+    { id: 97, songName: "Blank Space (Taylor's Version)", songDes: "Taylor Swift", songImage: "Art Cover/Blank Space (Taylor's Version).webp", songPath: "Lagu/Blank Space (Taylor's Version).mp3" },
+    { id: 98, songName: "Obsesi Mengejar Semesta", songDes: "Zephter", songImage: "Art Cover/Obsesi Mengejar Semesta.webp", songPath: "Lagu/Obsesi Mengejar Semesta.mp3" },
+    { id: 99, songName: "Scott and Zelda", songDes: "BIBI", songImage: "Art Cover/Scott and Zelda.webp", songPath: "Lagu/Scott and Zelda.mp3" },
+    { id: 100, songName: "Treat You Better", songDes: "Shawn Mendes", songImage: "Art Cover/Treat You Better.webp", songPath: "Lagu/Treat You Better.mp3" },
+    { id: 101, songName: "Love of My Life", songDes: "Queen", songImage: "Art Cover/Love of My Life.webp", songPath: "Lagu/Love of My Life.mp3" },
+    { id: 102, songName: "Glue Song", songDes: "beabadoobee", songImage: "Art Cover/Glue Song.webp", songPath: "Lagu/Glue Song.mp3" },
+    { id: 103, songName: "Closed Doors", songDes: "Ismail", songImage: "Art Cover/Closed Doors.webp", songPath: "Lagu/Closed Doors.mp3" },
+    { id: 104, songName: "The One That Got Away", songDes: "Katy Perry", songImage: "Art Cover/The One That Got Away.webp", songPath: "Lagu/The One That Got Away.mp3" },
+    { id: 105, songName: "Entry Four", songDes: "Jaydes Archive", songImage: "Art Cover/Entry Four.webp", songPath: "Lagu/Entry Four.mp3" },
+    { id: 106, songName: "500 Miles", songDes: "Peter Paul and Mary", songImage: "Art Cover/500 Miles.webp", songPath: "Lagu/500 Miles.mp3" },
+    { id: 107, songName: "Best Friend", songDes: "Rex Orange County", songImage: "Art Cover/Best Friend.webp", songPath: "Lagu/Best Friend.mp3" },
+    { id: 108, songName: "Siapkah Kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!", songImage: "Art Cover/Siapkah Kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau 'Tuk Jatuh Cinta Lagi.mp3" },
+    { id: 109, songName: "Remaja", songDes: "Hivi!", songImage: "Art Cover/Remaja.webp", songPath: "Lagu/Remaja.mp3" },
+    { id: 110, songName: "All Too Well (Taylor's Version)", songDes: "Taylor Swift", songImage: "Art Cover/All Too Well (Taylor's Version).webp", songPath: "Lagu/All Too Well (Taylor's Version).mp3" },
+    { id: 111, songName: "Enchanted", songDes: "Taylor Swift", songImage: "Art Cover/Enchanted.webp", songPath: "Lagu/Enchanted.webp", songPath: "Lagu/Enchanted.mp3" },
+    { id: 112, songName: "Jatuh Suka", songDes: "Tulus", songImage: "Art Cover/Jatuh Suka.webp", songPath: "Lagu/Jatuh Suka.mp3" },
+    { id: 113, songName: "Besok kita pergi makan", songDes: "Sal Priadi", songImage: "Art Cover/Besok kita pergi makan.webp", songPath: "Lagu/Besok kita pergi makan.mp3" },
+    { id: 114, songName: "Jatuh Hati", songDes: "Raisa", songImage: "Art Cover/Jatuh Hati.webp", songPath: "Lagu/Jatuh Hati.mp3" },
+    { id: 115, songName: "Payphone", songDes: "Maroon 5, Wiz Khalifa", songImage: "Art Cover/Payphone.webp", songPath: "Lagu/Payphone.mp3" },
+    { id: 116, songName: "Wide Awake", songDes: "Katy Perry", songImage: "Art Cover/Wide Awake.webp", songPath: "Lagu/Wide Awake.mp3" },
+    { id: 117, songName: "Langit Tak Seharusnya Biru", songDes: "The Jansen", songImage: "Art Cover/Langit Tak Seharusnya Biru.webp", songPath: "Lagu/Langit Tak Seharusnya Biru.mp3" },
+    { id: 118, songName: "Mantan Terindah", songDes: "Kahitna", songImage: "Art Cover/Mantan Terindah.webp", songPath: "Lagu/Mantan Terindah.mp3" },
+    { id: 119, songName: "Selamat (Selamat Tinggal)", songDes: "Virgoun, Audy", songImage: "Art Cover/Selamat (Selamat Tinggal).webp", songPath: "Lagu/Selamat (Selamat Tinggal).mp3" },
+    { id: 120, songName: "Diri", songDes: "Tulus", songImage: "Art Cover/Diri.webp", songPath: "Lagu/Diri.mp3" },
+    { id: 121, songName: "We Don't Talk Anymore (feat. Selena Gomez)", songDes: "Charlie Puth, Selena Gomez", songImage: "Art Cover/We Don't Talk Anymore (feat. Selena Gomez).webp", songPath: "Lagu/We Don't Talk Anymore (feat. Selena Gomez).mp3" },
+    { id: 122, songName: "Teh Hijau", songDes: "Tulus", songImage: "Art Cover/Teh Hijau.webp", songPath: "Lagu/Teh Hijau.mp3" },
+    { id: 123, songName: "WILDFLOWER", songDes: "Billie Eilish", songImage: "Art Cover/WILDFLOWER.webp", songPath: "Lagu/WILDFLOWER.mp3" }
 ];
 
 // Tampilan mobile aktif kalau layar <= 768px ATAU perangkat layar sentuh
@@ -134,7 +162,7 @@ function addToQueue(song) {
 }
 let currentIndex = 0;
 let audio = new Audio(order[currentIndex].songPath);
-audio.preload = "auto";
+audio.preload = "metadata";
 
 let currentTimeEl = document.getElementById('currentTime');
 let durationEl = document.getElementById('duration');
@@ -433,8 +461,6 @@ function renderAddToPlaylistList() {
             }
             btn.classList.toggle('checked');
             renderPlaylistList();
-            updateNowBarLikeIcon();
-            syncTrackLikeButtons(pendingSongIdForPlaylist);
         });
     });
 }
@@ -1107,6 +1133,21 @@ if (npBackBtn) {
         if (nowPlayingPanel) nowPlayingPanel.classList.remove('mobile-open');
         const bottomNavEl = document.querySelector('.bottom-nav');
         if (bottomNavEl) bottomNavEl.style.display = '';
+    });
+}
+
+let npQueueBtn = document.getElementById('npQueueBtn');
+if (npQueueBtn) {
+    npQueueBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (document.fullscreenElement) document.exitFullscreen();
+        if (nowPlayingPanel) nowPlayingPanel.classList.remove('mobile-open');
+
+        if (queuePanel) {
+            renderQueuePanel();
+            queuePanel.classList.add('show');
+            if (queueBtn) queueBtn.classList.add('active');
+        }
     });
 }
 
@@ -1898,7 +1939,7 @@ if (queueCloseBtn) {
     queueCloseBtn.addEventListener('click', () => {
         queuePanel.classList.remove('show');
         queueBtn.classList.remove('active');
-        if (nowPlayingPanel && playerBar.classList.contains('show')) {
+        if (!isMobileView() && nowPlayingPanel && playerBar.classList.contains('show')) {
             nowPlayingPanel.classList.add('show');
         }
     });
