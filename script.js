@@ -282,8 +282,8 @@ function getSongsInPlaylist(playlist) {
 }
 
 function getPlaylistCoverSrc(playlist) {
-    if (playlist.coverImage) return playlist.coverImage;
     if (playlist.id === LIKED_PLAYLIST_ID) return null;
+    if (playlist.coverImage) return playlist.coverImage;
     const songsInP = getSongsInPlaylist(playlist);
     return songsInP.length > 0 ? songsInP[0].songImage : null;
 }
@@ -301,32 +301,11 @@ function renderDetailCover(playlist, isLiked) {
         cover.innerHTML = '<i class="fa-solid fa-music"></i>';
         cover.style.background = '#2f2f2f';
     }
-    cover.insertAdjacentHTML('beforeend',
-        `<div class="cover-upload-overlay"><i class="fa-solid fa-pencil"></i><span>Choose photo</span></div>`);
-}
-
-function getPlaylistCoverSrc(playlist) {
-    if (playlist.coverImage) return playlist.coverImage;
-    if (playlist.id === LIKED_PLAYLIST_ID) return null;
-    const songsInP = getSongsInPlaylist(playlist);
-    return songsInP.length > 0 ? songsInP[0].songImage : null;
-}
-
-function renderDetailCover(playlist, isLiked) {
-    const cover = document.getElementById('playlistDetailCover');
-    const src = getPlaylistCoverSrc(playlist);
-    if (src) {
-        cover.innerHTML = `<img src="${src}" alt="">`;
-        cover.style.background = '#2f2f2f';
-    } else if (isLiked) {
-        cover.innerHTML = '<i class="fa-solid fa-heart"></i>';
-        cover.style.background = 'linear-gradient(135deg, #450af5, #c4efd9)';
-    } else {
-        cover.innerHTML = '<i class="fa-solid fa-music"></i>';
-        cover.style.background = '#2f2f2f';
+    cover.classList.toggle('no-edit', isLiked);
+    if (!isLiked) {
+        cover.insertAdjacentHTML('beforeend',
+            `<div class="cover-upload-overlay"><i class="fa-solid fa-pencil"></i><span>Choose photo</span></div>`);
     }
-    cover.insertAdjacentHTML('beforeend',
-        `<div class="cover-upload-overlay"><i class="fa-solid fa-pencil"></i><span>Choose photo</span></div>`);
 }
 
 function ensureLikedPlaylist() {
@@ -370,12 +349,9 @@ function renderPlaylistList() {
     let html = '';
 
     if (liked && (!libraryFilterQuery || 'liked songs'.includes(libraryFilterQuery))) {
-        const likedThumb = liked.coverImage
-            ? `<img class="playlist-thumb" src="${liked.coverImage}" alt="Liked Songs">`
-            : `<div class="playlist-icon"><i class="fa-solid fa-heart"></i></div>`;
         html += `
             <div class="history-item playlist-item liked-songs" data-playlist-id="${liked.id}">
-                ${likedThumb}
+                <div class="playlist-icon"><i class="fa-solid fa-heart"></i></div>
                 <button class="grid-play-btn" data-playlist-id="${liked.id}" title="Play"><i class="fa-solid fa-play"></i></button>
                 <div class="history-info">
                     <div class="history-title">Liked Songs</div>
@@ -548,7 +524,20 @@ function attachPlaylistButtonEvents() {
     });
 }
 
+function attachCardMoreButtonEvents() {
+    document.querySelectorAll('.card-more-btn').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const rect = btn.getBoundingClientRect();
+            openSongContextMenu(rect.left, rect.bottom + 4, parseInt(btn.dataset.songId));
+        });
+    });
+}
+
 function attachAddToPlaylistButtonEvents() {
+    attachCardMoreButtonEvents();
     document.querySelectorAll('.add-to-playlist-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -586,8 +575,13 @@ function renderSongs(songsToRender, options = {}) {
                     </div>
                 </div>
                 ${playlistBtnHTML}
-                <div class="img-title">${song.songName}</div>
-                <div class="img-description">${song.songDes}</div>
+                <div class="music-card-info">
+                    <div class="music-card-text">
+                        <div class="img-title">${song.songName}</div>
+                        <div class="img-description">${song.songDes}</div>
+                    </div>
+                    <button class="card-more-btn" data-song-id="${song.id}" title="More"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                </div>
             </div>
         `;
 
@@ -842,6 +836,7 @@ function updateNowBar() {
     updateNowPlayingPanel();
     updateNowBarLikeIcon();
     renderQueuePanel();
+    renderMobileSheet();
     updateMiniPlayerPopup();
     updateMediaSession();
 }
@@ -1121,12 +1116,8 @@ function loadAndPlayCurrent() {
 const playNextSong = () => {
     if (queue.length > 0) {
         const nextSong = queue.shift();
-        let pos = order.findIndex(s => s.id === nextSong.id);
-        if (pos === -1) {
-            order.splice(currentIndex + 1, 0, nextSong);
-            pos = currentIndex + 1;
-        }
-        currentIndex = pos;
+        order.splice(currentIndex + 1, 0, nextSong);
+        currentIndex = currentIndex + 1;
     } else {
         currentIndex = (currentIndex + 1) % order.length;
     }
@@ -1187,21 +1178,6 @@ if (npBackBtn) {
         if (nowPlayingPanel) nowPlayingPanel.classList.remove('mobile-open');
         const bottomNavEl = document.querySelector('.bottom-nav');
         if (bottomNavEl) bottomNavEl.style.display = '';
-    });
-}
-
-let npQueueBtn = document.getElementById('npQueueBtn');
-if (npQueueBtn) {
-    npQueueBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (document.fullscreenElement) document.exitFullscreen();
-        if (nowPlayingPanel) nowPlayingPanel.classList.remove('mobile-open');
-
-        if (queuePanel) {
-            renderQueuePanel();
-            queuePanel.classList.add('show');
-            if (queueBtn) queueBtn.classList.add('active');
-        }
     });
 }
 
@@ -1428,6 +1404,7 @@ function confirmCreatePlaylist() {
     if (name) {
         createPlaylist(name);
         renderPlaylistList();
+        showToast('Playlist created');
     }
     closeCreatePlaylistModal();
 }
@@ -1548,7 +1525,7 @@ function resizeImageToDataUrl(file, maxSize, callback) {
 let coverUploadInput = document.getElementById('coverUploadInput');
 
 document.getElementById('playlistDetailCover')?.addEventListener('click', () => {
-    if (pdCurrentPlaylistId && coverUploadInput) coverUploadInput.click();
+    if (pdCurrentPlaylistId && !pdCurrentIsLiked && coverUploadInput) coverUploadInput.click();
 });
 
 coverUploadInput?.addEventListener('change', (e) => {
@@ -1867,8 +1844,12 @@ if (ctxAddToQueue) {
     ctxAddToQueue.addEventListener('click', () => {
         if (contextMenuSongId !== null) {
             const song = songs.find(s => s.id === contextMenuSongId);
-            if (song) queue.push(song);
-            renderQueuePanel();
+            if (song) {
+                queue.push(song);
+                renderQueuePanel();
+                renderMobileSheet();
+                showToast('Added to Queue', isMobileView() ? 'Open' : null, () => openMobileSheet('queue'));
+            }
         }
         closeSongContextMenu();
     });
@@ -2049,10 +2030,10 @@ function openPlaylistDetailView(playlist, isLiked) {
 
     renderDetailCover(playlist, isLiked);
 
-    document.getElementById('playlistDetailDescription').textContent = playlist.description || '';
+    document.getElementById('playlistDetailDescription').textContent = isLiked ? '' : (playlist.description || '');
 
     if (pdAddSongsBtn) pdAddSongsBtn.style.display = 'flex';
-    if (pdEditDetailsBtn) pdEditDetailsBtn.style.display = 'flex';
+    if (pdEditDetailsBtn) pdEditDetailsBtn.style.display = isLiked ? 'none' : 'flex';
 
     tbody.innerHTML = songsInPlaylist.map((song, idx) => `
         <tr data-song-id="${song.id}">
@@ -2164,8 +2145,13 @@ function openShowAllView(title, songsList) {
                 </div>
             </div>
             <button class="add-to-playlist-btn" data-song-id="${song.id}" title="Tambah ke Playlist"><i class="fa-solid fa-plus"></i></button>
-            <div class="img-title">${song.songName}</div>
-            <div class="img-description">${song.songDes}</div>
+            <div class="music-card-info">
+                <div class="music-card-text">
+                    <div class="img-title">${song.songName}</div>
+                    <div class="img-description">${song.songDes}</div>
+                </div>
+                <button class="card-more-btn" data-song-id="${song.id}" title="More"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </div>
         </div>
     `).join('');
 
@@ -2476,6 +2462,216 @@ async function openRealMiniPlayer() {
         pipWindow = null;
     });
 }
+
+// ===== Notif kecil ("Added to Queue", dll) =====
+let toastTimer = null;
+
+function showToast(text, actionLabel, actionFn) {
+    const toast = document.getElementById('appToast');
+    const textEl = document.getElementById('appToastText');
+    const actionEl = document.getElementById('appToastAction');
+    if (!toast || !textEl || !actionEl) return;
+
+    textEl.textContent = text;
+    actionEl.textContent = actionLabel || '';
+    actionEl.onclick = (actionLabel && actionFn)
+        ? () => { toast.classList.remove('show'); actionFn(); }
+        : null;
+
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== Menu "Create" (+) di bottom nav (mobile) =====
+const createNavBtn = document.getElementById('createNavBtn');
+const createMenu = document.getElementById('createMenu');
+const createBackdrop = document.getElementById('createBackdrop');
+
+function openCreateMenu() {
+    createMenu.classList.add('show');
+    createBackdrop.classList.add('show');
+    createNavBtn.classList.add('create-open');
+    createNavBtn.querySelector('i').className = 'fa-solid fa-xmark';
+}
+
+function closeCreateMenu() {
+    if (!createMenu) return;
+    createMenu.classList.remove('show');
+    createBackdrop.classList.remove('show');
+    createNavBtn.classList.remove('create-open');
+    createNavBtn.querySelector('i').className = 'fa-solid fa-plus';
+}
+
+if (createNavBtn && createMenu) {
+    createNavBtn.addEventListener('click', () => {
+        if (createMenu.classList.contains('show')) closeCreateMenu();
+        else openCreateMenu();
+    });
+
+    // klik item menu bawah lain (Home/Library/About/Support) -> tutup menu Create
+    document.querySelectorAll('.bottom-nav-item').forEach((el) => {
+        if (el !== createNavBtn) el.addEventListener('click', closeCreateMenu);
+    });
+}
+
+createBackdrop?.addEventListener('click', closeCreateMenu);
+
+document.getElementById('createMenuPlaylist')?.addEventListener('click', () => {
+    closeCreateMenu();
+    openCreatePlaylistModal();
+});
+document.getElementById('createMenuQueue')?.addEventListener('click', () => {
+    closeCreateMenu();
+    openMobileSheet('queue');
+});
+document.getElementById('createMenuHistory')?.addEventListener('click', () => {
+    closeCreateMenu();
+    openMobileSheet('history');
+});
+
+// ===== Panel Queue & History dari bawah (mobile) =====
+let mobileSheetMode = null; // 'queue' | 'history' | null (tertutup)
+const mobileSheet = document.getElementById('mobileSheet');
+const sheetBackdrop = document.getElementById('sheetBackdrop');
+const mobileSheetTitle = document.getElementById('mobileSheetTitle');
+const mobileSheetSub = document.getElementById('mobileSheetSub');
+const mobileSheetBody = document.getElementById('mobileSheetBody');
+
+function openMobileSheet(mode) {
+    mobileSheetMode = mode;
+    renderMobileSheet();
+    mobileSheet.classList.add('show');
+    sheetBackdrop.classList.add('show');
+    mobileSheetBody.scrollTop = 0;
+}
+
+function closeMobileSheet() {
+    mobileSheetMode = null;
+    mobileSheet.classList.remove('show');
+    sheetBackdrop.classList.remove('show');
+}
+
+document.getElementById('mobileSheetClose')?.addEventListener('click', closeMobileSheet);
+sheetBackdrop?.addEventListener('click', closeMobileSheet);
+
+function sheetItemHTML(song, attrs = '', titleClass = '') {
+    return `
+        <div class="sheet-item" data-song-id="${song.id}" ${attrs}>
+            <img src="${song.songImage}" alt="" loading="lazy">
+            <div class="sheet-item-info">
+                <div class="sheet-item-title ${titleClass}">${song.songName}</div>
+                <div class="sheet-item-artist">${song.songDes}</div>
+            </div>
+        </div>
+    `;
+}
+
+// Mainkan lagu berdasarkan posisinya di daftar `order`
+function playOrderIndex(idx) {
+    currentIndex = idx;
+    loadAndPlayCurrent();
+    addToHistory(getCurrentSong());
+    playerBar.classList.add('show');
+    showNowPlayingPanel();
+    highlightCurrentSong();
+    updateNowBar();
+}
+
+function renderMobileSheet() {
+    if (!mobileSheetMode || !mobileSheetBody) return;
+    if (mobileSheetMode === 'history') renderHistorySheet();
+    else renderQueueSheet();
+}
+
+function renderQueueSheet() {
+    mobileSheetTitle.textContent = 'Queue';
+    const isPlaying = playerBar.classList.contains('show');
+    let html = '';
+
+    if (isPlaying) {
+        const current = getCurrentSong();
+        mobileSheetSub.innerHTML = `Playing <b>${current.songDes}</b>`;
+        html += `
+            <div class="sheet-item sheet-item-now">
+                <img src="${current.songImage}" alt="">
+                <div class="sheet-item-info">
+                    <div class="sheet-item-title current">${current.songName}</div>
+                    <div class="sheet-item-artist">${current.songDes}</div>
+                </div>
+                <button type="button" class="sheet-play-btn" id="sheetPlayBtn">
+                    <i class="fa-solid ${audio.paused ? 'fa-play' : 'fa-pause'}"></i>
+                </button>
+            </div>
+        `;
+    } else {
+        mobileSheetSub.textContent = '';
+    }
+
+    if (queue.length > 0) {
+        html += `<div class="sheet-section-title"><span>Next in queue</span><span class="sheet-clear" id="sheetClearQueue">Clear queue</span></div>`;
+        html += queue.map((s, i) => sheetItemHTML(s, `data-queue-index="${i}"`)).join('');
+    }
+
+    if (isPlaying) {
+        const upcoming = order.slice(currentIndex + 1, currentIndex + 21);
+        if (upcoming.length > 0) {
+            html += `<div class="sheet-section-title"><span>${songOnShuffle ? 'Shuffling from:' : 'Next from:'}</span></div>`;
+            html += upcoming.map((s, i) => sheetItemHTML(s, `data-order-index="${currentIndex + 1 + i}"`)).join('');
+        }
+    }
+
+    if (!html) html = `<div class="sheet-empty">Your queue is empty.</div>`;
+    mobileSheetBody.innerHTML = html;
+
+    // ketuk lagu dari "Next in queue" -> mainkan, lalu keluarkan dari queue
+    mobileSheetBody.querySelectorAll('[data-queue-index]').forEach((el) => {
+        el.addEventListener('click', () => {
+            const i = parseInt(el.dataset.queueIndex);
+            const [song] = queue.splice(i, 1);
+            if (!song) return;
+            order.splice(currentIndex + 1, 0, song);
+            playOrderIndex(currentIndex + 1);
+        });
+    });
+
+    // ketuk lagu dari "Next from" -> lompat ke lagu itu
+    mobileSheetBody.querySelectorAll('[data-order-index]').forEach((el) => {
+        el.addEventListener('click', () => playOrderIndex(parseInt(el.dataset.orderIndex)));
+    });
+
+    document.getElementById('sheetPlayBtn')?.addEventListener('click', () => play.click());
+    document.getElementById('sheetClearQueue')?.addEventListener('click', () => {
+        queue = [];
+        renderQueuePanel();
+        renderMobileSheet();
+    });
+}
+
+function renderHistorySheet() {
+    mobileSheetTitle.textContent = 'History';
+
+    if (playHistory.length === 0) {
+        mobileSheetSub.textContent = '';
+        mobileSheetBody.innerHTML = `<div class="sheet-empty">No songs have been played yet.</div>`;
+        return;
+    }
+
+    mobileSheetSub.textContent = `${playHistory.length} recently played`;
+    mobileSheetBody.innerHTML = playHistory.map((s) => sheetItemHTML(s)).join('');
+
+    mobileSheetBody.querySelectorAll('.sheet-item').forEach((el) => {
+        el.addEventListener('click', () => {
+            const id = parseInt(el.dataset.songId);
+            const pos = order.findIndex((s) => s.id === id);
+            playOrderIndex(pos !== -1 ? pos : 0);
+        });
+    });
+}
+
+// ikon play/pause di panel Queue ikut berubah
+audio.addEventListener('play', renderMobileSheet);
+audio.addEventListener('pause', renderMobileSheet);
 
 setupMediaSessionHandlers();
 

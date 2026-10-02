@@ -1252,13 +1252,37 @@ input[type="range"]::-webkit-slider-thumb{
 
     .playlist-detail-toolbar{
         padding: 12px 16px;
-        gap: 16px;
+        gap: 12px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .playlist-detail-toolbar::-webkit-scrollbar{
+        display: none;
     }
 
     .playlist-play-btn{
         width: 3rem;
         height: 3rem;
         font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .playlist-toolbar-icon{
+        flex-shrink: 0;
+    }
+
+    .pd-pill-btn{
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 0.78rem;
+        padding: 0.45rem 0.9rem;
+    }
+
+    .playlist-toolbar-spacer{
+        display: none;
     }
 
     /* tabel diubah jadi baris flex di HP */
@@ -2031,8 +2055,7 @@ input[type="range"]::-webkit-slider-thumb{
 
 /* Mobile: tidak ada hover, jadi tombol tambah/hapus playlist selalu kelihatan */
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
-    .remove-from-playlist-btn,
-    .add-to-playlist-btn{
+    .remove-from-playlist-btn{
         display: flex;
         opacity: 1;
         top: 0.4rem;
@@ -3478,4 +3501,260 @@ input[type="range"]::-webkit-slider-thumb{
 /* Di HP tidak ada hover, jadi tombol "..." selalu kelihatan */
 @media (hover: none) and (pointer: coarse){
     .edit-cover-more-btn{ opacity: 1; }
+}
+
+/* Cover Liked Songs: tidak bisa diganti */
+.playlist-detail-cover.no-edit{ cursor: default; }
+
+/* Tombol ⋮ di kanan judul & artis (hanya tampil di HP) */
+.music-card-info{
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+.music-card-text{
+    flex: 1;
+    min-width: 0;
+}
+.card-more-btn{
+    display: none;
+    background: none;
+    border: none;
+    color: var(--gray-light);
+    font-size: 1rem;
+    padding: 0.5rem 0.4rem;
+    margin-top: 0.7rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+.card-more-btn:active{ color: var(--yellow); }
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .card-more-btn{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* ===== Item ke-5 "Create" di bottom nav ===== */
+.bottom-nav-item.create-open span{ display: none; }
+.bottom-nav-item.create-open i{
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== Menu Create (mobile) ===== */
+.create-backdrop,
+.sheet-backdrop{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+}
+.create-backdrop{ z-index: 2400; }
+.sheet-backdrop{ z-index: 2900; }
+.create-backdrop.show,
+.sheet-backdrop.show{ display: block; }
+
+.create-menu{
+    display: none;
+    position: fixed;
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 4.8rem;
+    background: #282828;
+    border-radius: 12px;
+    padding: 0.5rem;
+    z-index: 2450;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.create-menu.show{ display: block; }
+.create-menu-item{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.create-menu-item:active{ background: #333; }
+.create-menu-icon{
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: #3d3d3d;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.create-menu-title{ color: #fff; font-weight: 700; font-size: 1rem; }
+.create-menu-desc{ color: var(--gray-mid); font-size: 0.8rem; margin-top: 0.15rem; }
+
+/* ===== Panel Queue / History dari bawah (mobile) ===== */
+.mobile-sheet{
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 85vh;
+    background: #1f1f1f;
+    border-radius: 14px 14px 0 0;
+    z-index: 3000;
+    flex-direction: column;
+    overflow: hidden;
+}
+.mobile-sheet.show{ display: flex; }
+.mobile-sheet-handle{
+    width: 3rem;
+    height: 0.3rem;
+    border-radius: 1rem;
+    background: #555;
+    margin: 0.6rem auto 0.3rem;
+    flex-shrink: 0;
+}
+.mobile-sheet-head{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.6rem 1.2rem 0.8rem;
+    flex-shrink: 0;
+}
+.mobile-sheet-head h3{ color: #fff; font-size: 1.5rem; font-weight: 800; }
+.mobile-sheet-head p{ color: var(--gray-mid); font-size: 0.9rem; margin-top: 0.2rem; }
+.mobile-sheet-head p b{ color: #fff; font-weight: 600; }
+.mobile-sheet-head button{
+    background: none;
+    border: none;
+    color: var(--gray-light);
+    font-size: 1.2rem;
+    padding: 0.4rem;
+    cursor: pointer;
+}
+.mobile-sheet-body{
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 1.2rem 2rem;
+}
+
+.sheet-section-title{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--gray-mid);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 1.2rem 0 0.6rem;
+}
+.sheet-clear{ color: #fff; font-size: 0.8rem; cursor: pointer; }
+
+.sheet-item{
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.sheet-item img{
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.sheet-item-info{ flex: 1; min-width: 0; }
+.sheet-item-title{
+    color: #fff;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sheet-item-title.current{ color: var(--yellow); }
+.sheet-item-artist{
+    color: var(--gray-mid);
+    font-size: 0.85rem;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sheet-play-btn{
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: #000;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.sheet-empty{
+    color: var(--gray-mid);
+    text-align: center;
+    padding: 2.5rem 0;
+    font-size: 0.9rem;
+}
+
+/* ===== Notif kecil "Added to Queue" ===== */
+.app-toast{
+    position: fixed;
+    left: 50%;
+    bottom: 6.5rem;
+    transform: translate(-50%, 1rem);
+    width: calc(100% - 1rem);
+    max-width: 26rem;
+    background: #fff;
+    color: #000;
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 4000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.app-toast.show{
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+}
+.app-toast button{
+    background: none;
+    border: none;
+    color: #107c3a;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.app-toast button:empty{ display: none; }
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .app-toast{ bottom: 5.2rem; }
+    body.player-active .app-toast{ bottom: 8.9rem; }
 }

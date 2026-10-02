@@ -251,12 +251,6 @@
                     <input type="range" id="npVolumeBar" min="0" max="100" value="100">
                     <i class="fa-solid fa-volume-high"></i>
                 </div>
-                <button class="np-queue-btn" id="npQueueBtn" title="Queue">
-                    <i class="fa-solid fa-list"></i> Queue
-                </button>
-                <div class="np-airplay">
-                    <i class="fa-solid fa-wifi"></i> PPLG
-                </div>
                 <div class="np-airplay">
                     <i class="fa-solid fa-wifi"></i> PPLG
                 </div>
@@ -463,6 +457,10 @@
             <i class="fa-solid fa-heart"></i>
             <span>Support</span>
         </a>
+        <div class="bottom-nav-item" id="createNavBtn">
+            <i class="fa-solid fa-plus"></i>
+            <span>Create</span>
+        </div>
     </div>
     <div class="context-menu" id="songContextMenu">
         <div class="context-menu-item" id="ctxAddToLibrary"><i class="fa-solid fa-heart"></i> Save to your Liked Songs
@@ -499,6 +497,52 @@
             </div>
             <button class="mini-player-like-btn" id="miniPopupLikeBtn"><i class="fa-regular fa-heart"></i></button>
         </div>
+    </div>
+
+    <!-- Mobile: menu Create (+) -->
+    <div class="create-backdrop" id="createBackdrop"></div>
+    <div class="create-menu" id="createMenu">
+        <div class="create-menu-item" id="createMenuPlaylist">
+            <div class="create-menu-icon"><i class="fa-solid fa-music"></i></div>
+            <div>
+                <div class="create-menu-title">Playlist</div>
+                <div class="create-menu-desc">Create a playlist with songs</div>
+            </div>
+        </div>
+        <div class="create-menu-item" id="createMenuQueue">
+            <div class="create-menu-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <div>
+                <div class="create-menu-title">Queue</div>
+                <div class="create-menu-desc">See what's playing next</div>
+            </div>
+        </div>
+        <div class="create-menu-item" id="createMenuHistory">
+            <div class="create-menu-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div>
+                <div class="create-menu-title">History</div>
+                <div class="create-menu-desc">Songs you've recently played</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile: panel Queue / History dari bawah -->
+    <div class="sheet-backdrop" id="sheetBackdrop"></div>
+    <div class="mobile-sheet" id="mobileSheet">
+        <div class="mobile-sheet-handle"></div>
+        <div class="mobile-sheet-head">
+            <div>
+                <h3 id="mobileSheetTitle">Queue</h3>
+                <p id="mobileSheetSub"></p>
+            </div>
+            <button type="button" id="mobileSheetClose" title="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="mobile-sheet-body" id="mobileSheetBody"></div>
+    </div>
+
+    <!-- Notif kecil (Added to Queue, dll) -->
+    <div class="app-toast" id="appToast">
+        <span id="appToastText"></span>
+        <button type="button" id="appToastAction"></button>
     </div>
 
     <input type="file" id="coverUploadInput" accept="image/*" style="display:none;">
