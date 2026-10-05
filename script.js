@@ -140,26 +140,26 @@ const songs = [
     { id: 136, songName: "SENCY", songDes: "dia, Tenxi", songImage: "Art Cover/SpotiDown.App - SENCY - dia_ Tenxi.webp", songPath: "Lagu/SpotiDown.App - SENCY - dia_ Tenxi.mp3" },
     { id: 137, songName: "Snooze", songDes: "SZA", songImage: "Art Cover/SpotiDown.App - Snooze - SZA.webp", songPath: "Lagu/SpotiDown.App - Snooze - SZA.mp3" },
     { id: 138, songName: "SO ASU", songDes: "Naykilla", songImage: "Art Cover/SpotiDown.App - SO ASU - Naykilla.webp", songPath: "Lagu/SpotiDown.App - SO ASU - Naykilla.mp3" },
-    { id: 139, songName: "Aneka Baju Raya", songDes: "Papa Pipi", songImage: "Art Cover/Aneka Baju Raya (Papa Pipi).webp", songPath: "Lagu/Aneka Baju Raya (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 140, songName: "Bangkit Anak Muda", songDes: "BoBoiBoy", songImage: "Art Cover/Bangkit Anak Muda (BoBoiBoy).webp", songPath: "Lagu/Bangkit Anak Muda (BoBoiBoy).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 141, songName: "Boboiboy Bersedia", songDes: "BoBoiBoy", songImage: "Art Cover/Boboiboy Bersedia.webp", songPath: "Lagu/Boboiboy Bersedia.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 142, songName: "BoBoiBoy Hero Kita (2024 Remastered Version)", songDes: "BoBoiBoy", songImage: "Art Cover/BoBoiBoy Hero Kita - 2024 Remastered Version.webp", songPath: "Lagu/BoBoiBoy Hero Kita - 2024 Remastered Version.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 143, songName: "BoBoiBoy Hero Kita (Acoustic Version)", songDes: "BoBoiBoy", songImage: "Art Cover/BoBoiBoy Hero Kita - Acoustic Version.webp", songPath: "Lagu/BoBoiBoy Hero Kita - Acoustic Version.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 144, songName: "Destinasi Ke Jepun", songDes: "Fly With Yaya", songImage: "Art Cover/Destinasi Ke Jepun (Fly With Yaya).webp", songPath: "Lagu/Destinasi Ke Jepun (Fly With Yaya).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 145, songName: "Dibawah Langit Yang Sama", songDes: "D'Masiv", songImage: "Art Cover/Dibawah Langit Yang Sama.webp", songPath: "Lagu/Dibawah Langit Yang Sama.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 146, songName: "Dunia Baru", songDes: "Bunkface", songImage: "Art Cover/Dunia Baru.webp", songPath: "Lagu/Dunia Baru.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 147, songName: "FIRE & WATER", songDes: "Faizal Tahir", songImage: "Art Cover/FIRE & WATER.webp", songPath: "Lagu/FIRE & WATER.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 148, songName: "Fly With Yaya (Opening Song)", songDes: "Fly With Yaya", songImage: "Art Cover/Fly With Yaya (Opening Song).webp", songPath: "Lagu/Fly With Yaya (Opening Song).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 149, songName: "Hapipi Birthday", songDes: "Papa Pipi", songImage: "Art Cover/Hapipi Birthday (Papa Pipi).webp", songPath: "Lagu/Hapipi Birthday (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 150, songName: "Jagalah Bumi", songDes: "Kotak", songImage: "Art Cover/Jagalah Bumi - Theme from BoBoiBoy.webp", songPath: "Lagu/Jagalah Bumi - Theme from BoBoiBoy.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 151, songName: "Kembali Beraksi", songDes: "BoBoiBoy", songImage: "Art Cover/Kembali Beraksi.webp", songPath: "Lagu/Kembali Beraksi.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 152, songName: "Kita Semua Happy", songDes: "Papa Pipi", songImage: "Art Cover/Kita Semua Happy (Papa Pipi).webp", songPath: "Lagu/Kita Semua Happy (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 153, songName: "Laksamana Tarung", songDes: "BoBoiBoy Galaxy", songImage: "Art Cover/Laksamana Tarung (BoBoiBoy Galaxy).webp", songPath: "Lagu/Laksmana Tarung (BoBoiBoy Galaxy).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 154, songName: "Masih Disini", songDes: "Bunkface", songImage: "Art Cover/Masih Disini.webp", songPath: "Lagu/Masih Disini.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 155, songName: "Perut Papaku", songDes: "Papa Pipi", songImage: "Art Cover/Perut Papaku (Papa Pipi).webp", songPath: "Lagu/Perut Papaku (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 156, songName: "Rasa SarangHae", songDes: "Papa Pipi", songImage: "Art Cover/Rasa SarangHae (Papa Pipi).webp", songPath: "Lagu/Rasa SarangHae (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 157, songName: "Team Bubadibako it's Chill", songDes: "BoBoiBoy", songImage: "Art Cover/Team Bubadibako it's Chill - Boboiboy.webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
-    { id: 158, songName: "Teman Setia", songDes: "BoBoiBoy Galaxy Sori", songImage: "Art Cover/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] }
+    { id: 139, songName: "Aneka Baju Raya", songDes: "Papa Pipi", songImage: "Art Cover/Aneka Baju Raya (Papa Pipi).webp", songPath: "Lagu/Aneka Baju Raya (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "aneka baju raya"] },
+    { id: 140, songName: "Bangkit Anak Muda", songDes: "BoBoiBoy", songImage: "Art Cover/Bangkit Anak Muda (BoBoiBoy).webp", songPath: "Lagu/Bangkit Anak Muda (BoBoiBoy).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "bangkit anak muda"] },
+    { id: 141, songName: "Boboiboy Bersedia", songDes: "BoBoiBoy", songImage: "Art Cover/Boboiboy Bersedia.webp", songPath: "Lagu/Boboiboy Bersedia.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "boboiboy bersedia"] },
+    { id: 142, songName: "BoBoiBoy Hero Kita (2024 Remastered Version)", songDes: "BoBoiBoy", songImage: "Art Cover/BoBoiBoy Hero Kita - 2024 Remastered Version.webp", songPath: "Lagu/BoBoiBoy Hero Kita - 2024 Remastered Version.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "boboiboy hero kita (2024 remastered version)", "boboiboy hero kita"] },
+    { id: 143, songName: "BoBoiBoy Hero Kita (Acoustic Version)", songDes: "BoBoiBoy", songImage: "Art Cover/BoBoiBoy Hero Kita - Acoustic Version.webp", songPath: "Lagu/BoBoiBoy Hero Kita - Acoustic Version.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "boboiboy hero kita (acoustic version)", "boboiboy hero kita"] },
+    { id: 144, songName: "Destinasi Ke Jepun", songDes: "Fly With Yaya", songImage: "Art Cover/Destinasi Ke Jepun (Fly With Yaya).webp", songPath: "Lagu/Destinasi Ke Jepun (Fly With Yaya).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "destinasi ke jepun"] },
+    { id: 145, songName: "Dibawah Langit Yang Sama", songDes: "D'Masiv", songImage: "Art Cover/Dibawah Langit Yang Sama.webp", songPath: "Lagu/Dibawah Langit Yang Sama.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "dibawah langit yang sama"] },
+    { id: 146, songName: "Dunia Baru", songDes: "Bunkface", songImage: "Art Cover/Dunia Baru.webp", songPath: "Lagu/Dunia Baru.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "dunia baru"] },
+    { id: 147, songName: "FIRE & WATER", songDes: "Faizal Tahir", songImage: "Art Cover/FIRE & WATER.webp", songPath: "Lagu/FIRE & WATER.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "fire & water"] },
+    { id: 148, songName: "Fly With Yaya (Opening Song)", songDes: "Fly With Yaya", songImage: "Art Cover/Fly With Yaya (Opening Song).webp", songPath: "Lagu/Fly With Yaya (Opening Song).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "fly with yaya (opening song)", "fly with yaya"] },
+    { id: 149, songName: "Hapipi Birthday", songDes: "Papa Pipi", songImage: "Art Cover/Hapipi Birthday (Papa Pipi).webp", songPath: "Lagu/Hapipi Birthday (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "hapipi birthday"] },
+    { id: 150, songName: "Jagalah Bumi", songDes: "Kotak", songImage: "Art Cover/Jagalah Bumi - Theme from BoBoiBoy.webp", songPath: "Lagu/Jagalah Bumi - Theme from BoBoiBoy.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "jagalah bumi"] },
+    { id: 151, songName: "Kembali Beraksi", songDes: "BoBoiBoy", songImage: "Art Cover/Kembali Beraksi.webp", songPath: "Lagu/Kembali Beraksi.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "kembali beraksi"] },
+    { id: 152, songName: "Kita Semua Happy", songDes: "Papa Pipi", songImage: "Art Cover/Kita Semua Happy (Papa Pipi).webp", songPath: "Lagu/Kita Semua Happy (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "kita semua happy"] },
+    { id: 153, songName: "Laksamana Tarung", songDes: "BoBoiBoy Galaxy", songImage: "Art Cover/Laksamana Tarung (BoBoiBoy Galaxy).webp", songPath: "Lagu/Laksmana Tarung (BoBoiBoy Galaxy).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "laksamana tarung"] },
+    { id: 154, songName: "Masih Disini", songDes: "Bunkface", songImage: "Art Cover/Masih Disini.webp", songPath: "Lagu/Masih Disini.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "masih disini"] },
+    { id: 155, songName: "Perut Papaku", songDes: "Papa Pipi", songImage: "Art Cover/Perut Papaku (Papa Pipi).webp", songPath: "Lagu/Perut Papaku (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "perut papaku"] },
+    { id: 156, songName: "Rasa SarangHae", songDes: "Papa Pipi", songImage: "Art Cover/Rasa SarangHae (Papa Pipi).webp", songPath: "Lagu/Rasa SarangHae (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "rasa saranghae"] },
+    { id: 157, songName: "Team Bubadibako it's Chill", songDes: "Ilofiu", songImage: "Art Cover/Team Bubadibako it's Chill - Boboiboy.webp", songPath: "Lagu/SpotiDown.App - Team Bubadibako but it_s Chill - Boboiboy - Ilofiu.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "team bubadibako it's chill"] },
+    { id: 158, songName: "Teman Setia", songDes: "BoBoiBoy Galaxy Sori", songImage: "Art Cover/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "teman setia"] }
 ];
 
 const visibleSongs = songs.filter(s => !s.hidden);
@@ -709,10 +709,19 @@ function setupSearch() {
 
         let query = e.target.value.toLowerCase().trim();
 
+        // Kalau lagi di tab Library (mobile) dan user mulai ngetik,
+        // tampilkan lagi area hasil pencarian (main-right-part)
+        if (isMobileView() && query.length > 0 && mainLeftPart && mainRightPart) {
+            mainLeftPart.classList.remove('mobile-show');
+            mainRightPart.classList.remove('mobile-hide');
+            document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector('.bottom-nav-item[data-target="home"]')?.classList.add('active');
+        }
+
         let filtered = songs.filter((song) => {
             if (song.hidden) {
                 const keys = [].concat(song.keyword || song.songName).map(k => k.toLowerCase());
-                return keys.includes(query);
+                return keys.some(k => k.includes(query));
             }
             return song.songName.toLowerCase().includes(query) ||
                    song.songDes.toLowerCase().includes(query);
@@ -2134,11 +2143,12 @@ function openPlaylistDetailView(playlist, isLiked) {
     
     document.getElementById('playlistPlayBtn').onclick = () => {
         if (songsInPlaylist.length === 0) return;
-        const firstSong = songsInPlaylist[0];
-        if (playerBar.classList.contains('show') && getCurrentSong().id === firstSong.id) {
-            play.click(); // toggle pause/resume lewat tombol play utama yang sudah ada
+        const isPlayingFromThisPlaylist = playerBar.classList.contains('show') &&
+            songsInPlaylist.some(s => s.id === getCurrentSong().id);
+        if (isPlayingFromThisPlaylist) {
+            play.click(); // toggle pause/resume
         } else {
-            playSongFromList(firstSong.id, songsInPlaylist);
+            playSongFromList(songsInPlaylist[0].id, songsInPlaylist);
         }
     };
 
