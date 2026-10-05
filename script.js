@@ -1844,9 +1844,34 @@ let ctxAddToQueue = document.getElementById('ctxAddToQueue');
 let ctxAddToPlaylist = document.getElementById('ctxAddToPlaylist');
 let contextMenuSongId = null;
 
+document.getElementById('ctxRemoveFromPlaylist')?.addEventListener('click', () => {
+    if (contextMenuSongId !== null && pdCurrentPlaylistId) {
+        removeSongFromPlaylist(pdCurrentPlaylistId, contextMenuSongId);
+        const playlist = getPlaylists().find(p => p.id === pdCurrentPlaylistId);
+        if (playlist) openPlaylistDetailView(playlist, pdCurrentIsLiked);
+        renderPlaylistList();
+    }
+    closeSongContextMenu();
+});
+
 function openSongContextMenu(x, y, songId) {
     contextMenuSongId = songId;
     if (!songContextMenu) return;
+
+    const removeItem = document.getElementById('ctxRemoveFromPlaylist');
+    const removeLabel = document.getElementById('ctxRemoveFromPlaylistLabel');
+    const detailOpen = document.getElementById('playlistDetailView')?.classList.contains('show') && pdCurrentPlaylistId;
+
+    if (removeItem) {
+        if (detailOpen) {
+            removeItem.style.display = 'flex';
+            if (removeLabel) {
+                removeLabel.textContent = pdCurrentIsLiked ? 'Remove from Liked Songs' : 'Remove from this playlist';
+            }
+        } else {
+            removeItem.style.display = 'none';
+        }
+    }
 
     songContextMenu.classList.add('show');
 
@@ -1867,9 +1892,14 @@ function closeSongContextMenu() {
 document.addEventListener('contextmenu', (e) => {
     const card = e.target.closest('.music-card');
     const historyItem = e.target.closest('.history-item:not(.playlist-item)');
+    const trackRow = e.target.closest('#playlistTrackTableBody tr[data-song-id]');
     const songId = card
         ? parseInt(card.dataset.songId)
-        : (historyItem ? parseInt(historyItem.dataset.id) : NaN);
+        : historyItem
+            ? parseInt(historyItem.dataset.id)
+            : trackRow
+                ? parseInt(trackRow.dataset.songId)
+                : NaN;
 
     if (isNaN(songId)) return;
 
@@ -2120,6 +2150,12 @@ function openPlaylistDetailView(playlist, isLiked) {
                 </button>
             </td>
             <td class="track-duration" data-song-path="${song.songPath}">--:--</td>
+            <td class="track-more-col">
+                <button class="track-more-btn" data-song-id="${song.id}" title="More options">
+                    <i class="fa-solid fa-ellipsis track-more-icon-desktop"></i>
+                    <i class="fa-solid fa-ellipsis-vertical track-more-icon-mobile"></i>
+                </button>
+            </td>
         </tr>
     `).join('');
 
@@ -2138,6 +2174,14 @@ function openPlaylistDetailView(playlist, isLiked) {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             openAddToPlaylistModal(parseInt(btn.dataset.songId));
+        });
+    });
+
+    tbody.querySelectorAll('.track-more-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const rect = btn.getBoundingClientRect();
+            openSongContextMenu(rect.left, rect.bottom + 4, parseInt(btn.dataset.songId));
         });
     });
     

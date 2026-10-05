@@ -158,8 +158,9 @@
                             <th class="pd-compact-only">Artist</th>
                             <th class="pd-album-col">Album</th>
                             <th class="pd-list-only">Date added</th>
-                            <th></th>
-                            <th><i class="fa-regular fa-clock"></i></th>
+                            <th class="track-actions"></th>
+                            <th class="track-duration"><i class="fa-regular fa-clock"></i></th>
+                            <th class="track-more-col"></th>
                         </tr>
                     </thead>
                     <tbody id="playlistTrackTableBody"></tbody>
@@ -466,6 +467,9 @@
         <div class="context-menu-item" id="ctxAddToLibrary"><i class="fa-solid fa-heart"></i> Save to your Liked Songs
         </div>
         <div class="context-menu-item" id="ctxAddToQueue"><i class="fa-solid fa-layer-group"></i> Add to Queue</div>
+        <div class="context-menu-item" id="ctxRemoveFromPlaylist" style="display:none;">
+            <i class="fa-solid fa-trash"></i> <span id="ctxRemoveFromPlaylistLabel">Remove from this playlist</span>
+        </div>
         <div class="context-menu-item" id="ctxAddToPlaylist"><i class="fa-solid fa-plus"></i> Add to Playlist</div>
     </div>
 

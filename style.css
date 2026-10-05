@@ -1326,12 +1326,15 @@ input[type="range"]::-webkit-slider-thumb{
         display: none !important;
     }
 
-    .playlist-track-table td.track-actions{
+    .playlist-track-table td.track-more-col{
         flex: 0 0 auto;
         display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .track-like-btn{
+    .track-like-btn,
+    .track-more-btn{
         opacity: 1;
     }
 
@@ -2686,9 +2689,8 @@ input[type="range"]::-webkit-slider-thumb{
 
 /* ===== Tombol love di tiap baris lagu — gaya sama seperti hati di player bar ===== */
 .track-actions{
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    text-align: center;
+    vertical-align: middle;
     padding-right: 0.8rem !important;
 }
 
@@ -2723,6 +2725,31 @@ input[type="range"]::-webkit-slider-thumb{
 
 .track-like-btn.liked:hover{
     color: var(--yellow);
+}
+
+.track-more-btn{
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--gray-mid);
+    font-size: 1rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    margin-left: 0.3rem;
+    opacity: 1 !important;
+}
+
+.playlist-track-table tbody tr:hover .track-more-btn{
+    opacity: 1;
+}
+
+.track-more-btn:hover{
+    color: white;
 }
 
 /* ===== Isi modal "Add to Playlist": ikon kecil + nama + tombol centang bulat ===== */
@@ -3795,7 +3822,7 @@ input[type="range"]::-webkit-slider-thumb{
     width: 24%;
     min-width: 18rem;
     flex: 0 0 auto;
-}
+    }
 
     .now-playing-panel:not(:fullscreen) {
         padding: 0 0 0 0.6rem;
@@ -3842,4 +3869,55 @@ input[type="range"]::-webkit-slider-thumb{
     .now-playing-panel:not(:fullscreen) #npForward {
         font-size: 1.9rem;
     }
+
+.track-more-col{
+    width: 2.4rem;
+    text-align: center;
+    padding-right: 0.8rem !important;
 }
+
+/* Rapatkan kolom Like - Durasi - Titik tiga biar ngumpul di kanan ala Spotify */
+.track-actions{
+    width: 2.6rem;
+    text-align: center;
+    padding: 0.6rem 0.5rem !important;
+}
+
+.playlist-track-table thead th.track-actions{
+    text-align: center;
+}
+.playlist-track-table thead th.track-duration{
+    text-align: right;
+}
+
+.track-duration{
+    width: 4rem;
+    text-align: right;
+    padding: 0.6rem 0.5rem 0.6rem 0.5rem !important;
+}
+
+.track-more-col{
+    width: 2.2rem;
+    padding: 0.6rem 1.2rem 0.6rem 0 !important;
+}
+
+/* Titik-tiga selalu terlihat, tidak perlu hover (beda dari tombol love) */
+.track-more-btn{
+    opacity: 1 !important;
+}
+
+.playlist-track-table th.pd-album-col,
+.playlist-track-table td.pd-album-col{
+    width: auto;
+}
+
+/* Default (desktop): pakai titik horizontal, sembunyikan versi vertikal */
+.track-more-icon-mobile{ display: none; }
+.track-more-icon-desktop{ display: inline-block; }
+
+/* Mobile: pakai titik vertikal (persis Spotify mobile), sembunyikan versi horizontal */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .track-more-icon-desktop{ display: none; }
+    .track-more-icon-mobile{ display: inline-block; }
+}
+
