@@ -102,30 +102,74 @@ const songs = [
     { id: 98, songName: "Obsesi Mengejar Semesta", songDes: "Zephter", songImage: "Art Cover/Obsesi Mengejar Semesta.webp", songPath: "Lagu/Obsesi Mengejar Semesta.mp3" },
     { id: 99, songName: "Scott and Zelda", songDes: "BIBI", songImage: "Art Cover/Scott and Zelda.webp", songPath: "Lagu/Scott and Zelda.mp3" },
     { id: 100, songName: "Treat You Better", songDes: "Shawn Mendes", songImage: "Art Cover/Treat You Better.webp", songPath: "Lagu/Treat You Better.mp3" },
-    { id: 101, songName: "Love of My Life", songDes: "Queen", songImage: "Art Cover/Love of My Life.webp", songPath: "Lagu/Love of My Life.mp3" },
-    { id: 102, songName: "Glue Song", songDes: "beabadoobee", songImage: "Art Cover/Glue Song.webp", songPath: "Lagu/Glue Song.mp3" },
-    { id: 103, songName: "Closed Doors", songDes: "Ismail", songImage: "Art Cover/Closed Doors.webp", songPath: "Lagu/Closed Doors.mp3" },
-    { id: 104, songName: "The One That Got Away", songDes: "Katy Perry", songImage: "Art Cover/The One That Got Away.webp", songPath: "Lagu/The One That Got Away.mp3" },
-    { id: 105, songName: "Entry Four", songDes: "Jaydes Archive", songImage: "Art Cover/Entry Four.webp", songPath: "Lagu/Entry Four.mp3" },
-    { id: 106, songName: "500 Miles", songDes: "Peter Paul and Mary", songImage: "Art Cover/500 Miles.webp", songPath: "Lagu/500 Miles.mp3" },
-    { id: 107, songName: "Best Friend", songDes: "Rex Orange County", songImage: "Art Cover/Best Friend.webp", songPath: "Lagu/Best Friend.mp3" },
-    { id: 108, songName: "Siapkah Kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!", songImage: "Art Cover/Siapkah Kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau 'Tuk Jatuh Cinta Lagi.mp3" },
-    { id: 109, songName: "Remaja", songDes: "Hivi!", songImage: "Art Cover/Remaja.webp", songPath: "Lagu/Remaja.mp3" },
-    { id: 110, songName: "All Too Well (Taylor's Version)", songDes: "Taylor Swift", songImage: "Art Cover/All Too Well (Taylor's Version).webp", songPath: "Lagu/All Too Well (Taylor's Version).mp3" },
-    { id: 111, songName: "Enchanted", songDes: "Taylor Swift", songImage: "Art Cover/Enchanted.webp", songPath: "Lagu/Enchanted.webp", songPath: "Lagu/Enchanted.mp3" },
-    { id: 112, songName: "Jatuh Suka", songDes: "Tulus", songImage: "Art Cover/Jatuh Suka.webp", songPath: "Lagu/Jatuh Suka.mp3" },
-    { id: 113, songName: "Besok kita pergi makan", songDes: "Sal Priadi", songImage: "Art Cover/Besok kita pergi makan.webp", songPath: "Lagu/Besok kita pergi makan.mp3" },
-    { id: 114, songName: "Jatuh Hati", songDes: "Raisa", songImage: "Art Cover/Jatuh Hati.webp", songPath: "Lagu/Jatuh Hati.mp3" },
-    { id: 115, songName: "Payphone", songDes: "Maroon 5, Wiz Khalifa", songImage: "Art Cover/Payphone.webp", songPath: "Lagu/Payphone.mp3" },
-    { id: 116, songName: "Wide Awake", songDes: "Katy Perry", songImage: "Art Cover/Wide Awake.webp", songPath: "Lagu/Wide Awake.mp3" },
-    { id: 117, songName: "Langit Tak Seharusnya Biru", songDes: "The Jansen", songImage: "Art Cover/Langit Tak Seharusnya Biru.webp", songPath: "Lagu/Langit Tak Seharusnya Biru.mp3" },
-    { id: 118, songName: "Mantan Terindah", songDes: "Kahitna", songImage: "Art Cover/Mantan Terindah.webp", songPath: "Lagu/Mantan Terindah.mp3" },
-    { id: 119, songName: "Selamat (Selamat Tinggal)", songDes: "Virgoun, Audy", songImage: "Art Cover/Selamat (Selamat Tinggal).webp", songPath: "Lagu/Selamat (Selamat Tinggal).mp3" },
-    { id: 120, songName: "Diri", songDes: "Tulus", songImage: "Art Cover/Diri.webp", songPath: "Lagu/Diri.mp3" },
-    { id: 121, songName: "We Don't Talk Anymore (feat. Selena Gomez)", songDes: "Charlie Puth, Selena Gomez", songImage: "Art Cover/We Don't Talk Anymore (feat. Selena Gomez).webp", songPath: "Lagu/We Don't Talk Anymore (feat. Selena Gomez).mp3" },
-    { id: 122, songName: "Teh Hijau", songDes: "Tulus", songImage: "Art Cover/Teh Hijau.webp", songPath: "Lagu/Teh Hijau.mp3" },
-    { id: 123, songName: "WILDFLOWER", songDes: "Billie Eilish", songImage: "Art Cover/WILDFLOWER.webp", songPath: "Lagu/WILDFLOWER.mp3" }
+    { id: 101, songName: "Glue Song", songDes: "beabadoobee", songImage: "Art Cover/Glue Song.webp", songPath: "Lagu/Glue Song.mp3" },
+    { id: 102, songName: "Closed Doors", songDes: "Ismail", songImage: "Art Cover/Closed Doors.webp", songPath: "Lagu/Closed Doors.mp3" },
+    { id: 103, songName: "The One That Got Away", songDes: "Katy Perry", songImage: "Art Cover/The One That Got Away.webp", songPath: "Lagu/The One That Got Away.mp3" },
+    { id: 104, songName: "Entry Four", songDes: "Jaydes Archive", songImage: "Art Cover/Entry Four.webp", songPath: "Lagu/Entry Four.mp3" },
+    { id: 105, songName: "500 Miles", songDes: "Peter Paul and Mary", songImage: "Art Cover/500 Miles.webp", songPath: "Lagu/500 Miles.mp3" },
+    { id: 106, songName: "Best Friend", songDes: "Rex Orange County", songImage: "Art Cover/Best Friend.webp", songPath: "Lagu/Best Friend.mp3" },
+    { id: 107, songName: "Siapkah Kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!", songImage: "Art Cover/Siapkah Kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau 'Tuk Jatuh Cinta Lagi.mp3" },
+    { id: 108, songName: "Remaja", songDes: "Hivi!", songImage: "Art Cover/Remaja.webp", songPath: "Lagu/Remaja.mp3" },
+    { id: 109, songName: "All Too Well (Taylor's Version)", songDes: "Taylor Swift", songImage: "Art Cover/All Too Well (Taylor's Version).webp", songPath: "Lagu/All Too Well (Taylor's Version).mp3" },
+    { id: 110, songName: "Enchanted", songDes: "Taylor Swift", songImage: "Art Cover/Enchanted.webp", songPath: "Lagu/Enchanted.webp", songPath: "Lagu/Enchanted.mp3" },
+    { id: 111, songName: "Jatuh Suka", songDes: "Tulus", songImage: "Art Cover/Jatuh Suka.webp", songPath: "Lagu/Jatuh Suka.mp3" },
+    { id: 112, songName: "Besok kita pergi makan", songDes: "Sal Priadi", songImage: "Art Cover/Besok kita pergi makan.webp", songPath: "Lagu/Besok kita pergi makan.mp3" },
+    { id: 113, songName: "Jatuh Hati", songDes: "Raisa", songImage: "Art Cover/Jatuh Hati.webp", songPath: "Lagu/Jatuh Hati.mp3" },
+    { id: 114, songName: "Payphone", songDes: "Maroon 5, Wiz Khalifa", songImage: "Art Cover/Payphone.webp", songPath: "Lagu/Payphone.mp3" },
+    { id: 115, songName: "Wide Awake", songDes: "Katy Perry", songImage: "Art Cover/Wide Awake.webp", songPath: "Lagu/Wide Awake.mp3" },
+    { id: 116, songName: "Langit Tak Seharusnya Biru", songDes: "The Jansen", songImage: "Art Cover/Langit Tak Seharusnya Biru.webp", songPath: "Lagu/Langit Tak Seharusnya Biru.mp3" },
+    { id: 117, songName: "Mantan Terindah", songDes: "Kahitna", songImage: "Art Cover/Mantan Terindah.webp", songPath: "Lagu/Mantan Terindah.mp3" },
+    { id: 118, songName: "Selamat (Selamat Tinggal)", songDes: "Virgoun, Audy", songImage: "Art Cover/Selamat (Selamat Tinggal).webp", songPath: "Lagu/Selamat (Selamat Tinggal).mp3" },
+    { id: 119, songName: "Diri", songDes: "Tulus", songImage: "Art Cover/Diri.webp", songPath: "Lagu/Diri.mp3" },
+    { id: 120, songName: "We Don't Talk Anymore (feat. Selena Gomez)", songDes: "Charlie Puth, Selena Gomez", songImage: "Art Cover/We Don't Talk Anymore (feat. Selena Gomez).webp", songPath: "Lagu/We Don't Talk Anymore (feat. Selena Gomez).mp3" },
+    { id: 121, songName: "Teh Hijau", songDes: "Tulus", songImage: "Art Cover/Teh Hijau.webp", songPath: "Lagu/Teh Hijau.mp3" },
+    { id: 122, songName: "WILDFLOWER", songDes: "Billie Eilish", songImage: "Art Cover/WILDFLOWER.webp", songPath: "Lagu/WILDFLOWER.mp3" },
+    { id: 123, songName: "Come Inside Of My Heart", songDes: "IV OF SPADES", songImage: "Art Cover/Come Inside Of My Heart.webp", songPath: "Lagu/SpotiDown.App - Come Inside Of My Heart - IV OF SPADES.mp3" },
+    { id: 124, songName: "EEEE A", songDes: "dia", songImage: "Art Cover/SpotiDown.App - EEEE A - dia.webp", songPath: "Lagu/SpotiDown.App - EEEE A - dia.mp3" },
+    { id: 125, songName: "Gravits", songDes: "Crayon Case", songImage: "Art Cover/Gravits.webp", songPath: "Lagu/SpotiDown.App - Gravits - Crayon Case.mp3" },
+    { id: 126, songName: "hate that i made you love me", songDes: "Ariana Grande", songImage: "Art Cover/hate that i made you love me.webp", songPath: "Lagu/SpotiDown.App - hate that i made you love me - Ariana Grande.mp3" },
+    { id: 127, songName: "Kill Bill", songDes: "SZA", songImage: "Art Cover/SpotiDown.App - Kill Bill - SZA.webp", songPath: "Lagu/SpotiDown.App - Kill Bill - SZA.mp3" },
+    { id: 128, songName: "Love of My Life", songDes: "Queen", songImage: "Art Cover/SpotiDown.App - Love of My Life - Queen.webp", songPath: "Lagu/SpotiDown.App - Love of My Life - Queen.mp3" },
+    { id: 129, songName: "lowkey", songDes: "NIKI", songImage: "Art Cover/SpotiDown.App - lowkey - NIKI.webp", songPath: "Lagu/SpotiDown.App - lowkey - NIKI.mp3" },
+    { id: 130, songName: "MALU MALU", songDes: "dia, INDAHKUS", songImage: "Art Cover/SpotiDown.App - MALU MALU - dia_ INDAHKUS.webp", songPath: "Lagu/SpotiDown.App - MALU MALU - dia_ INDAHKUS.mp3" },
+    { id: 131, songName: "Nobody Gets Me", songDes: "SZA", songImage: "Art Cover/SpotiDown.App - Nobody Gets Me - SZA.webp", songPath: "Lagu/SpotiDown.App - Nobody Gets Me - SZA.mp3" },
+    { id: 132, songName: "Open Arms (feat. Travis Scott)", songDes: "SZA, Travis Scott", songImage: "Art Cover/Open Arms (feat. Travis Scott).webp", songPath: "Lagu/SpotiDown.App - Open Arms (feat. Travis Scott) - SZA, Travis Scott.mp3" },
+    { id: 133, songName: "Pelangi", songDes: "Hivi!", songImage: "Art Cover/SpotiDown.App - Pelangi - Hivi_.webp", songPath: "Lagu/SpotiDown.App - Pelangi - Hivi_.mp3" },
+    { id: 134, songName: "putih susu", songDes: "ibra", songImage: "Art Cover/SpotiDown.App - putih susu - ibra.webp", songPath: "Lagu/SpotiDown.App - putih susu - ibra.mp3" },
+    { id: 135, songName: "Saturn", songDes: "SZA", songImage: "Art Cover/Saturn.webp", songPath: "Lagu/SpotiDown.App - Saturn - SZA.mp3" },
+    { id: 136, songName: "SENCY", songDes: "dia, Tenxi", songImage: "Art Cover/SpotiDown.App - SENCY - dia_ Tenxi.webp", songPath: "Lagu/SpotiDown.App - SENCY - dia_ Tenxi.mp3" },
+    { id: 137, songName: "Snooze", songDes: "SZA", songImage: "Art Cover/SpotiDown.App - Snooze - SZA.webp", songPath: "Lagu/SpotiDown.App - Snooze - SZA.mp3" },
+    { id: 138, songName: "SO ASU", songDes: "Naykilla", songImage: "Art Cover/SpotiDown.App - SO ASU - Naykilla.webp", songPath: "Lagu/SpotiDown.App - SO ASU - Naykilla.mp3" },
+    { id: 139, songName: "Aneka Baju Raya", songDes: "Papa Pipi", songImage: "Art Cover/Aneka Baju Raya (Papa Pipi).webp", songPath: "Lagu/Aneka Baju Raya (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 140, songName: "Bangkit Anak Muda", songDes: "BoBoiBoy", songImage: "Art Cover/Bangkit Anak Muda (BoBoiBoy).webp", songPath: "Lagu/Bangkit Anak Muda (BoBoiBoy).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 141, songName: "Boboiboy Bersedia", songDes: "BoBoiBoy", songImage: "Art Cover/Boboiboy Bersedia.webp", songPath: "Lagu/Boboiboy Bersedia.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 142, songName: "BoBoiBoy Hero Kita (2024 Remastered Version)", songDes: "BoBoiBoy", songImage: "Art Cover/BoBoiBoy Hero Kita - 2024 Remastered Version.webp", songPath: "Lagu/BoBoiBoy Hero Kita - 2024 Remastered Version.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 143, songName: "BoBoiBoy Hero Kita (Acoustic Version)", songDes: "BoBoiBoy", songImage: "Art Cover/BoBoiBoy Hero Kita - Acoustic Version.webp", songPath: "Lagu/BoBoiBoy Hero Kita - Acoustic Version.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 144, songName: "Destinasi Ke Jepun", songDes: "Fly With Yaya", songImage: "Art Cover/Destinasi Ke Jepun (Fly With Yaya).webp", songPath: "Lagu/Destinasi Ke Jepun (Fly With Yaya).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 145, songName: "Dibawah Langit Yang Sama", songDes: "D'Masiv", songImage: "Art Cover/Dibawah Langit Yang Sama.webp", songPath: "Lagu/Dibawah Langit Yang Sama.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 146, songName: "Dunia Baru", songDes: "Bunkface", songImage: "Art Cover/Dunia Baru.webp", songPath: "Lagu/Dunia Baru.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 147, songName: "FIRE & WATER", songDes: "Faizal Tahir", songImage: "Art Cover/FIRE & WATER.webp", songPath: "Lagu/FIRE & WATER.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 148, songName: "Fly With Yaya (Opening Song)", songDes: "Fly With Yaya", songImage: "Art Cover/Fly With Yaya (Opening Song).webp", songPath: "Lagu/Fly With Yaya (Opening Song).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 149, songName: "Hapipi Birthday", songDes: "Papa Pipi", songImage: "Art Cover/Hapipi Birthday (Papa Pipi).webp", songPath: "Lagu/Hapipi Birthday (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 150, songName: "Jagalah Bumi", songDes: "Kotak", songImage: "Art Cover/Jagalah Bumi - Theme from BoBoiBoy.webp", songPath: "Lagu/Jagalah Bumi - Theme from BoBoiBoy.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 151, songName: "Kembali Beraksi", songDes: "BoBoiBoy", songImage: "Art Cover/Kembali Beraksi.webp", songPath: "Lagu/Kembali Beraksi.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 152, songName: "Kita Semua Happy", songDes: "Papa Pipi", songImage: "Art Cover/Kita Semua Happy (Papa Pipi).webp", songPath: "Lagu/Kita Semua Happy (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 153, songName: "Laksamana Tarung", songDes: "BoBoiBoy Galaxy", songImage: "Art Cover/Laksamana Tarung (BoBoiBoy Galaxy).webp", songPath: "Lagu/Laksmana Tarung (BoBoiBoy Galaxy).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 154, songName: "Masih Disini", songDes: "Bunkface", songImage: "Art Cover/Masih Disini.webp", songPath: "Lagu/Masih Disini.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 155, songName: "Perut Papaku", songDes: "Papa Pipi", songImage: "Art Cover/Perut Papaku (Papa Pipi).webp", songPath: "Lagu/Perut Papaku (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 156, songName: "Rasa SarangHae", songDes: "Papa Pipi", songImage: "Art Cover/Rasa SarangHae (Papa Pipi).webp", songPath: "Lagu/Rasa SarangHae (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 157, songName: "Team Bubadibako it's Chill", songDes: "BoBoiBoy", songImage: "Art Cover/Team Bubadibako it's Chill - Boboiboy.webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] },
+    { id: 158, songName: "Teman Setia", songDes: "BoBoiBoy Galaxy Sori", songImage: "Art Cover/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy"] }
 ];
+
+const visibleSongs = songs.filter(s => !s.hidden);
+
+// pastikan lagu yang sedang diputar (termasuk yang rahasia) tetap ada di antrean
+function withCurrent(list, songId) {
+    if (list.some(s => s.id === songId)) return list;
+    const cur = songs.find(s => s.id === songId);
+    return cur ? [cur, ...list] : list;
+}
 
 // Tampilan mobile aktif kalau layar <= 768px ATAU perangkat layar sentuh
 const mobileQuery = window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)');
@@ -152,8 +196,8 @@ function fitMobileScale() {
 fitMobileScale();
 window.addEventListener('orientationchange', fitMobileScale);
 
-let order = [...songs];
-let homeSongsOrder = [...songs];
+let order = [...visibleSongs];
+let homeSongsOrder = [...visibleSongs];
 let lastRenderedSongs = homeSongsOrder;
 let queue = [];
 
@@ -635,7 +679,11 @@ function attachPlayEvents() {
 
             order = [...homeSongsOrder];
             let pos = order.findIndex((s) => s.id === clickedId);
-            currentIndex = pos !== -1 ? pos : 0;
+            if (pos === -1) {
+                order.unshift(songs.find((s) => s.id === clickedId));
+                pos = 0;
+            }
+            currentIndex = pos;
 
             audio.src = getCurrentSong().songPath;
             audio.currentTime = 0;
@@ -662,9 +710,12 @@ function setupSearch() {
         let query = e.target.value.toLowerCase().trim();
 
         let filtered = songs.filter((song) => {
-            let nameMatch = song.songName.toLowerCase().includes(query);
-            let desMatch = song.songDes.toLowerCase().includes(query);
-            return nameMatch || desMatch;
+            if (song.hidden) {
+                const keys = [].concat(song.keyword || song.songName).map(k => k.toLowerCase());
+                return keys.includes(query);
+            }
+            return song.songName.toLowerCase().includes(query) ||
+                   song.songDes.toLowerCase().includes(query);
         });
 
         renderSongs(filtered);
@@ -1058,13 +1109,13 @@ if (shuffle) {
             if (miniShuffle) miniShuffle.classList.add('active');
             if (miniRepeat) miniRepeat.classList.remove('active');
             if (playlistShuffleBtn) playlistShuffleBtn.classList.add('active');
-            order = shuffleSongs(songs);
+            order = withCurrent(shuffleSongs(visibleSongs), playingSongId);
         } else {
             songOnShuffle = false;
             shuffle.classList.remove('active');
             if (miniShuffle) miniShuffle.classList.remove('active');
             if (playlistShuffleBtn) playlistShuffleBtn.classList.remove('active');
-            order = [...songs];
+            order = withCurrent([...visibleSongs], playingSongId);
         }
 
         let newPos = order.findIndex((s) => s.id === playingSongId);
@@ -1084,7 +1135,7 @@ if (repeat) {
             if (shuffle) shuffle.classList.remove('active');
             if (miniRepeat) miniRepeat.classList.add('active');
             if (miniShuffle) miniShuffle.classList.remove('active');
-            order = [...songs];
+            order = withCurrent([...visibleSongs], playingSongId);
         } else {
             songOnRepeat = false;
             repeat.classList.remove('active');
@@ -1695,8 +1746,8 @@ function renderAddSongsList(query) {
     if (!playlist) return;
 
     const filtered = q
-        ? songs.filter(s => s.songName.toLowerCase().includes(q) || s.songDes.toLowerCase().includes(q))
-        : songs.slice(0, 50);
+        ? visibleSongs.filter(s => s.songName.toLowerCase().includes(q) || s.songDes.toLowerCase().includes(q))
+        : visibleSongs.slice(0, 50);
 
     addSongsList.innerHTML = filtered.map(song => {
         const already = playlist.songIds.includes(song.id);
@@ -2676,7 +2727,7 @@ audio.addEventListener('pause', renderMobileSheet);
 setupMediaSessionHandlers();
 
 // Inisialisasi Aplikasi
-homeSongsOrder = shuffleSongs(songs);
+homeSongsOrder = shuffleSongs(visibleSongs);
 renderSongs(homeSongsOrder);
 setupSearch();
 renderHistory();

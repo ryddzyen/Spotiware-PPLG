@@ -3758,3 +3758,88 @@ input[type="range"]::-webkit-slider-thumb{
     .app-toast{ bottom: 5.2rem; }
     body.player-active .app-toast{ bottom: 8.9rem; }
 }
+
+/* ===== Layout desktop ala Spotify: panel memenuhi tinggi layar ===== */
+@media (min-width: 901px) and (hover: hover) {
+    .main {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0 0.5rem 0.5rem;
+        height: calc(100vh - 4rem);   /* 4rem = tinggi navbar */
+    }
+
+    /* saat ada lagu diputar, sisakan ruang untuk player bar di bawah */
+    body.player-active .main {
+        height: calc(100vh - 4rem - 5.2rem);
+    }
+
+    .main-left-part,
+    .main-right-part,
+    .now-playing-panel,
+    .queue-panel,
+    .add-songs-panel {
+        height: 100%;
+    }
+
+    .main-right-part {
+        min-width: 0;
+    }
+}
+
+.now-playing-panel:not(:fullscreen),
+.queue-panel,
+.add-songs-panel {
+    box-sizing: border-box;
+    width: 24%;
+    min-width: 18rem;
+    flex: 0 0 auto;
+}
+
+    .now-playing-panel:not(:fullscreen) {
+        padding: 0 0 0 0.6rem;
+        align-items: stretch;
+    }
+
+    .now-playing-panel:not(:fullscreen) .phone-frame {
+        box-sizing: border-box;
+        max-width: none;
+        height: 100%;
+        padding: 1.1rem;
+        border-radius: 10px;
+        justify-content: flex-start;
+    }
+
+    /* cover mengisi sisa tinggi card */
+    .now-playing-panel:not(:fullscreen) .np-art {
+        position: relative;
+        aspect-ratio: auto;
+        flex: 1;
+        min-height: 0;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+    }
+
+    .now-playing-panel:not(:fullscreen) .np-art img {
+        position: absolute;
+        inset: 0;
+    }
+
+    .now-playing-panel:not(:fullscreen) .np-title {
+        font-size: 1.15rem;
+    }
+
+    .now-playing-panel:not(:fullscreen) .np-artist {
+        font-size: 0.9rem;
+    }
+
+    .now-playing-panel:not(:fullscreen) #npPlay {
+        font-size: 3rem;
+    }
+
+    .now-playing-panel:not(:fullscreen) #npBackward,
+    .now-playing-panel:not(:fullscreen) #npForward {
+        font-size: 1.9rem;
+    }
+}
