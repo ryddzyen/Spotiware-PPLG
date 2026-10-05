@@ -198,6 +198,7 @@ window.addEventListener('orientationchange', fitMobileScale);
 
 let order = [...visibleSongs];
 let homeSongsOrder = [...visibleSongs];
+let currentContextList = [...visibleSongs];
 let lastRenderedSongs = homeSongsOrder;
 let queue = [];
 
@@ -678,6 +679,7 @@ function attachPlayEvents() {
             }
 
             order = [...homeSongsOrder];
+            currentContextList = [...homeSongsOrder];
             let pos = order.findIndex((s) => s.id === clickedId);
             if (pos === -1) {
                 order.unshift(songs.find((s) => s.id === clickedId));
@@ -1118,13 +1120,13 @@ if (shuffle) {
             if (miniShuffle) miniShuffle.classList.add('active');
             if (miniRepeat) miniRepeat.classList.remove('active');
             if (playlistShuffleBtn) playlistShuffleBtn.classList.add('active');
-            order = withCurrent(shuffleSongs(visibleSongs), playingSongId);
+            order = withCurrent(shuffleSongs(currentContextList), playingSongId);
         } else {
             songOnShuffle = false;
             shuffle.classList.remove('active');
             if (miniShuffle) miniShuffle.classList.remove('active');
             if (playlistShuffleBtn) playlistShuffleBtn.classList.remove('active');
-            order = withCurrent([...visibleSongs], playingSongId);
+            order = withCurrent([...currentContextList], playingSongId);
         }
 
         let newPos = order.findIndex((s) => s.id === playingSongId);
@@ -1144,7 +1146,7 @@ if (repeat) {
             if (shuffle) shuffle.classList.remove('active');
             if (miniRepeat) miniRepeat.classList.add('active');
             if (miniShuffle) miniShuffle.classList.remove('active');
-            order = withCurrent([...visibleSongs], playingSongId);
+            order = withCurrent([...currentContextList], playingSongId);
         } else {
             songOnRepeat = false;
             repeat.classList.remove('active');
@@ -1157,19 +1159,23 @@ if (repeat) {
 }
 
 function loadAndPlayCurrent() {
+    isLoadingTrack = true;
     const song = getCurrentSong();
     audio.src = song.songPath;
     audio.load();
 
     const p = audio.play();
     if (p !== undefined) {
-        p.catch((err) => {
+        p.then(() => {
+            isLoadingTrack = false;
+        }).catch((err) => {
             console.warn('play() ditolak, coba lagi:', err);
-            // coba lagi begitu audio siap
             audio.addEventListener('canplay', () => {
-                audio.play().catch(() => {});
+                audio.play().then(() => { isLoadingTrack = false; }).catch(() => {});
             }, { once: true });
         });
+    } else {
+        isLoadingTrack = false;
     }
 }
 
@@ -1212,9 +1218,10 @@ audio.addEventListener('ended', () => {
     }
 });
 
+let isLoadingTrack = false;
+
 audio.addEventListener('stalled', () => {
     console.warn('audio stalled');
-    if (!audio.paused) audio.load();
 });
 
 let npFullscreenBtn = document.getElementById('npFullscreenBtn');
@@ -2212,6 +2219,7 @@ function openPlaylistDetailView(playlist, isLiked) {
 
 function playSongFromList(songId, songList) {
     order = songList.length > 0 ? [...songList] : [...songs];
+    currentContextList = [...order];
     let pos = order.findIndex(s => s.id === songId);
     currentIndex = pos !== -1 ? pos : 0;
 
