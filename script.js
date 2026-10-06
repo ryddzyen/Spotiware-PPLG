@@ -1224,6 +1224,41 @@ audio.addEventListener('stalled', () => {
     console.warn('audio stalled');
 });
 
+let errorSkipCount = 0;
+let isRetryingAfterError = false;
+
+audio.addEventListener('error', () => {
+    const failedSong = getCurrentSong();
+    console.warn('Gagal memutar:', failedSong?.songPath, audio.error);
+
+    // Coba sekali lagi dulu — siapa tahu cuma koneksi kedip sebentar
+    if (!isRetryingAfterError) {
+        isRetryingAfterError = true;
+        setTimeout(() => {
+            audio.load();
+            audio.play().catch(() => {
+                // Masih gagal juga setelah retry -> baru skip
+                isRetryingAfterError = false;
+                errorSkipCount++;
+                if (errorSkipCount > order.length) {
+                    showToast('Unable to play songs in this queue');
+                    return;
+                }
+                showToast(`Couldn't play "${failedSong?.songName}", skipping`);
+                playNextSong();
+            });
+        }, 1200);
+        return;
+    }
+
+    isRetryingAfterError = false;
+});
+
+audio.addEventListener('playing', () => {
+    errorSkipCount = 0;
+    isRetryingAfterError = false;
+});
+
 let npFullscreenBtn = document.getElementById('npFullscreenBtn');
 let npBackBtn = document.getElementById('npBackBtn');
 let nowPlayingPanelEl = document.querySelector('.now-playing-panel');
@@ -2787,6 +2822,21 @@ audio.addEventListener('play', renderMobileSheet);
 audio.addEventListener('pause', renderMobileSheet);
 
 setupMediaSessionHandlers();
+
+document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space') return;
+
+    // Jangan intercept spasi kalau user lagi ngetik di input/textarea/elemen yang bisa diedit
+    const tag = (e.target.tagName || '').toLowerCase();
+    const isEditable = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+    if (isEditable) return;
+
+    // Hanya aktif kalau sudah ada lagu yang diputar (now bar sedang tampil)
+    if (!playerBar.classList.contains('show')) return;
+
+    e.preventDefault(); // cegah halaman ikut scroll ke bawah
+    play.click(); // pakai tombol play yang sudah ada, biar semua sinkron (now bar, mini player, dsb)
+});
 
 // Inisialisasi Aplikasi
 homeSongsOrder = shuffleSongs(visibleSongs);
