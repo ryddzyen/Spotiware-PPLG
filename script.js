@@ -51,7 +51,7 @@ const songs = [
     { id: 47, songName: "Timeless (feat Playboi Carti)", songDes: "The Weeknd, Playboi Carti", songImage: "Art Cover/After Hours.webp", songPath: "Lagu/Timeless (feat Playboi Carti).mp3" },
     { id: 48, songName: "Under Your Spell", songDes: "Desire", songImage: "Art Cover/under your spell.webp", songPath: "Lagu/Under Your Spell.mp3" },
     { id: 49, songName: "VISION", songDes: "VALORANT, Grabbitz", songImage: "Art Cover/Dark Side.webp", songPath: "Lagu/VISION.mp3" },
-    { id: 50, songName: "West Coast", songDes: "Lana Del Rey", songImage: "Art Cover/AM.webp", songPath: "Lagu/West Coast.mp3" },
+    { id: 50, songName: "West Coast", songDes: "Lana Del Rey", songImage: "Art Cover/Ultraviolence (Deluxe).webp", songPath: "Lagu/West Coast.mp3" },
     { id: 51, songName: "Wutiwant X Love Potions LQ", songDes: "Potions, Auralyx, Evangeline <3", songImage: "Art Cover/Wutiwant X Love Potions LQ.webp", songPath: "Lagu/Wutiwant X Love Potions LQ.mp3" },
     { id: 52, songName: "AEAO", songDes: "Dynamicduo, CHEN", songImage: "Art Cover/aeao.webp", songPath: "Lagu/AEAO.mp3" },
     { id: 53, songName: "Apocalypse", songDes: "Cigarettes After Sex", songImage: "Art Cover/apocallypse.webp", songPath: "Lagu/Apocalypse.mp3" },
@@ -159,7 +159,8 @@ const songs = [
     { id: 155, songName: "Perut Papaku", songDes: "Papa Pipi", songImage: "Art Cover/Perut Papaku (Papa Pipi).webp", songPath: "Lagu/Perut Papaku (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "perut papaku"] },
     { id: 156, songName: "Rasa SarangHae", songDes: "Papa Pipi", songImage: "Art Cover/Rasa SarangHae (Papa Pipi).webp", songPath: "Lagu/Rasa SarangHae (Papa Pipi).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "rasa saranghae"] },
     { id: 157, songName: "Team Bubadibako it's Chill", songDes: "Ilofiu", songImage: "Art Cover/Team Bubadibako it's Chill - Boboiboy.webp", songPath: "Lagu/SpotiDown.App - Team Bubadibako but it_s Chill - Boboiboy - Ilofiu.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "team bubadibako it's chill"] },
-    { id: 158, songName: "Teman Setia", songDes: "BoBoiBoy Galaxy Sori", songImage: "Art Cover/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "teman setia"] }
+    { id: 158, songName: "Teman Setia", songDes: "BoBoiBoy Galaxy Sori", songImage: "Art Cover/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "teman setia"] },
+    { id: 159, songName: "Hard 2 Face Reality", songDes: "Poo Bear", songImage: "Art Cover/SpotiDown.App - Hard 2 Face Reality - Poo Bear.webp", songPath: "Lagu/SpotiDown.App - Hard 2 Face Reality - Poo Bear.mp3" },
 ];
 
 const visibleSongs = songs.filter(s => !s.hidden);
@@ -207,7 +208,7 @@ function addToQueue(song) {
 }
 let currentIndex = 0;
 let audio = new Audio(order[currentIndex].songPath);
-audio.preload = "metadata";
+audio.preload = "auto";
 let preloadAudio = new Audio();
 preloadAudio.preload = "auto";
 let preloadedPath = null;
@@ -634,7 +635,7 @@ function renderSongs(songsToRender, options = {}) {
         let cardHTML = `
             <div class="music-card" data-song-id="${song.id}">
                 <div class="music-card-art">
-                    <img src="${song.songImage}" alt="${song.songName}" loading="lazy" decoding="async">
+                    <img data-src="${song.songImage}" alt="${song.songName}" class="lazy-img" decoding="async">
                     <div class="music-play-btn">
                         <i id="${song.id}" class="playMusic fa-solid fa-circle-play" data-audio="${song.songPath}"></i>
                     </div>
@@ -673,6 +674,7 @@ function renderSongs(songsToRender, options = {}) {
     attachPlayEvents();
     attachPlaylistButtonEvents();
     attachAddToPlaylistButtonEvents();
+    initLazyImages();
 }
 
 function attachPlayEvents() {
@@ -718,6 +720,31 @@ function attachPlayEvents() {
             highlightCurrentSong();
             updateNowBar();
         });
+    });
+}
+
+let lazyImgObserver = null;
+
+function initLazyImages() {
+    if (lazyImgObserver) lazyImgObserver.disconnect();
+
+    lazyImgObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                }
+                lazyImgObserver.unobserve(img);
+            }
+        });
+    }, {
+        rootMargin: '150px' // mulai load sedikit sebelum benar-benar kelihatan
+    });
+
+    document.querySelectorAll('img.lazy-img[data-src]').forEach(img => {
+        lazyImgObserver.observe(img);
     });
 }
 
@@ -1041,7 +1068,9 @@ audio.addEventListener('pause', () => {
     updatePlaylistRowIcons();
     updateMiniPlayerPopup();
     updateMiniPlayerPopup();
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    if ('mediaSession' in navigator && !isSwitchingTrack) {
+        navigator.mediaSession.playbackState = 'paused';
+    }
 });
 
 audio.addEventListener('timeupdate', () => {
@@ -1193,24 +1222,36 @@ if (repeat) {
     });
 }
 
+let isSwitchingTrack = false;
+
 function loadAndPlayCurrent() {
+    isSwitchingTrack = true;
     isLoadingTrack = true;
     const song = getCurrentSong();
     audio.src = song.songPath;
     audio.load();
 
+    // Set metadata & state SEBELUM play() selesai, biar notifikasi HP tidak sempat hilang
+    updateMediaSession();
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+
     const p = audio.play();
     if (p !== undefined) {
         p.then(() => {
             isLoadingTrack = false;
+            isSwitchingTrack = false;
         }).catch((err) => {
             console.warn('play() ditolak, coba lagi:', err);
             audio.addEventListener('canplay', () => {
-                audio.play().then(() => { isLoadingTrack = false; }).catch(() => {});
+                audio.play().then(() => {
+                    isLoadingTrack = false;
+                    isSwitchingTrack = false;
+                }).catch(() => { isSwitchingTrack = false; });
             }, { once: true });
         });
     } else {
         isLoadingTrack = false;
+        isSwitchingTrack = false;
     }
 }
 
@@ -2350,7 +2391,7 @@ function openShowAllView(title, songsList) {
     grid.innerHTML = songsList.map(song => `
         <div class="music-card" data-song-id="${song.id}">
             <div class="music-card-art">
-                <img src="${song.songImage}" alt="${song.songName}" loading="lazy" decoding="async">
+                <img data-src="${song.songImage}" alt="${song.songName}" class="lazy-img" decoding="async">
                 <div class="music-play-btn">
                     <i id="${song.id}" class="playMusic fa-solid fa-circle-play" data-audio="${song.songPath}"></i>
                 </div>
@@ -2368,6 +2409,7 @@ function openShowAllView(title, songsList) {
 
     attachPlayEvents();
     attachAddToPlaylistButtonEvents();
+    initLazyImages();
 
     document.getElementById('showAllView').classList.add('show');
     if (mainRightPart) mainRightPart.scrollTo({ top: 0, behavior: 'smooth' });
