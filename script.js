@@ -84,7 +84,7 @@ const songs = [
     { id: 80, songName: "worry - Slowed", songDes: "LONOWN, riserayss", songImage: "Art Cover/worry.webp", songPath: "Lagu/worry - Slowed.mp3" },
     { id: 81, songName: "FLY", songDes: "Spectrum", songImage: "Art Cover/FLY.webp", songPath: "Lagu/F L Y.mp3.mpeg" },
     { id: 82, songName: "Surabaya", songDes: "Crayon Case", songImage: "Art Cover/surabaya.webp", songPath: "Lagu/Surabaya.mp3.mpeg" },
-    { id: 83, songName: "siapkah kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!,Andi Rianto", songImage: "Art Cover/siapkah kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau Tuk Jatuh Cinta Lagi.mp3.mpeg" },
+    { id: 83, songName: "Siapkah kau Tuk Jatuh Cinta Lagi", songDes: "Hivi!,Andi Rianto", songImage: "Art Cover/Siapkah Kau Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau Tuk Jatuh Cinta Lagi.mp3" },
     { id: 84, songName: "8 Letters", songDes: "Why Don't We", songImage: "Art Cover/8letters.webp", songPath: "Lagu/SpotiDown.App - 8 Letters - Why Don_t We.mp3" },
     { id: 85, songName: "20 Min", songDes: "Lil Uzi Vert", songImage: "Art Cover/20min.webp", songPath: "Lagu/20 Min.mp3.mpeg" },
     { id: 86, songName: "Breakin'Dishes", songDes: "Rihanna", songImage: "Art Cover/breakin'dishes.webp", songPath: "Lagu/Breakin Dishes.mp3.mpeg" },
@@ -108,7 +108,6 @@ const songs = [
     { id: 104, songName: "Entry Four", songDes: "Jaydes Archive", songImage: "Art Cover/Entry Four.webp", songPath: "Lagu/Entry Four.mp3" },
     { id: 105, songName: "500 Miles", songDes: "Peter Paul and Mary", songImage: "Art Cover/500 Miles.webp", songPath: "Lagu/500 Miles.mp3" },
     { id: 106, songName: "Best Friend", songDes: "Rex Orange County", songImage: "Art Cover/Best Friend.webp", songPath: "Lagu/Best Friend.mp3" },
-    { id: 107, songName: "Siapkah Kau 'Tuk Jatuh Cinta Lagi", songDes: "Hivi!", songImage: "Art Cover/Siapkah Kau 'Tuk Jatuh Cinta Lagi.webp", songPath: "Lagu/Siapkah Kau 'Tuk Jatuh Cinta Lagi.mp3" },
     { id: 108, songName: "Remaja", songDes: "Hivi!", songImage: "Art Cover/Remaja.webp", songPath: "Lagu/Remaja.mp3" },
     { id: 109, songName: "All Too Well (Taylor's Version)", songDes: "Taylor Swift", songImage: "Art Cover/All Too Well (Taylor's Version).webp", songPath: "Lagu/All Too Well (Taylor's Version).mp3" },
     { id: 110, songName: "Enchanted", songDes: "Taylor Swift", songImage: "Art Cover/Enchanted.webp", songPath: "Lagu/Enchanted.webp", songPath: "Lagu/Enchanted.mp3" },
@@ -208,7 +207,7 @@ function addToQueue(song) {
 }
 let currentIndex = 0;
 let audio = new Audio(order[currentIndex].songPath);
-audio.preload = "auto";
+audio.preload = "metadata";
 let preloadAudio = new Audio();
 preloadAudio.preload = "auto";
 let preloadedPath = null;
@@ -2942,6 +2941,10 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault(); // cegah halaman ikut scroll ke bawah
     play.click(); // pakai tombol play yang sudah ada, biar semua sinkron (now bar, mini player, dsb)
 });
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 
 // Inisialisasi Aplikasi
 homeSongsOrder = shuffleSongs(visibleSongs);
