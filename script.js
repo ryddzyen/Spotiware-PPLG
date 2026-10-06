@@ -208,6 +208,26 @@ function addToQueue(song) {
 let currentIndex = 0;
 let audio = new Audio(order[currentIndex].songPath);
 audio.preload = "metadata";
+let preloadAudio = new Audio();
+preloadAudio.preload = "auto";
+let preloadedPath = null;
+
+function preloadNextTrack() {
+    // Tentukan lagu apa yang akan diputar berikutnya (sama persis logikanya dengan playNextSong)
+    let nextSong;
+    if (queue.length > 0) {
+        nextSong = queue[0];
+    } else {
+        const nextIdx = (currentIndex + 1) % order.length;
+        nextSong = order[nextIdx];
+    }
+
+    if (!nextSong || nextSong.songPath === preloadedPath) return; // sudah di-preload / tidak ada lagu berikutnya
+
+    preloadedPath = nextSong.songPath;
+    preloadAudio.src = nextSong.songPath;
+    preloadAudio.load(); // mulai download di background, tanpa diputar
+}
 
 let currentTimeEl = document.getElementById('currentTime');
 let durationEl = document.getElementById('duration');
@@ -996,6 +1016,7 @@ audio.addEventListener('play', () => {
     updateMiniPlayerPopup();
     updateMiniPlayerPopup();
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+    preloadNextTrack();
 });
 
 audio.addEventListener('pause', () => {
@@ -1032,6 +1053,9 @@ audio.addEventListener('timeupdate', () => {
         if (miniPopupProgressBar) {
             miniPopupProgressBar.value = progress;
             miniPopupProgressBar.style.background = `linear-gradient(to right, white ${progress}%, #555 ${progress}%)`;
+        }
+        if (audio.duration - audio.currentTime < 15 && preloadedPath !== (queue[0]?.songPath || order[(currentIndex + 1) % order.length]?.songPath)) {
+            preloadNextTrack();
         }
     }
 });
@@ -1132,6 +1156,7 @@ if (shuffle) {
         let newPos = order.findIndex((s) => s.id === playingSongId);
         currentIndex = newPos !== -1 ? newPos : 0;
         updateMiniPlayerPopup();
+        preloadedPath = null;
     });
 }
 
@@ -1155,6 +1180,7 @@ if (repeat) {
 
         let newPos = order.findIndex((s) => s.id === playingSongId);
         currentIndex = newPos !== -1 ? newPos : 0;
+        preloadedPath = null;
     });
 }
 
@@ -1978,6 +2004,7 @@ if (ctxAddToQueue) {
             const song = songs.find(s => s.id === contextMenuSongId);
             if (song) {
                 queue.push(song);
+                preloadedPath = null;
                 renderQueuePanel();
                 renderMobileSheet();
                 showToast('Added to Queue', isMobileView() ? 'Open' : null, () => openMobileSheet('queue'));
