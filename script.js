@@ -846,7 +846,11 @@ let songOnRepeat = false;
 let songOnShuffle = false;
 
 function getCurrentSong() {
-    return order[currentIndex];
+    if (!order || order.length === 0) return visibleSongs[0];
+    if (currentIndex < 0 || currentIndex >= order.length) {
+        currentIndex = 0; // self-heal kalau index kebablasan
+    }
+    return order[currentIndex] || visibleSongs[0];
 }
 
 function getSongElement(songId) {
@@ -911,16 +915,21 @@ function setupMediaSessionHandlers() {
 }
 
 function updateNowBar() {
-    let song = getCurrentSong();
-    nowBar.getElementsByTagName('img')[0].src = song.songImage;
-    nowBar.getElementsByClassName('img-title-info')[0].innerText = song.songName;
-    nowBar.getElementsByClassName('img-des-info')[0].innerText = song.songDes;
-    updateNowPlayingPanel();
-    updateNowBarLikeIcon();
-    renderQueuePanel();
-    renderMobileSheet();
-    updateMiniPlayerPopup();
-    updateMediaSession();
+    try {
+        let song = getCurrentSong();
+        if (!song) return;
+        nowBar.getElementsByTagName('img')[0].src = song.songImage;
+        nowBar.getElementsByClassName('img-title-info')[0].innerText = song.songName;
+        nowBar.getElementsByClassName('img-des-info')[0].innerText = song.songDes;
+        updateNowPlayingPanel();
+        updateNowBarLikeIcon();
+        renderQueuePanel();
+        renderMobileSheet();
+        updateMiniPlayerPopup();
+        updateMediaSession();
+    } catch (err) {
+        console.error('updateNowBar error:', err);
+    }
 }
 
 // ===== History functions =====
@@ -1206,26 +1215,53 @@ function loadAndPlayCurrent() {
 }
 
 const playNextSong = () => {
-    if (queue.length > 0) {
-        const nextSong = queue.shift();
-        order.splice(currentIndex + 1, 0, nextSong);
-        currentIndex = currentIndex + 1;
-    } else {
-        currentIndex = (currentIndex + 1) % order.length;
+    try {
+        if (queue.length > 0) {
+            const nextSong = queue.shift();
+            order.splice(currentIndex + 1, 0, nextSong);
+            currentIndex = currentIndex + 1;
+        } else if (order.length > 0) {
+            currentIndex = (currentIndex + 1) % order.length;
+        }
+        loadAndPlayCurrent();
+        addToHistory(getCurrentSong());
+        highlightCurrentSong();
+        updateNowBar();
+    } catch (err) {
+        console.error('playNextSong error, recovering:', err);
+        recoverPlaybackState();
     }
-    loadAndPlayCurrent();
-    addToHistory(getCurrentSong());
-    highlightCurrentSong();
-    updateNowBar();
 };
 
 const playPrevSong = () => {
-    currentIndex = (currentIndex - 1 + order.length) % order.length;
-    loadAndPlayCurrent();
-    addToHistory(getCurrentSong());
-    highlightCurrentSong();
-    updateNowBar();
+    try {
+        if (order.length > 0) {
+            currentIndex = (currentIndex - 1 + order.length) % order.length;
+        }
+        loadAndPlayCurrent();
+        addToHistory(getCurrentSong());
+        highlightCurrentSong();
+        updateNowBar();
+    } catch (err) {
+        console.error('playPrevSong error, recovering:', err);
+        recoverPlaybackState();
+    }
 };
+
+function recoverPlaybackState() {
+    // Reset ke konteks yang masih valid supaya UI & playback tidak macet total
+    order = currentContextList.length > 0 ? [...currentContextList] : [...homeSongsOrder];
+    currentIndex = 0;
+    try {
+        loadAndPlayCurrent();
+        addToHistory(getCurrentSong());
+        highlightCurrentSong();
+        updateNowBar();
+        showToast('Playback recovered, restarting queue');
+    } catch (e) {
+        console.error('Recovery juga gagal:', e);
+    }
+}
 
 let forward = document.getElementById('forward');
 let backward = document.getElementById('backward');
