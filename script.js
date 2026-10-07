@@ -160,6 +160,7 @@ const songs = [
     { id: 157, songName: "Team Bubadibako it's Chill", songDes: "Ilofiu", songImage: "Art Cover/Team Bubadibako it's Chill - Boboiboy.webp", songPath: "Lagu/SpotiDown.App - Team Bubadibako but it_s Chill - Boboiboy - Ilofiu.mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "team bubadibako it's chill"] },
     { id: 158, songName: "Teman Setia", songDes: "BoBoiBoy Galaxy Sori", songImage: "Art Cover/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).webp", songPath: "Lagu/Teman Setia (Official Soundtrack Boboiboy Galaxy Sori - Short Version).mp3", hidden: true, keyword: ["bob", "boboi", "boboiboy", "teman setia"] },
     { id: 159, songName: "Hard 2 Face Reality", songDes: "Poo Bear", songImage: "Art Cover/SpotiDown.App - Hard 2 Face Reality - Poo Bear.webp", songPath: "Lagu/SpotiDown.App - Hard 2 Face Reality - Poo Bear.mp3" },
+    { id: 160, songName: "DJ PHANTEON X MIMI X TRUMPET - Slowed & Reverb", songDes: "ᴇʟ_ᴍᴀϙɪᴇ", songImage: "Art Cover/DJ PHANTEON X MIMI X TRUMPET - Slowed & Reverb.webp", songPath: "Lagu/DJ PHANTEON X MIMI X TRUMPET - Slowed & Reverb.mp3", hidden: true, keyword: ["DJ"] },
 ];
 
 const visibleSongs = songs.filter(s => !s.hidden);
