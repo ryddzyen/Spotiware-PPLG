@@ -1154,6 +1154,12 @@ if (npVolumeBar) {
     npVolumeBar.addEventListener('input', function () {
         audio.volume = this.value / 100;
         updateVolumeFill(this);
+
+        if (mainVolumeBar) {
+            mainVolumeBar.value = this.value;
+            updateVolumeFill(mainVolumeBar);
+            updateVolumeIcon(this.value);
+        }
     });
 }
 
@@ -2573,6 +2579,11 @@ if (mainVolumeBar) {
         audio.volume = this.value / 100;
         updateVolumeIcon(this.value);
         updateVolumeFill(this);
+
+        if (npVolumeBar) {
+            npVolumeBar.value = this.value;
+            updateVolumeFill(npVolumeBar);
+        }
     });
 }
 
@@ -2588,6 +2599,12 @@ if (volumeBtn) {
             if (mainVolumeBar) mainVolumeBar.value = prev * 100;
         }
         updateVolumeIcon(mainVolumeBar.value);
+        updateVolumeFill(mainVolumeBar);
+
+        if (npVolumeBar) {
+            npVolumeBar.value = mainVolumeBar.value;
+            updateVolumeFill(npVolumeBar);
+        }
     });
 }
 
