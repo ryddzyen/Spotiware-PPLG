@@ -89,7 +89,7 @@ const songs = [
     { id: 85, songName: "20 Min", songDes: "Lil Uzi Vert", songImage: "Art Cover/20min.webp", songPath: "Lagu/20 Min.mp3.mpeg" },
     { id: 86, songName: "Breakin'Dishes", songDes: "Rihanna", songImage: "Art Cover/breakin'dishes.webp", songPath: "Lagu/Breakin Dishes.mp3.mpeg" },
     { id: 87, songName: "Bring Me To Life", songDes: "Evanescence", songImage: "Art Cover/bringmetolife.webp", songPath: "Lagu/Bring Me To Life.mp3.mpeg" },
-    { id: 88, songName: "Foto kita blur", songDes: "Sal Priadi", songImage: "Art Cover/fotokitablur.webp", songPath: "Lagu/Foto kita blur.mp3.mpeg" },
+    { id: 88, songName: "Foto kita blur", songDes: "Sal Priadi", songImage: "Art Cover/fotokitablur.webp", songPath: "Lagu/SpotiDown.App - Foto kita blur - Sal Priadi.mp3" },
     { id: 89, songName: "Goodluck,Babe!", songDes: "Chappell Roan", songImage: "Art Cover/goodluckbabe.webp", songPath: "Lagu/SpotiDown.App - Good Luck_ Babe_ - Chappell Roan.mp3" },
     { id: 90, songName: "Lovely with Khalid", songDes: "Billie Eilish,Khalid", songImage: "Art Cover/lovely.webp", songPath: "Lagu/lovely with Khalid.mp3.mpeg" },
     { id: 91, songName: "Tek It", songDes: "Cafuné", songImage: "Art Cover/SpotiDown.App - Tek It - Cafuné.webp", songPath: "Lagu/SpotiDown.App - Tek It - Cafuné.mp3" },
