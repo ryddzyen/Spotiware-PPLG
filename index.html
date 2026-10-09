@@ -36,8 +36,8 @@
             </div>
             <div class="right-half-p2">
                 <div class="nav-text notify-btn"><i class="fa-regular fa-circle-down"></i> Install App</div>
-                <div class="nav-text notify-btn">Sign up</div>
-                <button class="login-btn notify-btn">Log in</button>
+                <div class="nav-text" id="signupBtn" style="cursor:pointer;">Sign up</div>
+                <button class="login-btn" id="loginBtn">Log in</button>
             </div>
         </div>
     </nav>
@@ -352,6 +352,30 @@
         </div>
     </div>
 
+    <!-- Modal Login / Daftar -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-box create-playlist-modal-box">
+            <h3 id="authTitle">Log in</h3>
+            <input type="text" id="authName" class="create-playlist-modal-input" placeholder="Nama"
+                style="display:none; margin-bottom:0.6rem;">
+            <input type="email" id="authEmail" class="create-playlist-modal-input" placeholder="Email"
+                style="margin-bottom:0.6rem;">
+            <input type="password" id="authPassword" class="create-playlist-modal-input"
+                placeholder="Password (min. 6 karakter)">
+            <p id="authError" style="color:#f15e6c; font-size:0.8rem; margin:0.6rem 0 0; min-height:1rem;"></p>
+            <div class="modal-btn-row" style="margin-top:1rem;">
+                <button class="modal-secondary-btn" id="authCancel">Batal</button>
+                <button class="modal-close-btn" id="authSubmit">Masuk</button>
+            </div>
+            <button class="modal-secondary-btn" id="authGoogle" style="width:100%; margin-top:0.8rem;">Lanjut dengan
+                Google</button>
+            <p style="margin:1rem 0 0; font-size:0.8rem;">
+                <span id="authSwitchText">Belum punya akun?</span>
+                <a href="#" id="authSwitch" style="color:var(--yellow);">Daftar</a>
+            </p>
+        </div>
+    </div>
+
     <!-- Modal Tambah ke Playlist -->
     <div class="modal-overlay" id="addToPlaylistModal">
         <div class="modal-box">
@@ -552,6 +576,11 @@
 
     <input type="file" id="coverUploadInput" accept="image/*" style="display:none;">
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
     <script src="script.js" defer></script>
     <script src="share.js" defer></script>
 
