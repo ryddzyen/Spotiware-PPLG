@@ -1353,38 +1353,49 @@ audio.addEventListener('stalled', () => {
 });
 
 let errorSkipCount = 0;
-let isRetryingAfterError = false;
+let errorRetriedSrc = null;   // lagu yang sudah pernah di-retry
 
 audio.addEventListener('error', () => {
-    const failedSong = getCurrentSong();
-    console.warn('Gagal memutar:', failedSong?.songPath, audio.error);
+    // Abaikan error sebelum ada lagu yang dimainkan (mis. preload awal halaman)
+    if (!playerBar.classList.contains('show')) return;
+    if (!audio.error) return;
 
-    // Coba sekali lagi dulu — siapa tahu cuma koneksi kedip sebentar
-    if (!isRetryingAfterError) {
-        isRetryingAfterError = true;
+    const failedSong = getCurrentSong();
+    console.warn('Gagal memutar:', failedSong?.songPath,
+        '| kode error:', audio.error.code, '|', audio.error.message);
+
+    // Coba sekali lagi untuk lagu yang sama (siapa tahu koneksi cuma kedip)
+    if (errorRetriedSrc !== audio.src) {
+        errorRetriedSrc = audio.src;
         setTimeout(() => {
             audio.load();
-            audio.play().catch(() => {
-                // Masih gagal juga setelah retry -> baru skip
-                isRetryingAfterError = false;
-                errorSkipCount++;
-                if (errorSkipCount > order.length) {
-                    showToast('Unable to play songs in this queue');
-                    return;
-                }
-                showToast(`Couldn't play "${failedSong?.songName}", skipping`);
-                playNextSong();
-            });
+            audio.play().catch(() => {}); // kalau gagal lagi, event 'error' berikutnya yang menangani
         }, 1200);
         return;
     }
 
-    isRetryingAfterError = false;
+    // Sudah di-retry tapi tetap gagal -> lewati ke lagu berikutnya
+    errorRetriedSrc = null;
+    errorSkipCount++;
+
+    // 3 lagu berturut-turut gagal = masalahnya sistemik, berhenti saja (jangan lompat terus)
+    if (errorSkipCount >= 3) {
+        errorSkipCount = 0;
+        audio.pause();
+        play.classList.remove('fa-circle-pause');
+        play.classList.add('fa-circle-play');
+        makeAllPlay();
+        showToast('Unable to play songs. Check that the audio files exist.');
+        return;
+    }
+
+    showToast(`Couldn't play "${failedSong?.songName}", skipping`);
+    playNextSong();
 });
 
 audio.addEventListener('playing', () => {
     errorSkipCount = 0;
-    isRetryingAfterError = false;
+    errorRetriedSrc = null;
 });
 
 let npFullscreenBtn = document.getElementById('npFullscreenBtn');
