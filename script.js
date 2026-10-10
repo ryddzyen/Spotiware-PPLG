@@ -180,6 +180,10 @@ const songs = [
     { id: 177, songName: "Pengarepan", songDes: "DJ ALMIRA BERTO", songImage: "Art Cover/Pengarepan.webp", songPath: "Lagu/Pengarepan.mp3", hidden: true, keyword: ["dj", "pengarepan"] },
     { id: 178, songName: "Sekti", songDes: "DJ ALMIRA BERTO", songImage: "Art Cover/Sekti.webp", songPath: "Lagu/Sekti.mp3", hidden: true, keyword: ["dj", "sekti"] },
     { id: 179, songName: "Sembilu", songDes: "TESSA MORENA", songImage: "Art Cover/Sembilu.webp", songPath: "Lagu/Sembilu.mp3", hidden: true, keyword: ["dj", "sembilu"] },
+    { id: 180, songName: "Serba Salah", songDes: "New Gvme", songImage: "Art Cover/Serba Salah.webp", songPath: "Lagu/Serba Salah.mp3", hidden: true, keyword: ["serba salah"] },
+    { id: 181, songName: "so bitter x vacation bible school", songDes: "Stady", songImage: "Art Cover/so bitter x vacation bible school.webp", songPath: "Lagu/so bitter x vacation bible school - (128 Kbps).mp3", hidden: true, keyword: ["so bitter x vacation bible school"] },
+    { id: 182, songName: "Brooklynbloodpop! x Vacation bible school", songDes: "Stady", songImage: "Art Cover/Stady - Brooklynbloodpop! x Vacation bible school.webp", songPath: "Lagu/Stady - Brooklynbloodpop! x Vacation bible school - (128 Kbps).mp3", hidden: true, keyword: ["brooklynbloodpop! x vacation bible school"] },
+    { id: 183, songName: "#BrooklynBloodPop!", songDes: "SyKo", songImage: "Art Cover/Brooklynbloodpop -syko.avif", songPath: "Lagu/SyKo - BrooklynBloodPop.mp3", hidden: true, keyword: ["#brooklynbloodpop!"] },
 ];
 
 const visibleSongs = songs.filter(s => !s.hidden);
@@ -283,6 +287,7 @@ const LIKED_PLAYLIST_ID = 'liked_songs';
 let pendingSongIdForPlaylist = null;
 let pdCurrentPlaylistId = null;
 let pdCurrentIsLiked = false;
+let pdOpenedFromLibrary = false;
 
 const homeSection1Title = document.querySelector('#section-1')?.closest('.music-section')?.querySelector('h2')?.textContent || '';
 
@@ -2282,6 +2287,10 @@ function renderLibraryCompactTable() {
 
 // ===== Playlist Detail View (ala Spotify) =====
 function openPlaylistDetailView(playlist, isLiked) {
+    if (!document.getElementById('playlistDetailView').classList.contains('show')) {
+        pdOpenedFromLibrary = isMobileView() && !!mainLeftPart && mainLeftPart.classList.contains('mobile-show');
+    }
+
     closeShowAllView();
 
     // [BARU] Catat waktu playlist ini terakhir dibuka, dipakai untuk sort "Recents"
@@ -2468,7 +2477,23 @@ document.querySelectorAll('.show-all-link').forEach(link => {
 
 document.getElementById('showAllBackBtn')?.addEventListener('click', closeShowAllView);
 
-document.getElementById('playlistDetailBackBtn')?.addEventListener('click', closePlaylistDetailView);
+function backFromPlaylistDetail() {
+    const toLibrary = pdOpenedFromLibrary && isMobileView();
+    pdOpenedFromLibrary = false;
+    closePlaylistDetailView();
+
+    if (toLibrary) {
+        // kembali ke tab Library (mobile)
+        if (mainLeftPart) mainLeftPart.classList.add('mobile-show');
+        if (mainRightPart) mainRightPart.classList.add('mobile-hide');
+        document.querySelectorAll('.bottom-nav-item').forEach((el) => el.classList.remove('active'));
+        document.querySelector('.bottom-nav-item[data-target="library"]')?.classList.add('active');
+        renderPlaylistList();
+        window.scrollTo({ top: 0 });
+    }
+}
+
+document.getElementById('playlistDetailBackBtn')?.addEventListener('click', backFromPlaylistDetail);
 
 // ===== [DIUBAH] Dropdown menu List/Compact (butuh elemen #playlistViewMenu di HTML) =====
 document.getElementById('playlistViewToggle')?.addEventListener('click', (e) => {

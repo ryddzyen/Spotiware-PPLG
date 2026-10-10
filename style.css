@@ -4662,3 +4662,837 @@ body.custom-cursor.cursor-native *{ cursor: auto !important; }
     to{ transform: rotate(360deg); }
 }
 .cur-spin{ animation: curSpin 2.2s linear infinite; transform-origin: center; }
+
+/* ===== Profile gaya Discord, foto di kanan (gaya TikTok) ===== */
+.pf-banner{
+    position: relative;
+    width: 100%;
+    height: 12rem;
+    overflow: hidden;
+    background: #2a2a2a;
+}
+.pf-banner.empty{
+    background: linear-gradient(135deg, #3a3000, #1a1a1a 60%, #2b1a55);
+}
+.pf-banner img,
+.pf-banner video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.pf-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0 1.5rem;
+}
+.pf-ident{ min-width: 0; padding-top: 1.2rem; }
+.pf-name{
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    word-break: break-word;
+}
+.pf-meta{ color: var(--gray-mid); font-size: 0.9rem; margin-top: 0.3rem; }
+
+.pf-avatar{
+    width: 8.5rem;
+    height: 8.5rem;
+    margin-top: -4.5rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 5px solid #121212;
+    outline: 3px solid var(--yellow);
+    background: #2a2a2a;
+    color: #7a7a7a;
+    font-size: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.pf-avatar img{ width: 100%; height: 100%; object-fit: cover; }
+
+.pf-actions{ padding: 1.2rem 1.5rem 0.4rem; }
+.pf-edit-btn{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.15s;
+}
+.pf-edit-btn:hover{ background: #4a4a4a; }
+
+.pf-tabs{
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 1.5rem 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+.pf-tab{
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--gray-mid);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    padding: 0.8rem 1.4rem;
+    cursor: pointer;
+    margin-bottom: -1px;
+}
+.pf-tab:hover{ color: #fff; }
+.pf-tab.active{ color: #fff; border-bottom-color: var(--yellow); }
+
+.pf-panel{ padding: 1.4rem 1.5rem 2rem; }
+.pf-label{ color: var(--gray-mid); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.6rem; }
+.pf-bio{
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.pf-bio.empty{ color: var(--gray-mid); font-style: italic; }
+
+.pf-pl-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 1.2rem;
+}
+.pf-pl-card{
+    padding: 0.7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.15s;
+}
+.pf-pl-card:hover{ background: #222; }
+.pf-pl-cover{
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 6px;
+    background: #2f2f2f;
+    color: var(--yellow);
+    font-size: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+}
+.pf-pl-cover img{ width: 100%; height: 100%; object-fit: cover; }
+.pf-pl-name{
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pf-pl-sub{ color: var(--gray-mid); font-size: 0.78rem; margin-top: 0.15rem; }
+.pf-empty{ grid-column: 1 / -1; color: var(--gray-mid); padding: 1.5rem 0; font-size: 0.9rem; }
+
+/* ===== Modal Edit profile ===== */
+.pfe-box{
+    max-width: 32rem;
+    text-align: left;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pfe-banner.empty{ background: linear-gradient(135deg, #3a3000, #1a1a1a 60%, #2b1a55); }
+.pfe-banner img,
+.pfe-banner video{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.pfe-hint{
+    color: var(--gray-mid);
+    font-size: 0.75rem;
+    margin: 0.6rem 0 0;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.pfe-avatar img{ width: 100%; height: 100%; object-fit: cover; }
+
+.pfe-link:hover{ color: #fff; }
+.pfe-label{
+    display: block;
+    color: var(--gray-light);
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 0.4rem 0 0.4rem;
+}
+.pfe-box .create-playlist-modal-input{ margin-bottom: 0.8rem; }
+.pfe-box .edit-details-desc-input{ min-height: 5rem; margin-bottom: 0.8rem; }
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .pf-banner{ height: 9rem; }
+    .pf-head{ padding: 0 1rem; }
+    .pf-avatar{ width: 6.5rem; height: 6.5rem; margin-top: -3.5rem; font-size: 2.2rem; }
+    .pf-ident{ padding-top: 0.8rem; }
+    .pf-actions{ padding: 1rem 1rem 0.3rem; }
+    .pf-tabs{ margin: 0.8rem 1rem 0; }
+    .pf-panel{ padding: 1.2rem 1rem 2rem; }
+    .pf-pl-grid{ grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); gap: 0.6rem; }
+}
+
+/* ===== Perbesar halaman Profile + konten tengah ===== */
+.pf-banner{ height: clamp(12rem, 22vw, 20rem); }
+.pf-avatar{
+    width: 11rem;
+    height: 11rem;
+    margin-top: -5.5rem;
+    font-size: 3.6rem;
+}
+.pf-name{ font-size: clamp(2.6rem, 6vw, 4.5rem); }
+.pf-meta{ font-size: 1rem; }
+.pf-edit-btn{ font-size: 1.05rem; padding: 0.95rem; }
+.pf-tab{ font-size: 1.05rem; padding: 0.9rem 1.6rem; }
+.pf-label{ font-size: 0.95rem; }
+.pf-bio{ font-size: 1.05rem; }
+
+.profile-view .pf-head,
+.profile-view .pf-actions,
+.profile-view .pf-tabs,
+.profile-view .pf-panel{
+    max-width: 56rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .pf-banner{ height: clamp(9rem, 32vw, 14rem); }
+    .pf-avatar{ width: 7.5rem; height: 7.5rem; margin-top: -3.8rem; font-size: 2.4rem; }
+    .pf-name{ font-size: clamp(1.8rem, 7vw, 2.6rem); }
+    .profile-view .pf-head,
+    .profile-view .pf-actions,
+    .profile-view .pf-tabs,
+    .profile-view .pf-panel{
+        max-width: none;
+    }
+}
+
+/* ===== Modal Edit Profile: pensil banner dgn menu Upload/Remove ===== */
+.pfe-banner-edit-btn:hover{ background: rgba(0,0,0,0.85); transform: scale(1.05); }
+
+.pfe-banner-wrap{
+    position: relative;
+    margin-bottom: 3.3rem;
+}
+.pfe-banner{
+    position: relative;
+    width: 100%;
+    height: 7rem;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #2a2a2a;
+}
+.pfe-banner.empty{ background: linear-gradient(135deg, #3a3000, #1a1a1a 60%, #2b1a55); }
+.pfe-banner img,
+.pfe-banner video{ width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.pfe-banner-edit-btn{
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.65);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    z-index: 3;
+}
+.pfe-banner-edit-btn:hover{ background: rgba(0,0,0,0.85); transform: scale(1.05); }
+
+.pfe-banner-menu,
+.pfe-avatar-menu{
+    display: none;
+    position: absolute;
+    min-width: 11.5rem;
+    background-color: #282828;
+    border-radius: 8px;
+    padding: 0.4rem 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 20;
+    text-align: left;
+}
+.pfe-banner-menu{ top: 3rem; right: 0.6rem; }
+.pfe-avatar-menu{ right: 1rem; bottom: -8.3rem; }
+.pfe-banner-menu.show,
+.pfe-avatar-menu.show{ display: block; }
+
+.pfe-banner-menu-item{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1rem;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.pfe-banner-menu-item i{ width: 1rem; color: var(--gray-light); }
+.pfe-banner-menu-item:hover{ background-color: #3a3a3a; }
+.pfe-banner-menu-item.disabled{ opacity: 0.4; pointer-events: none; }
+
+/* Foto profil numpuk di KANAN bawah banner, konsisten dengan halaman Profile utama */
+.pfe-avatar{
+    position: absolute;
+    right: 1rem;
+    bottom: -3rem;
+    width: 6rem;
+    height: 6rem;
+    flex-shrink: 0;
+}
+.pfe-avatar-img{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid #181818;
+    outline: 2px solid var(--yellow);
+    background: #2a2a2a;
+    color: #7a7a7a;
+    font-size: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.pfe-avatar-img img{ width: 100%; height: 100%; object-fit: cover; }
+
+.pfe-avatar-edit-btn{
+    position: absolute;
+    right: -0.15rem;
+    bottom: -0.15rem;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    border: 3px solid #181818;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    font-size: 0.68rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+}
+.pfe-avatar-edit-btn:hover{ background: rgba(0,0,0,0.9); }
+
+.pfe-banner-menu.show{ display: block; }
+.pfe-banner-menu-item{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1rem;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.pfe-banner-menu-item i{ width: 1rem; color: var(--gray-light); }
+.pfe-banner-menu-item:hover{ background-color: #3a3a3a; }
+.pfe-banner-menu-item.disabled{ opacity: 0.4; pointer-events: none; }
+
+/* ===== Pencarian: tombol X + dropdown saran ===== */
+.search-bar{ position: relative; }
+
+.search-clear{
+    display: none;
+    background: none;
+    border: none;
+    border-right: 1px solid rgb(179,179,179);
+    color: #b3b3b3;
+    font-size: 1.1rem;
+    padding: 0 0.8rem;
+    height: 1.8rem;
+    cursor: pointer;
+}
+.search-clear.show{ display: block; }
+.search-clear:hover{ color: #fff; }
+.search-bar.has-text .input-box{ border-right: none; }
+
+.search-dropdown{
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    width: 100%;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #282828;
+    color: #fff;
+    border-radius: 10px;
+    padding: 0.5rem;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.7);
+    z-index: 3600;
+    text-align: left;
+}
+.search-dropdown.show{ display: block; }
+
+.sd-sug{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.sd-sug:hover{ background: #3a3a3a; }
+.sd-sug-icon{
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: #1f1f1f;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.sd-sug-text{
+    color: #b3b3b3;
+    font-size: 0.95rem;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sd-sug-text b{ color: #fff; font-weight: 700; }
+.sd-divider{ height: 1px; background: #3a3a3a; margin: 0.4rem 0.6rem; }
+.sd-empty{
+    color: var(--gray-mid);
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* ===== Baris lagu kecil (dropdown + hasil) ===== */
+.sr-row{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.sr-row:hover{ background: #3a3a3a; }
+.sr-row img{
+    width: 3rem;
+    height: 3rem;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #2f2f2f;
+}
+.sr-info{ flex: 1; min-width: 0; }
+.sr-title{
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sr-sub{
+    color: var(--gray-mid);
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sr-row.playing .sr-title{ color: var(--yellow); }
+
+.sr-add,
+.sr-more{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* tombol love */
+.sr-add{ font-size: 1.2rem; padding: 0.3rem; }
+.sr-add:hover{ color: #fff; transform: scale(1.08); }
+.sr-add.liked{ color: var(--yellow); }
+
+/* tombol titik 3: desktop "..." muncul saat hover, HP "⋮" selalu terlihat */
+.sr-more{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    padding: 0.4rem 0.6rem;
+    opacity: 0;
+    transition: 0.15s;
+}
+.sr-row:hover .sr-more,
+.sr-more:focus{ opacity: 1; }
+.sr-more:hover{ color: #fff; }
+.sr-more-v{ display: none; }
+
+/* ===== Halaman hasil pencarian ===== */
+.search-view{ display: none; padding: 0 1.2rem 2rem; }
+.search-view.show{ display: block; }
+.sv-chips{
+    display: flex;
+    gap: 0.6rem;
+    padding: 1rem 0.4rem;
+    background: transparent;   /* tanpa card, ikut ambient / transparan */
+}
+.sv-chip{
+    background: #2a2a2a;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sv-chip.active{ background: #fff; color: #000; }
+.search-view .sr-row:hover{ background: #1f1f1f; }
+
+/* ===== Search bar ke tengah setelah Enter (khusus laptop/PC) ===== */
+@media (min-width: 901px) and (hover: hover){
+    body.search-centered .search-bar{
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 29rem;
+        max-width: 29rem;
+    }
+}
+
+/* ===== Mobile: dropdown selebar layar di bawah navbar ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .search-dropdown{
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 4.2rem;
+        width: auto;
+        max-height: none;
+        border-radius: 0;
+        background: #121212;
+        padding: 0.4rem 0.8rem 5rem;
+        box-shadow: none;
+    }
+    .sr-more{ opacity: 1; }
+    .sr-more-h{ display: none; }
+    .sr-more-v{ display: inline-block; }
+    .search-view{ padding: 0 0.6rem 2rem; }
+}
+
+/* ===== Cover lagu di hasil pencarian: ikon play/pause saat di-hover ===== */
+.sr-cover{
+    position: relative;
+    width: 3rem;
+    height: 3rem;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.sr-cover img{
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.sr-play{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 1rem;
+    opacity: 0;
+    transition: 0.15s;
+}
+.sr-row:hover .sr-play{ opacity: 1; }
+
+/* ===== Recent searches ===== */
+.sd-head{
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    padding: 0.5rem 0.6rem 0.6rem;
+}
+.sd-sug-text{ flex: 1; }
+.sd-sug-text.recent{ color: #fff; }
+
+.sr-remove{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-size: 1rem;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: 0.15s;
+}
+.sr-row:hover .sr-remove,
+.sd-sug:hover .sr-remove,
+.sr-remove:focus{ opacity: 1; }
+.sr-remove:hover{ color: #fff; }
+
+.sd-clear-recent{
+    display: inline-block;
+    margin: 0.6rem 0.6rem 0.4rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #727272;
+    border-radius: 999px;
+    color: #b3b3b3;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s;
+}
+.sd-clear-recent:hover{ color: #fff; border-color: #fff; transform: scale(1.03); }
+
+/* HP: tidak ada hover, jadi tombol X selalu terlihat dan overlay play disembunyikan (tap baris = putar) */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .sr-play{ display: none; }
+    .sr-remove{ opacity: 1; }
+}
+
+/* ===== Login: versi HP lebih kecil ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .lp-inner{ max-width: 19rem; padding: 2.8rem 1rem 2rem; }
+    .lp-close{ top: 0.7rem; right: 0.9rem; font-size: 1.1rem; }
+    .lp-logo{ height: 2.4rem; margin-bottom: 0.8rem; }
+    .lp-title{ font-size: 1.5rem; margin-bottom: 1.2rem; }
+    .lp-sub{ font-size: 0.78rem; margin: -0.6rem 0 1rem; }
+    .lp-label{ font-size: 0.78rem; margin-bottom: 0.35rem; }
+    .lp-input{ padding: 0.7rem 0.75rem; font-size: 0.85rem; margin-bottom: 0.7rem; }
+    .lp-code{ font-size: 1.1rem; letter-spacing: 0.4rem; }
+    .lp-error{ font-size: 0.75rem; }
+    .lp-primary{ padding: 0.7rem; font-size: 0.85rem; }
+    .lp-or{ margin: 1rem 0; font-size: 0.8rem; }
+    .lp-outline{ padding: 0.65rem 1rem 0.65rem 2.8rem; font-size: 0.8rem; margin-bottom: 0.55rem; }
+    .lp-outline > i,
+    .lp-outline > svg{ left: 0.9rem; width: 1.1rem; height: 1.1rem; font-size: 1.05rem; }
+    .lp-foot{ margin-top: 1.8rem; }
+    .lp-foot p,
+    .lp-foot a{ font-size: 0.8rem; }
+}
+
+/* ===== Tab profile: 2 kategori di tengah ala Discord ===== */
+.pf-tabs{ gap: 0; }
+.pf-tab{
+    flex: 1;
+    text-align: center;
+    padding: 0.9rem 0;
+    border-bottom: none;
+    position: relative;
+}
+.pf-tab.active::after{
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    width: 4.5rem;
+    height: 3px;
+    transform: translateX(-50%);
+    background: var(--yellow);
+    border-radius: 3px 3px 0 0;
+}
+
+/* ===== Profile: warna teks mengikuti theme + background gradient ===== */
+.profile-view.show{ min-height: 100%; }
+.profile-view .pf-name{ color: var(--pf-top, #fff); }
+.profile-view .pf-meta{ color: var(--pf-top-sub, #9ca3af); }
+.profile-view .pf-tab{ color: var(--pf-bot-sub, #9ca3af); }
+.profile-view .pf-tab.active,
+.profile-view .pf-bio,
+.profile-view .pf-pl-name{ color: var(--pf-bot, #fff); }
+.profile-view .pf-label,
+.profile-view .pf-pl-sub,
+.profile-view .pf-empty,
+.profile-view .pf-bio.empty{ color: var(--pf-bot-sub, #9ca3af); }
+
+/* ===== Modal Edit Profile: header Save di kanan atas ===== */
+.pfe-top{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+.pfe-top h3{
+    flex: 1;
+    margin: 0;
+    color: #fff;
+    font-size: 1.1rem;
+    text-align: left;
+}
+.pfe-save{
+    background: none;
+    border: none;
+    color: var(--yellow);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 0.4rem 0.2rem;
+    cursor: pointer;
+}
+.pfe-save:hover{ color: var(--gold); }
+
+/* ===== Profile Theme: Primary & Accent ===== */
+.pfe-theme-preview{
+    height: 2.4rem;
+    border-radius: 8px;
+    margin-bottom: 0.7rem;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+.pfe-theme{ display: flex; gap: 0.8rem; margin-bottom: 0.4rem; }
+.pfe-theme-item{
+    flex: 1;
+    text-align: center;
+    color: var(--gray-light);
+    font-size: 0.82rem;
+}
+.pfe-swatch{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 3rem;
+    padding: 0 0.8rem;
+    margin-bottom: 0.4rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    cursor: pointer;
+}
+.pfe-swatch i{ filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7)); pointer-events: none; }
+.pfe-swatch input[type="color"]{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+.pfe-reset{
+    background: none;
+    border: none;
+    color: var(--gray-mid);
+    font-family: inherit;
+    font-size: 0.78rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+}
+.pfe-reset:hover{ color: #fff; }
+
+/* ===== HP: Edit Profile layar penuh, header menempel di atas ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    #profileDetailsModal{ align-items: stretch; justify-content: stretch; }
+    #profileDetailsModal .pfe-box{
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: none;
+        border: none;
+        border-radius: 0;
+        padding: 0 1rem 2.5rem;
+    }
+    .pfe-top{
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        margin: 0 -1rem 1rem;
+        padding: 0.9rem 1rem;
+        background: #181818;
+    }
+    .profile-view.show{ min-height: calc(100vh - 7rem); }
+}
+
+/* ===== Warna display name ===== */
+.pfe-namecolor{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    color: var(--gray-light);
+    font-size: 0.85rem;
+}
+.pfe-namecolor .pfe-swatch-sm{
+    width: 3rem;
+    height: 2.2rem;
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ===== Perbaikan kursor ganda ===== */
+body.cursor-hide-sprite #customCursor,
+body.cursor-picker #customCursor{ visibility: hidden !important; }
+body.cursor-picker,
+body.cursor-picker *{ cursor: auto !important; }
+
+/* ===== Search bar & tombol home ikut "Transparansi Card" ===== */
+body.ambient-on .search-bar,
+body.has-wallpaper .search-bar{
+    background-color: rgba(31,31,31,var(--card-alpha,0.68));
+}
+body.ambient-on .search-bar:hover,
+body.has-wallpaper .search-bar:hover{
+    background-color: rgba(42,42,42,var(--card-alpha,0.68));
+}
+body.ambient-on .home-icon,
+body.has-wallpaper .home-icon{
+    background-color: rgba(31,31,31,var(--card-alpha,0.68));
+}
+body.ambient-on .home-icon:hover,
+body.has-wallpaper .home-icon:hover{
+    background-color: var(--yellow);
+}
+
+/* ===== Search bar & tombol home: border putih saat card transparan ===== */
+body.ambient-on .search-bar,
+body.has-wallpaper .search-bar,
+body.ambient-on .home-icon,
+body.has-wallpaper .home-icon{
+    border: 1px solid rgba(255,255,255,0.85);
+}
+
+/* hover / fokus tetap kuning seperti biasa */
+body.ambient-on .search-bar:hover,
+body.has-wallpaper .search-bar:hover,
+body.ambient-on .search-bar:focus-within,
+body.has-wallpaper .search-bar:focus-within,
+body.ambient-on .home-icon:hover,
+body.has-wallpaper .home-icon:hover{
+    border-color: var(--yellow);
+}
