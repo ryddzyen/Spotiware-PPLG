@@ -334,21 +334,107 @@
     });
     bindRows(dropdown, () => dropdownList, () => { closeDropdown(); input.blur(); });
 
-    // ---------- Halaman hasil (kategori Songs) ----------
+    // ---------- Halaman hasil: kategori Songs / Playlists / Profiles ----------
     const view = document.createElement('div');
     view.className = 'search-view';
     view.id = 'searchView';
     view.innerHTML = `
-        <div class="sv-chips"><button type="button" class="sv-chip active">Songs</button></div>
+        <div class="sv-chips">
+            <button type="button" class="sv-chip active" data-cat="songs">Songs</button>
+            <button type="button" class="sv-chip" data-cat="playlists">Playlists</button>
+            <button type="button" class="sv-chip" data-cat="profiles">Profiles</button>
+        </div>
         <div class="sv-list" id="svList"></div>`;
     rightPart.prepend(view);
     const svList = view.querySelector('#svList');
     bindRows(svList, () => resultList);
 
-    function openResults(raw) {
+    let category = 'songs';
+    let lastQuery = '';
+    let searchToken = 0;
+    let cardItems = {};
+
+    function setChip(cat) {
+        category = cat;
+        view.querySelectorAll('.sv-chip').forEach((c) => c.classList.toggle('active', c.dataset.cat === cat));
+    }
+
+    function userCardHTML(u) {
+        const img = u.photo ? `<img src="${esc(u.photo)}" alt="" loading="lazy">` : '<i class="fa-solid fa-user"></i>';
+        return `
+            <div class="sv-card" data-kind="profile" data-id="${esc(u.id)}">
+                <div class="sv-card-img round">${img}</div>
+                <div class="sv-card-title">${esc(u.displayName || u.username || 'User')}</div>
+                <div class="sv-card-sub">Profile • @${esc(u.username || '')}</div>
+            </div>`;
+    }
+
+    function playlistCardHTML(p) {
+        const src = Social.coverOf(p);
+        const img = src ? `<img src="${esc(src)}" alt="" loading="lazy">` : '<i class="fa-solid fa-music"></i>';
+        return `
+            <div class="sv-card" data-kind="playlist" data-id="${esc(p.id)}">
+                <div class="sv-card-img">${img}</div>
+                <div class="sv-card-title">${esc(p.name)}</div>
+                <div class="sv-card-sub">By ${esc(p.ownerName || 'Unknown')}</div>
+            </div>`;
+    }
+
+    async function renderResults() {
+        const q = lastQuery;
+        const token = ++searchToken;
+        cardItems = {};
+
+        if (category === 'songs') {
+            resultList = matchSongs(q);
+            svList.innerHTML = resultList.length
+                ? resultList.map(rowHTML).join('')
+                : `<div class="sd-empty">No results found for "${esc(q)}"<br><small>Please make sure your words are spelled correctly.</small></div>`;
+            return;
+        }
+
+        svList.innerHTML = '<div class="sd-empty">Searching…</div>';
+        let items;
+        try {
+            if (!window.Social) throw new Error('unavailable');
+            items = category === 'profiles' ? await Social.searchProfiles(q) : await Social.searchPlaylists(q);
+        } catch (err) {
+            if (token !== searchToken) return;
+            svList.innerHTML = `<div class="sd-empty">${err.message === 'login'
+                ? 'Log in to search profiles and playlists.'
+                : 'Could not load results. Check your connection and Firestore rules.'}</div>`;
+            return;
+        }
+        if (token !== searchToken) return;
+
+        if (!items.length) {
+            svList.innerHTML = `<div class="sd-empty">No results found for "${esc(q)}"</div>`;
+            return;
+        }
+        items.forEach((it) => { cardItems[it.id] = it; });
+        svList.innerHTML = '<div class="sv-grid">' +
+            items.map(category === 'profiles' ? userCardHTML : playlistCardHTML).join('') + '</div>';
+    }
+
+    view.querySelector('.sv-chips').addEventListener('click', (e) => {
+        const chip = e.target.closest('.sv-chip');
+        if (!chip) return;
+        setChip(chip.dataset.cat);
+        renderResults();
+    });
+
+    svList.addEventListener('click', (e) => {
+        const card = e.target.closest('.sv-card');
+        if (!card || !window.Social) return;
+        if (card.dataset.kind === 'profile') Social.openProfile(card.dataset.id);
+        else if (cardItems[card.dataset.id]) Social.openPublicPlaylist(cardItems[card.dataset.id]);
+    });
+
+    function openResults(raw, keepCategory) {
         const q = raw.trim();
         if (!q) return;
-        addRecent({ type: 'query', text: q });
+        if (!keepCategory) { addRecent({ type: 'query', text: q }); setChip('songs'); }
+        lastQuery = q;
         closeDropdown();
         input.blur();
 
@@ -356,12 +442,8 @@
         centerSearchBar(true);       // harus SETELAH closePlaylistDetailView
         document.querySelectorAll('.music-section').forEach((s) => s.classList.add('hide'));
 
-        resultList = matchSongs(q);
-        svList.innerHTML = resultList.length
-            ? resultList.map(rowHTML).join('')
-            : `<div class="sd-empty">No results found for "${esc(q)}"<br><small>Please make sure your words are spelled correctly.</small></div>`;
-
         view.classList.add('show');
+        renderResults();
         rightPart.scrollTo({ top: 0 });
         window.scrollTo({ top: 0 });
 
@@ -372,6 +454,14 @@
         document.querySelector('.bottom-nav-item[data-target="home"]')?.classList.add('active');
     }
 
+    // dipakai tombol back di halaman profil orang lain
+    window.SpotiSearch = {
+        reopen() {
+            if (!lastQuery) return false;
+            openResults(lastQuery, true);
+            return true;
+        }
+    };
     function closeResults() {
         centerSearchBar(false);
         if (!view.classList.contains('show')) return;

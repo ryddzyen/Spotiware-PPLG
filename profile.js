@@ -570,6 +570,12 @@
 
     modal.querySelector('#pfeSave').addEventListener('click', async () => {
         const name = pfeName.value.trim();
+        const unCheck = pfeUsername.value.trim().toLowerCase().replace(/[^a-z0-9._]/g, '');
+        if (unCheck && window.Social) {
+            try {
+                if (!(await Social.isUsernameFree(unCheck))) { showToast('Username sudah dipakai'); return; }
+            } catch (_) {}
+        }
         try {
             if (name && name !== currentUser.displayName) {
                 await currentUser.updateProfile({ displayName: name });
@@ -605,6 +611,7 @@
         closeEditModal();
         refreshProfileUI();
         await loadBanner(currentUser);
+        window.dispatchEvent(new Event('spotiware:profile-saved'));
         showToast('Profile saved');
     });
 
@@ -640,6 +647,23 @@
     renderHistory = function () {
         _renderHistory();
         if (historyView.classList.contains('show')) renderHistoryView();
+    };
+
+     // ---------- Dipakai social.js ----------
+    window.SpotiProfile = {
+        async data() {
+            const u = currentUser;
+            if (!u) return null;
+            let banner = currentBanner;
+            if (!banner) { try { banner = await idbGet(u.uid); } catch (_) {} }
+            return {
+                uid: u.uid, name: getName(u), username: getUsername(u),
+                photo: getPhoto(u), bio: getBio(u), pronouns: getPronouns(u),
+                theme: getTheme(u), nameColor: getNameColor(u), banner
+            };
+        },
+        applyTheme,
+        openSelf: openProfileView
     };
 
     // ---------- Status login ----------

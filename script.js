@@ -2040,13 +2040,13 @@ document.getElementById('ctxRemoveFromPlaylist')?.addEventListener('click', () =
     closeSongContextMenu();
 });
 
-function openSongContextMenu(x, y, songId) {
+function openSongContextMenu(x, y, songId, hideRemove = false) {
     contextMenuSongId = songId;
     if (!songContextMenu) return;
 
     const removeItem = document.getElementById('ctxRemoveFromPlaylist');
     const removeLabel = document.getElementById('ctxRemoveFromPlaylistLabel');
-    const detailOpen = document.getElementById('playlistDetailView')?.classList.contains('show') && pdCurrentPlaylistId;
+    const detailOpen = !hideRemove && document.getElementById('playlistDetailView')?.classList.contains('show') && pdCurrentPlaylistId;
 
     if (removeItem) {
         if (detailOpen) {
@@ -3018,6 +3018,41 @@ document.addEventListener('keydown', (e) => {
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+// ===== Hide / show Now Playing view (desktop) + titik 3 di phone frame =====
+const npHideBtn = document.getElementById('npHideBtn');
+const npShowEdge = document.getElementById('npShowEdge');
+const npMoreBtn = document.getElementById('npMoreBtn');
+const NP_HIDDEN_KEY = 'spotiware_np_hidden';
+
+function setNowPlayingHidden(hidden) {
+    document.body.classList.toggle('np-hidden', hidden);
+    try { localStorage.setItem(NP_HIDDEN_KEY, hidden ? '1' : '0'); } catch (e) {}
+}
+
+npHideBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setNowPlayingHidden(true);
+});
+npShowEdge?.addEventListener('click', () => setNowPlayingHidden(false));
+
+// titik 3: Save to your Liked Songs, Add to Queue, Add to Playlist (untuk lagu yang sedang diputar)
+npMoreBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!playerBar.classList.contains('show')) return;
+    const rect = npMoreBtn.getBoundingClientRect();
+    openSongContextMenu(rect.left, rect.bottom + 4, getCurrentSong().id, true);
+});
+
+// ingat pilihan terakhir pengguna
+let _npWasHidden = false;
+try { _npWasHidden = localStorage.getItem(NP_HIDDEN_KEY) === '1'; } catch (e) {}
+setNowPlayingHidden(_npWasHidden);
+
+// kursor di atas "<": sembunyikan scrollbar daftar lagu
+npShowEdge?.addEventListener('mouseenter', () => document.body.classList.add('np-edge-hover'));
+npShowEdge?.addEventListener('mouseleave', () => document.body.classList.remove('np-edge-hover'));
+npShowEdge?.addEventListener('click', () => document.body.classList.remove('np-edge-hover'));
 
 // Inisialisasi Aplikasi
 homeSongsOrder = shuffleSongs(visibleSongs);
