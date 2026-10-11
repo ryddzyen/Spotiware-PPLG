@@ -273,3 +273,89 @@
 .bn-btn:disabled { opacity: .5; cursor: default; }
 .user-profile .pf-actions { display: none; }
 @media (max-width: 768px) { .bn-btn { width: 40px; height: 40px; } }
+
+/* =====================================================
+   HOME (laptop): chip All + grid 8 playlist terakhir diputar
+   ===================================================== */
+.m-nav-chips, .m-nav-lib, .m-lib-view { display: none; }
+
+@media (min-width: 769px) and (hover: hover) {
+    .mh-section { display: block; margin: .4rem 0 1.4rem; padding: 0 1.5rem; }
+    .mh-chips { display: flex; gap: .6rem; margin: .8rem 0 1.1rem; }
+    .mh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: .7rem; }
+    .mh-tile {
+        display: flex; align-items: center; gap: .8rem; height: 4rem;
+        background: rgba(255, 255, 255, .08); border-radius: 6px; overflow: hidden;
+        cursor: pointer; transition: background .2s;
+    }
+    .mh-tile:hover { background: rgba(255, 255, 255, .17); }
+    .mh-cover {
+        width: 4rem; height: 4rem; flex-shrink: 0; background: #3a3a3a; color: var(--yellow);
+        display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .mh-cover.liked { background: linear-gradient(135deg, #450af5, #c4efd9); color: #fff; }
+    .mh-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .mh-name {
+        flex: 1; min-width: 0; padding-right: 3.6rem; color: #fff; font-size: .95rem; font-weight: 700;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+}
+
+/* =====================================================
+   MOBILE (sudah login): bar atas + Library ala Spotify
+   ===================================================== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    /* --- bar atas: foto profil di kiri, tanpa logo --- */
+    body.m-logged .logo { display: none; }
+    body.m-logged .right-half { order: -1; flex: 0 0 auto; }
+    body.m-logged .left-half { order: 0; flex: 1 1 auto; min-width: 0; gap: .6rem; }
+    body.m-logged .right-half-p2 { gap: 0; }
+    body.m-logged .profile-avatar-btn { width: 2.5rem; height: 2.5rem; border: 0; }
+    body.m-logged .profile-menu { left: 0; right: auto; }
+    body.m-logged .mh-chips { display: none; }          /* chip "All" pindah ke bar atas */
+
+    .mn-chip {
+        background: #2a2a2a; color: #fff; border: 0; border-radius: 999px;
+        padding: .5rem 1.1rem; font-family: inherit; font-size: .9rem; font-weight: 600;
+    }
+    .mn-chip.active { background: var(--yellow); color: #000; }
+
+    /* chip muncul hanya di Home */
+    body.m-logged:not(.m-search):not(:has(.main-left-part.mobile-show)):has(.mh-section:not(.hide)) .m-nav-chips {
+        display: flex; gap: .5rem; align-items: center;
+    }
+    /* judul + ikon muncul hanya di tab Library */
+    body.m-logged:not(.m-search):has(.main-left-part.mobile-show) .m-nav-lib {
+        display: flex; align-items: center; flex: 1; min-width: 0;
+    }
+    .mn-title { color: #fff; font-size: 1.55rem; font-weight: 800; white-space: nowrap; margin-right: auto; }
+    .mn-ic { background: none; border: 0; color: #fff; font-size: 1.35rem; padding: .4rem .7rem; cursor: pointer; }
+
+    /* --- Library --- */
+    body.m-logged .library { display: none; }            /* judul pindah ke bar atas */
+    .library-tabs { margin: .6rem 1rem .2rem; gap: .5rem; }
+    .library-tab { background: #2a2a2a; color: #fff; font-size: .9rem; padding: .55rem 1.1rem; }
+    .library-tab.active { background: var(--yellow); color: #000; }
+    .library-toolbar { margin: .7rem 1rem .5rem; gap: .6rem; }
+    body.m-logged .library-search-btn { display: none; }
+    .library-search-input.show { flex: 1; }
+    .library-sort {
+        margin-left: 0; margin-right: auto; flex-direction: row-reverse; gap: .55rem;
+        color: #fff; font-weight: 700; font-size: .95rem;
+    }
+    .library-sort-menu { right: auto; left: 0; }
+    .m-lib-view {
+        display: flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem;
+        background: none; border: 0; color: #fff; font-size: 1.1rem; cursor: pointer;
+    }
+
+    .playlist-item { margin: 0; padding: .5rem 1rem; gap: .9rem; }
+    .playlist-thumb, .playlist-icon { width: 4rem; height: 4rem; border-radius: 4px; }
+    .history-title { font-size: 1.05rem; }
+    .history-artist { font-size: .88rem; margin-top: .15rem; }
+    .playlist-item.liked-songs .history-artist::before {
+        content: "\f08d"; font-family: "Font Awesome 7 Free", "Font Awesome 6 Free";
+        font-weight: 900; color: var(--yellow); margin-right: .45rem; font-size: .8rem;
+        display: inline-block; transform: rotate(45deg);
+    }
+}

@@ -321,6 +321,7 @@
 
                 card.append(cover, name, sub);
                 card.addEventListener('click', () => openPlaylistDetailView(p, false));
+                if (window.PLX) PLX.decorate(card, 'loc:' + p.id, p);
                 grid.appendChild(card);
             });
         }

@@ -642,6 +642,7 @@
                 sub.textContent = `Playlist • ${n} song${n !== 1 ? 's' : ''}`;
                 card.append(cover, name, sub);
                 card.addEventListener('click', () => openPublicPlaylist(p));
+                if (window.PLX) PLX.decorate(card, 'pub:' + p.id, p);
                 grid.appendChild(card);
             });
         } catch (err) {
