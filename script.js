@@ -279,7 +279,18 @@ let npVolumeBar = document.getElementById('npVolumeBar');
 
 // ===== History refs =====
 let historyList = document.getElementById('historyList');
-let playHistory = [];
+const HISTORY_KEY = 'spotiware_play_history';
+const HISTORY_MAX = 30;
+
+function loadSavedHistory() {
+    try {
+        const ids = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+        return ids.map((id) => songs.find((s) => s.id === id)).filter(Boolean).slice(0, HISTORY_MAX);
+    } catch (e) {
+        return [];
+    }
+}
+let playHistory = loadSavedHistory();
 
 // ===== Playlist (localStorage) =====
 const PLAYLIST_KEY = 'spotiware_playlists';
@@ -988,11 +999,15 @@ function addToHistory(song) {
     playHistory = playHistory.filter((s) => s.id !== song.id);
     playHistory.unshift(song);
 
-    if (playHistory.length > 20) {
-        playHistory = playHistory.slice(0, 20);
+    if (playHistory.length > HISTORY_MAX) {
+        playHistory = playHistory.slice(0, HISTORY_MAX);
     }
+    try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(playHistory.map((s) => s.id)));
+    } catch (e) {}
 
     renderHistory();
+    window.dispatchEvent(new Event('spotiware:history'));
 }
 
 function renderHistory() {

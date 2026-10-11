@@ -14,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="friends.css">
     <link rel="manifest" href="manifest.json">
 </head>
 
@@ -480,18 +481,18 @@
             <i class="fa-solid fa-house"></i>
             <span>Home</span>
         </div>
+        <div class="bottom-nav-item" data-target="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Search</span>
+        </div>
         <div class="bottom-nav-item" data-target="library">
             <i class="fa-solid fa-list"></i>
             <span>Library</span>
         </div>
-        <a href="about.html" class="bottom-nav-item">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>About</span>
-        </a>
-        <a href="support.html" class="bottom-nav-item">
-            <i class="fa-solid fa-heart"></i>
-            <span>Support</span>
-        </a>
+        <div class="bottom-nav-item" data-target="inbox">
+            <i class="fa-solid fa-user-group"></i>
+            <span>Friends</span>
+        </div>
         <div class="bottom-nav-item" id="createNavBtn">
             <i class="fa-solid fa-plus"></i>
             <span>Create</span>
@@ -603,6 +604,8 @@
     <script src="search.js" defer></script>
     <script src="cursor-fix.js" defer></script>
     <script src="social.js" defer></script>
+    <script src="mobile.js" defer></script>
+    <script src="friends.js" defer></script>
 
 </body>
 

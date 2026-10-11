@@ -5864,3 +5864,255 @@ body.pd-readonly .cover-upload-overlay{ display: none; }
     .sv-card{ padding: 0.6rem; }
     .fr-actions{ flex-direction: column; }
 }
+
+/* =====================================================
+   TAMBAHAN: tempel di PALING BAWAH style.css
+   ===================================================== */
+
+/* ---------- Ikon teman + inbox di navbar (laptop) ---------- */
+.friends-wrap{ position: relative; }
+.friends-btn{
+    position: relative;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    border: none;
+    background: none;
+    color: #b3b3b3;
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.friends-btn:hover{ color: var(--yellow); transform: scale(1.08); }
+.friends-btn.has-notif::after{
+    content: '';
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: #f15e6c;
+    border: 2px solid #000;
+}
+.friends-menu{
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    width: 22rem;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #282828;
+    border-radius: 10px;
+    padding: 0.6rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 3500;
+}
+.friends-menu.show{ display: block; }
+.fm-title{
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 0.4rem 0.5rem 0.6rem;
+}
+.friends-menu .fr-row:hover{ background: #3a3a3a; }
+
+/* ---------- Baris kecil: profil / playlist (hasil search, recent, All) ---------- */
+.sv-item{
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.5rem 0.4rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.sv-item:hover{ background: rgba(255,255,255,0.07); }
+.sv-item-img{
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 4px;
+    background: #2a2a2a;
+    color: #7a7a7a;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.sv-item-img.round{ border-radius: 50%; }
+.sv-item-img img{ width: 100%; height: 100%; object-fit: cover; }
+.sv-item-info{ flex: 1; min-width: 0; }
+.sv-item-title{
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sv-item-sub{
+    color: var(--gray-mid);
+    font-size: 0.82rem;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* di dalam dropdown */
+.search-dropdown .sv-item{ padding: 0.5rem 0.6rem; }
+.search-dropdown .sv-item:hover{ background: #3a3a3a; }
+.search-dropdown .sv-item-img{ width: 3rem; height: 3rem; }
+.sd-prof:hover .sr-remove{ opacity: 1; }
+
+/* tombol panah ↖ di saran (HP saja) */
+.sd-fill{
+    display: none;
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 1rem;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* chip X (hanya dipakai di HP saat kategori dipilih) */
+.sv-chip-x{
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    padding: 0.5rem 0;
+}
+
+/* ---------- Komponen HP (disembunyikan di laptop) ---------- */
+.m-back{
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.mh-section{ display: none; }
+.m-page{ display: none; padding: 0 1rem 2rem; }
+.m-page.show{ display: block; }
+.ms-h{
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 1.2rem 0 0.6rem;
+}
+.mi-title{
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 1rem 0 0.6rem;
+}
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    /* Home: tanpa search bar */
+    .search-bar{ display: none; }
+    .browse{ display: none; }
+
+    /* Mode search: logo & tombol kanan disembunyikan, ada tombol back */
+    body.m-search .search-bar{ display: flex; }
+    body.m-search .logo,
+    body.m-search .right-half{ display: none; }
+    body.m-search .m-back{ display: flex; }
+    body.m-search .left-half{ gap: 0.3rem; }
+
+    /* Home: chip All + grid 2 kolom (8 playlist) */
+    .mh-section{
+        display: block;
+        margin: 0.2rem 0 1rem;
+        padding: 0 0.8rem;
+    }
+    .mh-chips{ display: flex; gap: 0.5rem; margin-bottom: 0.9rem; }
+    .mh-grid{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    .mh-tile{
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        height: 3.4rem;
+        background: #2a2a2a;
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .mh-tile:active{ background: #333; }
+    .mh-cover{
+        width: 3.4rem;
+        height: 3.4rem;
+        flex-shrink: 0;
+        background: #3a3a3a;
+        color: var(--yellow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    .mh-cover.liked{ background: linear-gradient(135deg, #450af5, #c4efd9); color: #fff; }
+    .mh-cover img{ width: 100%; height: 100%; object-fit: cover; }
+    .mh-name{
+        flex: 1;
+        min-width: 0;
+        padding-right: 0.5rem;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Dropdown saran: dipindah ke <body> oleh search.js, selebar layar di bawah navbar */
+    .search-dropdown{
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: auto;
+        max-height: none;
+        z-index: 1800;                 /* di atas mini player, di bawah menu bawah */
+        border-radius: 0;
+        background: #121212;
+        padding: 0.4rem 0.8rem 9rem;
+        box-shadow: none;
+    }
+    .sd-fill{ display: block; }
+    .sd-sug-text{ font-size: 1.05rem; }
+
+    /* Chip hasil pencarian: setelah kategori dipilih -> tampil [X] [Kategori] saja */
+    .sv-chips.filtered .sv-chip:not(.active):not(.sv-chip-x){ display: none; }
+    .sv-chips.filtered .sv-chip-x{ display: flex; }
+
+    /* titik merah menu Friends */
+    .bottom-nav-item.has-notif i{ position: relative; }
+    .bottom-nav-item.has-notif i::after{
+        content: '';
+        position: absolute;
+        top: -0.1rem;
+        right: -0.2rem;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: #f15e6c;
+    }
+
+    .friends-wrap{ display: none !important; }
+}

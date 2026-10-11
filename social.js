@@ -1,4 +1,4 @@
-// ===== Social: sinkron profil ke Firestore, pertemanan, playlist publik, pencarian =====
+// ===== Social: sinkron profil ke Firestore, pertemanan, inbox, playlist publik, pencarian =====
 (() => {
     if (typeof firebase === 'undefined' || !firebase.firestore) {
         console.warn('Firestore belum dimuat (cek firebase-firestore-compat.js).');
@@ -19,12 +19,12 @@
     const userCache = {};
 
     const rightPart = document.querySelector('.main-right-part');
-    const avatarBtn = document.getElementById('profileAvatarBtn');
 
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const pairId = (a, b) => [a, b].sort().join('_');
     const pubId = (pid) => me.uid + '_' + pid;
+    const other = (f) => f.users.find((x) => x !== me.uid);
 
     function fillAvatar(el, src, icon) {
         el.innerHTML = '';
@@ -110,7 +110,7 @@
     });
 
     // =====================================================
-    // 2. Playlist publik ("Add to your profile")
+    // 2. Playlist publik ("Make public")
     // =====================================================
     const publishedKey = () => 'spotiware_published_' + (me ? me.uid : '');
     const readPublished = () => {
@@ -166,29 +166,12 @@
         }
     }
 
-    // setiap playlist disimpan -> jadwalkan sinkron
     const _savePlaylists = savePlaylists;
     savePlaylists = function (list) {
         _savePlaylists(list);
         schedulePublishSync();
     };
 
-    // ---- tombol ". . ." di halaman playlist ----
-    const moreBtn = document.createElement('i');
-    moreBtn.className = 'fa-solid fa-ellipsis playlist-toolbar-icon';
-    moreBtn.id = 'pdMoreBtn';
-    moreBtn.title = 'More options';
-    document.getElementById('playlistShuffleBtn')?.insertAdjacentElement('afterend', moreBtn);
-
-    const plMenu = document.createElement('div');
-    plMenu.className = 'context-menu';
-    plMenu.id = 'plMoreMenu';
-    plMenu.innerHTML = `
-        <div class="context-menu-item" id="plMenuProfile">
-            <i class="fa-solid fa-lock-open" id="plMenuProfileIcon"></i> <span id="plMenuProfileLabel">Make public</span>
-        </div>`;
-
-    // penanda "Public" / "Private" di baris info playlist
     function showVisibility(p) {
         const meta = document.getElementById('playlistDetailMeta');
         if (!meta) return;
@@ -197,26 +180,8 @@
             meta.textContent += p.isPublic ? ' • Public' : ' • Private';
         }
     }
-    document.body.appendChild(plMenu);
 
-    moreBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const p = getPlaylists().find((x) => x.id === pdCurrentPlaylistId);
-        if (!p) return;
-        document.getElementById('plMenuProfileLabel').textContent = p.isPublic ? 'Make private' : 'Make public';
-        document.getElementById('plMenuProfileIcon').className = 'fa-solid ' + (p.isPublic ? 'fa-lock' : 'fa-lock-open');
-        plMenu.classList.add('show');
-        const r = moreBtn.getBoundingClientRect();
-        plMenu.style.left = Math.min(r.left, window.innerWidth - plMenu.offsetWidth - 8) + 'px';
-        plMenu.style.top = (r.bottom + 6) + 'px';
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!plMenu.contains(e.target)) plMenu.classList.remove('show');
-    });
-
-    document.getElementById('plMenuProfile').addEventListener('click', () => {
-        plMenu.classList.remove('show');
+    function togglePublic() {
         if (!me) { showToast('Log in to make playlists public'); return; }
         if (pdCurrentIsLiked) { showToast("Liked Songs can't be made public"); return; }
         const list = getPlaylists();
@@ -226,6 +191,94 @@
         savePlaylists(list);
         showVisibility(p);
         showToast(p.isPublic ? 'Playlist is now public' : 'Playlist is now private');
+    }
+
+    function currentPublicState() {
+        const p = getPlaylists().find((x) => x.id === pdCurrentPlaylistId);
+        return !!(p && p.isPublic);
+    }
+
+    // ---- tombol ". . ." di halaman playlist ----
+    // FIX titik 3 dobel: kalau sudah ada tombol "..." di toolbar (mis. dari share.js),
+    // jangan bikin baru. Pakai yang ada dan tambahkan "Make public/private" ke menunya.
+    const toolbar = document.querySelector('.playlist-detail-toolbar');
+    const existingIcon = toolbar ? toolbar.querySelector('.fa-ellipsis, .fa-ellipsis-h') : null;
+    let moreBtn;
+    let adopted = false;
+
+    if (existingIcon) {
+        moreBtn = existingIcon.closest('button') || existingIcon;
+        adopted = true;
+    } else {
+        moreBtn = document.createElement('i');
+        moreBtn.className = 'fa-solid fa-ellipsis playlist-toolbar-icon';
+        moreBtn.id = 'pdMoreBtn';
+        moreBtn.title = 'More options';
+        document.getElementById('playlistShuffleBtn')?.insertAdjacentElement('afterend', moreBtn);
+    }
+
+    const plMenu = document.createElement('div');
+    plMenu.className = 'context-menu';
+    plMenu.id = 'plMoreMenu';
+    plMenu.innerHTML = `
+        <div class="context-menu-item" id="plMenuProfile">
+            <i class="fa-solid fa-lock-open" id="plMenuProfileIcon"></i> <span id="plMenuProfileLabel">Make public</span>
+        </div>`;
+    document.body.appendChild(plMenu);
+
+    function syncMenuLabels() {
+        const pub = currentPublicState();
+        document.getElementById('plMenuProfileLabel').textContent = pub ? 'Make private' : 'Make public';
+        document.getElementById('plMenuProfileIcon').className = 'fa-solid ' + (pub ? 'fa-lock' : 'fa-lock-open');
+    }
+
+    function placeOurMenu() {
+        syncMenuLabels();
+        plMenu.classList.add('show');
+        const r = moreBtn.getBoundingClientRect();
+        plMenu.style.left = Math.min(r.left, window.innerWidth - plMenu.offsetWidth - 8) + 'px';
+        plMenu.style.top = (r.bottom + 6) + 'px';
+    }
+
+    moreBtn.addEventListener('click', (e) => {
+        if (!getPlaylists().find((x) => x.id === pdCurrentPlaylistId)) return;
+
+        if (!adopted) {
+            e.stopPropagation();
+            placeOurMenu();
+            return;
+        }
+
+        // tombol milik fitur lain: tunggu menunya muncul, lalu sisipkan item kita
+        setTimeout(() => {
+            const menu = document.querySelector('.context-menu.show:not(#plMoreMenu):not(#songContextMenu)');
+            if (menu) {
+                if (!menu.querySelector('#plMenuProfileInj')) {
+                    const item = document.createElement('div');
+                    item.className = 'context-menu-item';
+                    item.id = 'plMenuProfileInj';
+                    item.addEventListener('click', () => {
+                        menu.classList.remove('show');
+                        togglePublic();
+                    });
+                    menu.appendChild(item);
+                }
+                const pub = currentPublicState();
+                menu.querySelector('#plMenuProfileInj').innerHTML =
+                    `<i class="fa-solid ${pub ? 'fa-lock' : 'fa-lock-open'}"></i> ${pub ? 'Make private' : 'Make public'}`;
+            } else {
+                placeOurMenu();   // fallback kalau menu fitur lain bukan .context-menu
+            }
+        }, 0);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!plMenu.contains(e.target) && !moreBtn.contains(e.target)) plMenu.classList.remove('show');
+    });
+
+    document.getElementById('plMenuProfile').addEventListener('click', () => {
+        plMenu.classList.remove('show');
+        togglePublic();
     });
 
     // =====================================================
@@ -272,12 +325,19 @@
     const acceptRequest = (id) => db.collection('friendships').doc(id).update({ status: 'accepted' });
     const removeFriendship = (id) => db.collection('friendships').doc(id).delete();
 
+    const pendingIn = () => me
+        ? friendships.filter((f) => f.status === 'pending' && f.requester !== me.uid)
+        : [];
+
     function startFriends() {
         unsubFriends = db.collection('friendships').where('users', 'array-contains', me.uid)
             .onSnapshot((snap) => {
                 friendships = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                 renderFriendsSection();
                 refreshActions();
+                updateBadge();
+                if (friendsMenu.classList.contains('show')) renderInbox(fmList, false);
+                window.dispatchEvent(new Event('spotiware:friends'));
             }, (err) => console.warn('Friendships:', err));
     }
 
@@ -302,6 +362,84 @@
             </div>`;
     }
 
+    const reqActions = (fid) => `
+        <div class="fr-actions">
+            <button class="fr-btn primary" data-act="accept" data-fid="${esc(fid)}">Accept</button>
+            <button class="fr-btn" data-act="decline" data-fid="${esc(fid)}">Decline</button>
+        </div>`;
+
+    // ---- Inbox: dipakai dropdown ikon teman (laptop) dan halaman Friends (HP) ----
+    async function renderInbox(el, full) {
+        if (!el) return;
+        const tok = (el._tok = (el._tok || 0) + 1);
+        if (!me) {
+            el.innerHTML = '<div class="fr-empty">Log in to see your friend requests.</div>';
+            return;
+        }
+        const incoming = pendingIn();
+        const accepted = friendships.filter((f) => f.status === 'accepted');
+        let inU = [], frU = [];
+        try {
+            [inU, frU] = await Promise.all([
+                Promise.all(incoming.map((f) => getUser(other(f)))),
+                full ? Promise.all(accepted.map((f) => getUser(other(f)))) : Promise.resolve([])
+            ]);
+        } catch (err) { console.warn(err); }
+        if (tok !== el._tok) return;
+
+        let html = '';
+        if (full) html += `<h3 class="pf-label fr-title">Friend requests (${incoming.length})</h3>`;
+        html += incoming.length
+            ? inU.map((u, i) => frRow(u, reqActions(incoming[i].id))).join('')
+            : '<div class="fr-empty">No new friend requests.</div>';
+        if (full) {
+            html += `<h3 class="pf-label fr-title">Friends (${accepted.length})</h3>`;
+            html += accepted.length
+                ? frU.map((u) => frRow(u)).join('')
+                : '<div class="fr-empty">No friends yet. Search for a profile and send a request.</div>';
+        }
+        el.innerHTML = html;
+    }
+
+    // ---- ikon teman di navbar (laptop), di sebelah foto profil ----
+    const friendsWrap = document.createElement('div');
+    friendsWrap.className = 'friends-wrap';
+    friendsWrap.style.display = 'none';
+    friendsWrap.innerHTML = `
+        <button type="button" class="friends-btn" id="friendsBtn" title="Friend requests">
+            <i class="fa-solid fa-user-group"></i>
+        </button>
+        <div class="friends-menu" id="friendsMenu">
+            <div class="fm-title">Friend requests</div>
+            <div class="inbox-list" id="fmList"></div>
+        </div>`;
+    const profWrap = document.querySelector('.profile-wrap');
+    if (profWrap && profWrap.parentNode) profWrap.parentNode.insertBefore(friendsWrap, profWrap);
+    else document.querySelector('.right-half-p2')?.appendChild(friendsWrap);
+
+    const friendsBtn = friendsWrap.querySelector('#friendsBtn');
+    const friendsMenu = friendsWrap.querySelector('#friendsMenu');
+    const fmList = friendsWrap.querySelector('#fmList');
+
+    function updateBadge() {
+        friendsBtn.classList.toggle('has-notif', pendingIn().length > 0);
+    }
+
+    friendsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('profileMenu')?.classList.remove('show');
+        if (window.Chat && !isMobileView()) {
+            friendsMenu.classList.remove('show');
+            Chat.openFriends();
+            return;
+        }
+        const open = friendsMenu.classList.toggle('show');
+        if (open) renderInbox(fmList, false);
+    });
+    document.addEventListener('click', (e) => {
+        if (!friendsWrap.contains(e.target)) friendsMenu.classList.remove('show');
+    });
+
     // daftar teman + permintaan masuk di tab Main profil sendiri
     async function renderFriendsSection() {
         const main = document.getElementById('pfMain');
@@ -315,11 +453,8 @@
         if (!me) { sec.innerHTML = ''; return; }
 
         const token = ++friendsToken;
-        const incoming = friendships.filter((f) => f.status === 'pending' && f.requester !== me.uid);
+        const incoming = pendingIn();
         const accepted = friendships.filter((f) => f.status === 'accepted');
-        const other = (f) => f.users.find((x) => x !== me.uid);
-
-        avatarBtn?.classList.toggle('has-notif', incoming.length > 0);
 
         let inUsers = [], frUsers = [];
         try {
@@ -333,11 +468,7 @@
         let html = '';
         if (incoming.length) {
             html += `<h3 class="pf-label fr-title">Friend requests (${incoming.length})</h3>`;
-            html += inUsers.map((u, i) => frRow(u, `
-                <div class="fr-actions">
-                    <button class="fr-btn primary" data-act="accept" data-fid="${esc(incoming[i].id)}">Accept</button>
-                    <button class="fr-btn" data-act="decline" data-fid="${esc(incoming[i].id)}">Decline</button>
-                </div>`)).join('');
+            html += inUsers.map((u, i) => frRow(u, reqActions(incoming[i].id))).join('');
         }
         html += `<h3 class="pf-label fr-title">Friends (${accepted.length})</h3>`;
         html += accepted.length
@@ -347,7 +478,7 @@
     }
 
     document.addEventListener('click', async (e) => {
-        const sec = e.target.closest('#pfFriends');
+        const sec = e.target.closest('#pfFriends, .inbox-list');
         if (!sec) return;
         const btn = e.target.closest('[data-act]');
         if (btn) {
@@ -360,7 +491,10 @@
             return;
         }
         const row = e.target.closest('.fr-row');
-        if (row) openProfile(row.dataset.uid);
+        if (row) {
+            friendsMenu.classList.remove('show');
+            openProfile(row.dataset.uid);
+        }
     });
 
     // =====================================================
@@ -371,6 +505,7 @@
     view.innerHTML = `
         <div class="pf-banner empty" id="upBanner"></div>
         <button class="playlist-back-btn up-back" id="upBack" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="pf-bn-actions" id="upBn"></div>
 
         <div class="pf-head">
             <div class="pf-ident">
@@ -407,31 +542,39 @@
         if (!(window.SpotiSearch && SpotiSearch.reopen())) goHome();
     });
 
-    function actionsHTML(uid) {
-        if (uid === me.uid) return '<button class="pf-edit-btn" data-act="edit"><i class="fa-solid fa-pen"></i> Edit Profile</button>';
+    function bnBtn(act, icon, title, fid) {
+        return `<button type="button" class="bn-btn" data-act="${act}"${fid ? ` data-fid="${esc(fid)}"` : ''} title="${title}"><i class="fa-solid ${icon}"></i></button>`;
+    }
+
+    function bannerHTML(uid) {
+        if (uid === me.uid) return '';
         const r = relationWith(uid);
-        if (r.state === 'friends') return `<button class="pf-edit-btn" data-act="unfriend" data-fid="${esc(r.id)}"><i class="fa-solid fa-user-check"></i> Friends</button>`;
-        if (r.state === 'sent') return `<button class="pf-edit-btn" data-act="cancel" data-fid="${esc(r.id)}"><i class="fa-solid fa-clock"></i> Request Sent</button>`;
-        if (r.state === 'received') return `
-            <div class="up-btn-row">
-                <button class="pf-edit-btn primary" data-act="accept" data-fid="${esc(r.id)}"><i class="fa-solid fa-user-plus"></i> Accept</button>
-                <button class="pf-edit-btn" data-act="decline" data-fid="${esc(r.id)}">Decline</button>
-            </div>`;
-        return '<button class="pf-edit-btn primary" data-act="add"><i class="fa-solid fa-user-plus"></i> Add Friend</button>';
+        let h = '';
+        if (r.state === 'friends') h += bnBtn('chat', 'fa-message', 'Message') + bnBtn('unfriend', 'fa-user-check', 'Friends (tap to unfriend)', r.id);
+        else if (r.state === 'sent') h += bnBtn('cancel', 'fa-user-clock', 'Cancel request', r.id);
+        else if (r.state === 'received') h += bnBtn('accept', 'fa-user-check', 'Accept', r.id) + bnBtn('decline', 'fa-user-xmark', 'Decline', r.id);
+        else h += bnBtn('add', 'fa-user-plus', 'Add friend');
+        return h + bnBtn('more', 'fa-ellipsis', 'More');
     }
 
     function refreshActions() {
         if (!me || !viewUid || !view.classList.contains('show')) return;
-        view.querySelector('#upActions').innerHTML = actionsHTML(viewUid);
+        view.querySelector('#upActions').innerHTML = '';
+        view.querySelector('#upBn').innerHTML = bannerHTML(viewUid);
     }
 
-    view.querySelector('#upActions').addEventListener('click', async (e) => {
+    view.querySelector('#upBn').addEventListener('click', async (e) => {
         const b = e.target.closest('[data-act]');
         if (!b || !viewUid) return;
+        if (b.dataset.act === 'more') {
+            e.stopPropagation();
+            if (window.Chat && Chat.profileMenu) Chat.profileMenu(b, viewUid);
+            return;
+        }
+        if (b.dataset.act === 'chat') { if (window.Chat) Chat.openChat(viewUid); return; }
         b.disabled = true;
         try {
             switch (b.dataset.act) {
-                case 'edit': SpotiProfile.openSelf(); break;
                 case 'add': await sendRequest(viewUid); showToast('Friend request sent'); break;
                 case 'cancel':
                 case 'decline': await removeFriendship(b.dataset.fid); break;
@@ -539,7 +682,7 @@
     // 6. Buka playlist orang lain (hanya lihat & putar)
     // =====================================================
     function openPublicPlaylist(item) {
-        closePlaylistDetailView();   // tutup hasil pencarian / profil
+        closePlaylistDetailView();
         const pl = { id: 'pub_' + item.id, name: item.name, songIds: item.songIds || [], description: '', addedDates: {} };
         if (item.cover) pl.coverImage = item.cover;
         openPlaylistDetailView(pl, false);
@@ -548,7 +691,6 @@
             (item.description ? item.description + ' • ' : '') + 'By ' + (item.ownerName || 'Unknown');
     }
 
-    // tutup view ini saat pindah halaman
     const _closePD = closePlaylistDetailView;
     closePlaylistDetailView = function () {
         view.classList.remove('show');
@@ -558,10 +700,10 @@
     const _closeSA = closeShowAllView;
     closeShowAllView = function () { view.classList.remove('show'); _closeSA(); };
 
-    // membuka playlist milik sendiri -> keluar dari mode read-only
     const _openPD = openPlaylistDetailView;
     openPlaylistDetailView = function (pl, isLiked) {
         if (!String(pl.id).startsWith('pub_')) document.body.classList.remove('pd-readonly');
+        view.classList.remove('show');   // profil orang lain ikut ditutup
         _openPD(pl, isLiked);
         showVisibility(pl);
     };
@@ -575,9 +717,12 @@
         friendships = [];
         lastSig = null;
         viewUid = null;
+        friendsWrap.style.display = user ? 'block' : 'none';
+        friendsMenu.classList.remove('show');
+        updateBadge();
+        window.dispatchEvent(new Event('spotiware:friends'));
 
         if (!user) {
-            avatarBtn?.classList.remove('has-notif');
             view.classList.remove('show');
             renderFriendsSection();
             return;
@@ -589,5 +734,16 @@
         }, 700);
     });
 
-    window.Social = { searchProfiles, searchPlaylists, openProfile, openPublicPlaylist, isUsernameFree, coverOf };
+    window.Social = {
+        searchProfiles, searchPlaylists, openProfile, openPublicPlaylist, isUsernameFree, coverOf,
+        renderInbox,
+        pendingCount: () => pendingIn().length,
+        core: {
+            friendships: () => friendships,
+            getUser,
+            getMe: () => me,
+            acceptRequest,
+            removeFriendship
+        }
+    };
 })();

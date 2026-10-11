@@ -1,0 +1,275 @@
+/* ===== friends.css : Friends (laptop), DM, Messages (HP), Online status ===== */
+:root {
+    --st-online: #23a55a;
+    --st-idle: #f0b232;
+    --st-dnd: #f23f43;
+    --st-off: #80848e;
+    --fv-bg: #1a1a1e;
+    --fv-line: rgba(255, 255, 255, .07);
+    --fv-hover: rgba(255, 255, 255, .05);
+    --fv-sub: #9ca3af;
+}
+
+/* ---------- Titik status (ukuran dikunci lewat --s, bulat sempurna) ---------- */
+.sdot {
+    --s: 14px;
+    position: absolute !important;
+    right: -2px !important; bottom: -2px !important; left: auto !important; top: auto !important;
+    width: var(--s) !important; height: var(--s) !important;
+    min-width: var(--s) !important; max-width: var(--s) !important;
+    min-height: var(--s) !important; max-height: var(--s) !important;
+    aspect-ratio: 1 / 1;
+    display: block !important; flex: 0 0 auto !important;
+    padding: 0 !important; margin: 0 !important;
+    box-sizing: content-box !important;
+    border: 3px solid var(--fv-bg) !important;
+    border-radius: 50% !important;
+    background: var(--st-off);
+}
+.sdot.big, .sdot.mini {
+    position: relative !important; right: auto !important; bottom: auto !important;
+    border: 0 !important; box-sizing: border-box !important;
+}
+.sdot.big { --s: 24px; }
+.sdot.mini { --s: 20px; }
+.sdot.online { background: var(--st-online); }
+.sdot.idle {
+    background: var(--st-idle);
+    -webkit-mask: radial-gradient(circle at 30% 30%, transparent 38%, #000 40%);
+    mask: radial-gradient(circle at 30% 30%, transparent 38%, #000 40%);
+}
+.sdot.dnd { background: var(--st-dnd); }
+.sdot.dnd::after {
+    content: ""; position: absolute; left: 22%; right: 22%; top: 42%; height: 16%;
+    background: var(--fv-bg); border-radius: 2px;
+}
+.sdot.offline {
+    background: var(--st-off);
+    -webkit-mask: radial-gradient(circle at center, transparent 30%, #000 32%);
+    mask: radial-gradient(circle at center, transparent 30%, #000 32%);
+}
+.sdot.big.dnd::after { background: #2b2b31; }
+
+/* Titik di foto profil sendiri (navbar + halaman profil) */
+.profile-wrap[data-st], .pf-avatar[data-st] { position: relative; }
+.profile-wrap[data-st]::after, .pf-avatar[data-st]::after {
+    content: ""; position: absolute; right: 0; bottom: 0;
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 3px solid #121212; box-sizing: content-box;
+    pointer-events: none;
+}
+.pf-avatar[data-st]::after { display: none; }
+.my-st-btn {
+    position: absolute; z-index: 20;
+    width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
+    background: #121212; display: grid; place-items: center; cursor: pointer;
+}
+.my-st-btn:hover { background: #26262b; }
+.my-st-btn .sdot.dnd::after { background: #121212; }
+.my-st-btn:hover .sdot.dnd::after { background: #26262b; }
+[data-st="online"]::after { background: var(--st-online); }
+[data-st="idle"]::after { background: var(--st-idle); }
+[data-st="dnd"]::after { background: var(--st-dnd); }
+[data-st="offline"]::after { background: var(--st-off); }
+
+/* ---------- Avatar umum ---------- */
+.fv-av { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.fv-av-img {
+    width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+    background: #2f2f2f; display: flex; align-items: center; justify-content: center; color: #aaa;
+}
+.fv-av-img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Halaman Friends (laptop) ---------- */
+.fv-view, .dm-view { display: none; }
+.fv-view.show { display: block; padding: 0 0 2rem; }
+.fv-top {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .8rem 1.2rem; border-bottom: 1px solid var(--fv-line);
+    position: sticky; top: 0; background: var(--fv-bg); z-index: 3;
+}
+.fv-title { display: flex; align-items: center; gap: .6rem; font-weight: 600; color: #fff; margin-right: .2rem; }
+.fv-sepdot { color: #555; }
+.fv-tab {
+    background: none; border: 0; color: var(--fv-sub); font: inherit; font-weight: 500;
+    padding: .35rem .8rem; border-radius: 6px; cursor: pointer;
+}
+.fv-tab:hover { background: var(--fv-hover); color: #fff; }
+.fv-tab.active { background: rgba(255, 255, 255, .1); color: #fff; }
+.fv-count:not(:empty) {
+    display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px;
+    background: var(--st-dnd); color: #fff; border-radius: 9px; font-size: .72rem; line-height: 18px; text-align: center;
+}
+.fv-searchbox {
+    display: flex; align-items: center; gap: .6rem; margin: 1rem 1.2rem .4rem;
+    padding: .55rem .9rem; border: 1px solid rgba(255, 255, 255, .14); border-radius: 8px; background: #121214;
+}
+.fv-searchbox i { color: #cfcfd4; }
+.fv-searchbox input { flex: 1; background: none; border: 0; outline: 0; color: #fff; font: inherit; }
+.fv-headrow {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .9rem 1.4rem .4rem; color: #fff; font-weight: 600; font-size: .9rem;
+}
+.fv-clear { background: none; border: 0; color: #7983f5; cursor: pointer; font: inherit; font-weight: 500; }
+.fv-list { padding: 0 1.2rem; }
+.fv-row {
+    display: flex; align-items: center; gap: .8rem; padding: .7rem .6rem;
+    border-top: 1px solid var(--fv-line); border-radius: 8px; cursor: pointer;
+}
+.fv-row:hover { background: var(--fv-hover); }
+.fv-info { flex: 1; min-width: 0; }
+.fv-name { color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fv-sub { color: var(--fv-sub); font-size: .82rem; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fv-listen { color: var(--st-online); }
+.fv-acts { display: flex; gap: .5rem; }
+.fv-ic {
+    position: relative; width: 36px; height: 36px; border: 0; border-radius: 50%;
+    background: rgba(255, 255, 255, .06); color: #b5b8bd; cursor: pointer;
+}
+.fv-ic:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+.fv-ic.has-dot::after {
+    content: ""; position: absolute; top: 4px; right: 4px; width: 9px; height: 9px;
+    border-radius: 50%; background: var(--st-dnd);
+}
+.fv-empty { padding: 2.5rem 1rem; text-align: center; color: var(--fv-sub); }
+
+/* ---------- Chat DM ---------- */
+.dm-view.show { display: flex; flex-direction: column; height: calc(100vh - 140px); min-height: 360px; }
+.dm-head {
+    display: flex; align-items: center; gap: .8rem; padding: .7rem 1.2rem;
+    border-bottom: 1px solid var(--fv-line); background: var(--fv-bg);
+}
+.dm-back {
+    width: 34px; height: 34px; border: 0; border-radius: 50%;
+    background: rgba(255, 255, 255, .06); color: #fff; cursor: pointer;
+}
+.dm-avwrap .fv-av { width: 32px; height: 32px; }
+.dm-avwrap .sdot { --s: 10px; border-width: 2px !important; }
+.dm-who { display: flex; align-items: baseline; gap: .6rem; min-width: 0; }
+.dm-name { color: #fff; font-weight: 600; }
+.dm-status { color: var(--fv-sub); font-size: .82rem; }
+.dm-body { flex: 1; overflow-y: auto; padding: 1rem 1.2rem; }
+.dm-empty { color: var(--fv-sub); text-align: center; padding: 2rem 1rem; }
+.dm-date { display: flex; align-items: center; gap: .8rem; margin: 1rem 0; color: var(--fv-sub); font-size: .75rem; font-weight: 600; }
+.dm-date::before, .dm-date::after { content: ""; flex: 1; height: 1px; background: var(--fv-line); }
+.dm-msg { display: flex; gap: .8rem; margin-top: 1rem; }
+.dm-msg.grouped { margin-top: 2px; padding-left: 52px; }
+.dm-pic {
+    width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+    background: #2f2f2f; display: flex; align-items: center; justify-content: center; color: #aaa;
+}
+.dm-pic img { width: 100%; height: 100%; object-fit: cover; }
+.dm-main { min-width: 0; }
+.dm-meta { display: flex; align-items: baseline; gap: .5rem; }
+.dm-meta b { color: #fff; font-weight: 600; }
+.dm-meta span { color: var(--fv-sub); font-size: .72rem; }
+.dm-text { color: #dcddde; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+.dm-text a { color: #00a8fc; text-decoration: none; }
+.dm-text a:hover { text-decoration: underline; }
+.dm-input { display: flex; gap: .6rem; padding: .8rem 1.2rem 1rem; }
+.dm-input input {
+    flex: 1; padding: .8rem 1rem; border: 0; border-radius: 8px; outline: 0;
+    background: #26262b; color: #fff; font: inherit;
+}
+.dm-send { width: 44px; border: 0; border-radius: 8px; background: #26262b; color: #b5b8bd; cursor: pointer; }
+.dm-send:hover { color: #fff; }
+
+/* ---------- Messages (HP, gaya Instagram) ---------- */
+.msg-head { padding: 1rem 1rem .4rem; }
+.msg-title { margin: 0; font-size: 1.35rem; font-weight: 700; color: #fff; }
+.msg-search {
+    display: flex; align-items: center; gap: .6rem; margin: .5rem 1rem;
+    padding: .65rem 1rem; border-radius: 999px; background: #26262b; color: #aaa;
+}
+.msg-search input { flex: 1; background: none; border: 0; outline: 0; color: #fff; font: inherit; }
+.msg-notes { display: flex; gap: 1rem; overflow-x: auto; padding: 1.6rem 1rem .6rem; scrollbar-width: none; }
+.msg-notes::-webkit-scrollbar { display: none; }
+.msg-note { position: relative; width: 74px; flex-shrink: 0; text-align: center; cursor: pointer; }
+.msg-note .fv-av { width: 66px; height: 66px; margin: 0 auto; }
+.msg-note .sdot { --s: 13px; right: 2px !important; bottom: 2px !important; }
+.note-bub {
+    position: absolute; top: -26px; left: 50%; transform: translateX(-50%);
+    min-width: 54px; max-width: 86px; padding: 4px 8px; border-radius: 14px;
+    background: #3a3a40; color: #fff; font-size: .62rem; line-height: 1.2; z-index: 1;
+}
+.note-bub.empty { display: none; }
+.note-bub .nb-t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-bub .nb-a { color: #c9c9ce; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-note-name { margin-top: 6px; font-size: .74rem; color: var(--fv-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-chips { display: flex; gap: .5rem; padding: .6rem 1rem; }
+.msg-chip {
+    display: flex; align-items: center; gap: .4rem; padding: .45rem .9rem; border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .18); background: none; color: #fff; font: inherit; font-weight: 600; font-size: .85rem;
+}
+.msg-chip.active { background: #2f2f35; }
+.msg-cnt:not(:empty) { color: var(--fv-sub); font-weight: 600; }
+.msg-list { padding-bottom: 7rem; }
+.msg-row { display: flex; align-items: center; gap: .9rem; padding: .7rem 1rem; cursor: pointer; }
+.msg-row .fv-av { width: 54px; height: 54px; }
+.msg-mid { flex: 1; min-width: 0; }
+.msg-name { color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-last { color: var(--fv-sub); font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-row.unread .msg-name, .msg-row.unread .msg-last { color: #fff; font-weight: 700; }
+.msg-dot { width: 10px; height: 10px; border-radius: 50%; background: #4d6bff; flex-shrink: 0; }
+
+/* DM di HP: layar penuh */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .dm-view.show {
+        position: fixed; inset: 0; z-index: 400; height: auto; background: var(--fv-bg);
+    }
+    .dm-body { padding-bottom: .5rem; }
+    .dm-input { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); }
+    .fv-view.show { display: none; }  /* di HP pakai Messages, bukan halaman Friends */
+}
+
+/* ---------- Sheet "Change Online Status" ---------- */
+.stat-backdrop {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, .55); z-index: 3000;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.stat-backdrop.show { opacity: 1; pointer-events: auto; }
+.stat-sheet {
+    position: fixed; left: 50%; bottom: 0; z-index: 3001; width: min(100%, 520px);
+    transform: translate(-50%, 105%); transition: transform .25s ease;
+    background: #232327; border-radius: 22px 22px 0 0; padding: .6rem 1rem 1.4rem;
+    color: #fff;
+}
+.stat-sheet.show { transform: translate(-50%, 0); }
+.stat-handle { width: 44px; height: 5px; border-radius: 3px; background: #4a4a50; margin: 0 auto .8rem; }
+.stat-title { text-align: center; margin: 0 0 1.2rem; font-size: 1.1rem; font-weight: 600; }
+.stat-label { color: var(--fv-sub); margin: 0 .2rem .5rem; }
+.stat-opt {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #2c2c31; cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.stat-opt:first-of-type { border-radius: 14px 14px 0 0; }
+.stat-opt:last-child { border-radius: 0 0 14px 14px; border-bottom: 0; }
+.stat-name { flex: 1; font-size: 1.02rem; }
+.stat-radio { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #6b6b72; position: relative; }
+.stat-opt.selected .stat-radio { border-color: #5865f2; background: #5865f2; }
+.stat-opt.selected .stat-radio::after {
+    content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #fff;
+}
+
+/* ---------- Header chat bisa diklik -> profil ---------- */
+.dm-avwrap, .dm-who { cursor: pointer; }
+.dm-who:hover .dm-name { text-decoration: underline; }
+.dm-pic, .dm-meta b { cursor: pointer; }
+.dm-meta b:hover { text-decoration: underline; }
+
+
+/* ---------- Tombol bulat di banner (add friend, titik 3, dll) ---------- */
+.pf-bn-actions {
+    position: absolute; top: 12px; right: 12px; z-index: 8;
+    display: flex; gap: 10px;
+}
+.bn-btn {
+    width: 46px; height: 46px; border: 0; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    background: rgba(70, 70, 70, .8); color: #fff; font-size: 1.05rem;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.bn-btn:hover { background: rgba(95, 95, 95, .9); }
+.bn-btn:disabled { opacity: .5; cursor: default; }
+.user-profile .pf-actions { display: none; }
+@media (max-width: 768px) { .bn-btn { width: 40px; height: 40px; } }
