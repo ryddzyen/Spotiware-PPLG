@@ -279,7 +279,7 @@ let npVolumeBar = document.getElementById('npVolumeBar');
 
 // ===== History refs =====
 let historyList = document.getElementById('historyList');
-const HISTORY_KEY = 'spotiware_play_history';
+let HISTORY_KEY = 'spotiware_play_history';
 const HISTORY_MAX = 30;
 
 function loadSavedHistory() {
@@ -293,7 +293,7 @@ function loadSavedHistory() {
 let playHistory = loadSavedHistory();
 
 // ===== Playlist (localStorage) =====
-const PLAYLIST_KEY = 'spotiware_playlists';
+let PLAYLIST_KEY = 'spotiware_playlists';
 const LIKED_PLAYLIST_ID = 'liked_songs';
 let pendingSongIdForPlaylist = null;
 let pdCurrentPlaylistId = null;
@@ -3063,6 +3063,46 @@ npMoreBtn?.addEventListener('click', (e) => {
 let _npWasHidden = false;
 try { _npWasHidden = localStorage.getItem(NP_HIDDEN_KEY) === '1'; } catch (e) {}
 setNowPlayingHidden(_npWasHidden);
+
+// ===== Data per akun =====
+const BASE_PLAYLIST_KEY = 'spotiware_playlists';
+const BASE_HISTORY_KEY = 'spotiware_play_history';
+let accountUid = undefined;
+
+function switchAccountData(user) {
+    const uid = user ? user.uid : null;
+    if (uid === accountUid) return;
+    accountUid = uid;
+
+    if (uid) {
+        PLAYLIST_KEY = BASE_PLAYLIST_KEY + ':' + uid;
+        HISTORY_KEY = BASE_HISTORY_KEY + ':' + uid;
+        // data lama (sebelum fitur ini) diberikan ke akun pertama yang login, sekali saja
+        try {
+            if (!localStorage.getItem('spotiware_legacy_claimed')) {
+                const oldPl = localStorage.getItem(BASE_PLAYLIST_KEY);
+                const oldHi = localStorage.getItem(BASE_HISTORY_KEY);
+                if (oldPl && !localStorage.getItem(PLAYLIST_KEY)) localStorage.setItem(PLAYLIST_KEY, oldPl);
+                if (oldHi && !localStorage.getItem(HISTORY_KEY)) localStorage.setItem(HISTORY_KEY, oldHi);
+                localStorage.removeItem(BASE_PLAYLIST_KEY);
+                localStorage.removeItem(BASE_HISTORY_KEY);
+                localStorage.setItem('spotiware_legacy_claimed', uid);
+            }
+        } catch (e) {}
+    } else {
+        PLAYLIST_KEY = BASE_PLAYLIST_KEY;
+        HISTORY_KEY = BASE_HISTORY_KEY;
+    }
+
+    playHistory = loadSavedHistory();
+    queue = [];
+    pdCurrentPlaylistId = null;
+    renderHistory();
+    renderPlaylistList();
+    if (document.getElementById('playlistDetailView')?.classList.contains('show')) closePlaylistDetailView();
+    window.dispatchEvent(new Event('spotiware:account-changed'));
+}
+if (window.firebase && firebase.auth) firebase.auth().onAuthStateChanged(switchAccountData);
 
 // kursor di atas "<": sembunyikan scrollbar daftar lagu
 npShowEdge?.addEventListener('mouseenter', () => document.body.classList.add('np-edge-hover'));

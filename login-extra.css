@@ -1,0 +1,156 @@
+/* ===== Tambahan halaman login / sign up ===== */
+
+/* banner merah ala Spotify */
+.lp-banner{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #e91429;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.9rem 1rem;
+    border-radius: 4px;
+    margin: 0 0 1.2rem;
+    text-align: left;
+}
+.lp-banner i{ font-size: 1.2rem; flex-shrink: 0; }
+
+/* progress bar langkah sign up */
+.lp-progress{
+    position: relative;
+    height: 3px;
+    background: #4d4d4d;
+    margin: 0 0 1.4rem;
+}
+.lp-progress > span{
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: var(--yellow);
+    transition: width 0.3s;
+}
+
+.lp-step{ text-align: left; color: #b3b3b3; font-size: 0.9rem; margin: 0 0 0.2rem; }
+.lp-step-title{
+    text-align: left;
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 1.6rem;
+}
+.lp-step-title.big{ font-size: 1.7rem; line-height: 1.2; }
+.lp-sub.lp-left{ text-align: left; margin: -0.8rem 0 1.4rem; }
+.lp-sub b{ color: #fff; }
+.lp-hint{
+    text-align: left;
+    color: #b3b3b3;
+    font-size: 0.82rem;
+    margin: -0.2rem 0 0.5rem;
+    line-height: 1.4;
+}
+.lp-error.ok{ color: #4ade80; }
+
+/* password + ikon mata */
+.lp-pw{ position: relative; }
+.lp-pw .lp-input{ padding-right: 3rem; }
+.lp-eye{
+    position: absolute;
+    right: 0.8rem;
+    top: 0.75rem;
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.lp-eye:hover{ color: #fff; }
+
+/* daftar syarat password */
+.lp-checks{ list-style: none; text-align: left; margin: 0.4rem 0 1.6rem; padding: 0; }
+.lp-checks li{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.9rem;
+    margin: 0.6rem 0;
+    color: #fff;
+}
+.lp-checks li i{
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+    border: 1px solid #b3b3b3;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+}
+.lp-checks li.ok i{ background: var(--yellow); border-color: var(--yellow); color: #000; }
+
+.lp-primary:disabled{ opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.lp-linkbtn{
+    display: block;
+    margin: 1.4rem auto 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.lp-linkbtn:hover{ color: var(--yellow); text-decoration: underline; }
+
+.lp-check{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0 0 1.5rem;
+    cursor: pointer;
+}
+.lp-check input{ margin-top: 0.2rem; accent-color: var(--yellow); }
+
+/* dialog "No Spotiware account found" */
+.lp-dialog-backdrop{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 6100;
+}
+.lp-dialog-backdrop.show{ display: flex; }
+.lp-dialog{
+    background: #efefef;
+    color: #000;
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    width: 100%;
+    max-width: 30rem;
+    text-align: center;
+}
+.lp-dialog h2{ font-size: 1.5rem; font-weight: 800; margin-bottom: 0.8rem; }
+.lp-dialog p{ font-size: 0.95rem; margin-bottom: 1.4rem; color: #000; }
+.lp-dialog .lp-primary{
+    display: block;
+    width: auto;
+    min-width: 14rem;
+    margin: 0 auto 0.6rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+.lp-dialog .lp-secondary{
+    background: transparent;
+    color: #000;
+    border: 1px solid #7a7a7a;
+}
+.lp-dialog .lp-secondary:hover{ background: rgba(0,0,0,0.06); transform: scale(1.03); }
