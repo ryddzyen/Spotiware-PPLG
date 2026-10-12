@@ -533,7 +533,7 @@
             <ul class="lp-checks">
                 <li data-k="letter"><i class="fa-solid fa-check"></i>1 letter</li>
                 <li data-k="num"><i class="fa-solid fa-check"></i>1 number or special character (example: # ? ! &amp;)</li>
-                <li data-k="len"><i class="fa-solid fa-check"></i>10 characters</li>
+                <li data-k="len"><i class="fa-solid fa-check"></i>6 characters</li>
             </ul>
             <button class="lp-primary" id="lpNext" disabled>Next</button>`;
         wireEye('lpPass');
@@ -543,7 +543,7 @@
         const rules = {
             letter: (v) => /[A-Za-z]/.test(v),
             num: (v) => /[^A-Za-z]/.test(v),
-            len: (v) => v.length >= 10
+            len: (v) => v.length >= 6
         };
         function check() {
             let all = true;
