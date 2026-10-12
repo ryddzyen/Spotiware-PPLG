@@ -349,8 +349,19 @@
 
         $('lpForgot').addEventListener('click', async (e) => {
             e.preventDefault();
-            try { await auth.sendPasswordResetEmail(flow.email); showToast('If this email has a password, a reset link was sent. Check your inbox and spam folder.'); }
-            catch (err) { banner(friendlyError(err)); }
+            const link = $('lpForgot');
+            if (link.dataset.busy) return;
+            link.dataset.busy = '1';
+            banner('');
+            try {
+                await auth.sendPasswordResetEmail(flow.email);
+                showToast('Reset link sent. Check your inbox and spam folder.');
+            } catch (err) {
+                banner(err.code === 'auth/user-not-found'
+                    ? 'No password account found for this email.'
+                    : friendlyError(err));
+            }
+            setTimeout(() => { delete link.dataset.busy; }, 15000);
         });
     }
 
