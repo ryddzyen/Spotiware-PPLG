@@ -215,11 +215,49 @@
 /* DM di HP: layar penuh */
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
     .dm-view.show {
-        position: fixed; inset: 0; z-index: 400; height: auto; background: var(--fv-bg);
+        position: fixed; inset: 0; z-index: 400; height: 100dvh; background: var(--fv-bg);
+        display: flex; flex-direction: column;
     }
-    .dm-body { padding-bottom: .5rem; }
-    .dm-input { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); }
+    .dm-body { padding-bottom: .5rem; flex: 1; min-height: 0; }
+    .dm-input {
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        flex-shrink: 0;
+    }
     .fv-view.show { display: none; }  /* di HP pakai Messages, bukan halaman Friends */
+
+    /* Bottom-nav sudah disembunyikan saat chat terbuka, jadi player-bar digeser turun
+       ke posisi paling bawah (gak perlu lagi kasih ruang buat bottom-nav) */
+    body:has(.dm-view.show) .player-bar{
+        bottom: 0.5rem;
+    }
+
+    /* Kalau ada lagu lagi diputar, sisakan ruang di atas player-bar supaya tombol kirim
+       tetap kelihatan penuh di atasnya, bukan ketutup */
+    body.player-active:has(.dm-view.show) .dm-input{
+        padding-bottom: calc(4.3rem + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .dm-who{
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+    }
+    .dm-name{
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 55vw;
+    }
+    .dm-status{
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 /* ---------- Sheet "Change Online Status" ---------- */
@@ -462,4 +500,9 @@ body.ambient-on .st-group, body.has-wallpaper .st-group { background-color: rgba
         -webkit-backdrop-filter: none !important;
         backdrop-filter: none !important;
     }
+}
+
+/* Sembunyikan menu bawah (Home/Search/Library/Friends/Create) saat chat DM dibuka di mobile */
+body:has(.dm-view.show) .bottom-nav{
+    display: none;
 }

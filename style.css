@@ -6117,37 +6117,4 @@ body.pd-readonly .cover-upload-overlay{ display: none; }
     .friends-wrap{ display: none !important; }
 }
 
-/* ===== Obrolan di HP ===== */
-@media (max-width: 768px), (hover: none) and (pointer: coarse){
-    /* menu bawah hilang saat obrolan terbuka */
-    body.chat-open .bottom-nav{ display: none !important; }
-
-    /* ruang untuk now bar: 0 kalau tidak ada lagu, 4.6rem kalau ada */
-    body.chat-open{ --pl-space: 0rem; }
-    body.chat-open.player-active{ --pl-space: 4.6rem; }
-
-    /* panel obrolan / kolom kirim berhenti tepat di atas now bar, dan naik mengikuti keyboard */
-    body.chat-open .chat-host{
-        bottom: calc(var(--kb, 0px) + var(--pl-space)) !important;
-        height: auto !important;
-        max-height: none !important;
-    }
-
-    /* now bar berada tepat di bawah kolom kirim, ikut naik di atas keyboard */
-    body.chat-open .player-bar{
-        bottom: calc(var(--kb, 0px) + 0.5rem) !important;
-    }
-
-    /* nama di header: lebih kecil, satu baris */
-    .chat-name-sm{
-        font-size: 1rem !important;
-        font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        min-width: 0;
-        max-width: 100%;
-    }
-}
-
 .app-toast{ z-index: 7000; }
