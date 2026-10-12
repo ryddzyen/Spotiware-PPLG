@@ -359,3 +359,107 @@
         display: inline-block; transform: rotate(45deg);
     }
 }
+
+/* =====================================================
+   SETTINGS: grup "Tampilan" + menu "Akun"
+   ===================================================== */
+.st-account { margin-bottom: 1.6rem; }
+.acc-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem 0; color: var(--gray-light); font-size: 1rem;
+}
+.acc-edit {
+    display: inline-flex; align-items: center; gap: .6rem; padding: .55rem 1.2rem;
+    background: none; border: 1px solid #727272; border-radius: 999px; color: #fff;
+    font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; transition: .15s;
+}
+.acc-edit:hover { border-color: #fff; transform: scale(1.03); }
+
+.st-group { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; margin-bottom: .9rem; }
+.st-group-head {
+    display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1rem 1.2rem;
+    background: none; border: 0; color: #fff; text-align: left; font-family: inherit; cursor: pointer;
+}
+.st-group-head:hover { background: rgba(255, 255, 255, .04); }
+.st-group-chev { color: var(--gray-mid); transition: transform .2s; }
+.st-group.open .st-group-chev { transform: rotate(180deg); }
+.st-group-body { display: none; padding: 0 1.2rem 1rem; }
+.st-group.open .st-group-body { display: block; }
+.st-group-body .st-desc { margin-top: .2rem; }
+.st-group-body .st-card { background: #141414; }
+body.ambient-on .st-group, body.has-wallpaper .st-group { background-color: rgba(26, 26, 26, var(--card-alpha, .68)); }
+
+/* sub halaman akun */
+#stSub { max-width: 44rem; }
+.acc-back {
+    width: 2.4rem; height: 2.4rem; margin-bottom: 1rem; border: 0; border-radius: 50%;
+    background: rgba(255, 255, 255, .08); color: #fff; cursor: pointer;
+}
+.acc-back:hover { background: rgba(255, 255, 255, .16); }
+.acc-list { border-top: 1px solid #2a2a2a; }
+.acc-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem .6rem; border-bottom: 1px solid #2a2a2a; cursor: pointer; color: #fff;
+}
+.acc-item:hover:not(.disabled):not(.static) { background: rgba(255, 255, 255, .04); }
+.acc-item.disabled, .acc-item.static { cursor: default; }
+.acc-lbl { font-size: .85rem; color: var(--gray-light); margin-bottom: .2rem; }
+.acc-val { font-size: 1.05rem; font-weight: 600; }
+.acc-hint { font-size: .78rem; color: var(--gray-mid); margin-top: .4rem; max-width: 30rem; }
+.acc-social { display: flex; align-items: center; gap: 1rem; font-size: 1.05rem; font-weight: 600; }
+.acc-social i { font-size: 1.4rem; }
+.acc-link {
+    background: none; border: 0; color: var(--gray-light); font-family: inherit;
+    font-size: .95rem; font-weight: 700; padding: .5rem 1rem; cursor: pointer; border-radius: 999px;
+}
+.acc-link:hover:not(:disabled) { color: #fff; text-decoration: underline; }
+.acc-link:disabled { opacity: .4; cursor: not-allowed; }
+
+.acc-form { max-width: 36rem; }
+.acc-label { display: block; font-size: .92rem; font-weight: 700; color: #fff; margin: 1.3rem 0 .5rem; }
+.acc-input {
+    box-sizing: border-box; width: 100%; padding: .9rem 1rem; background: transparent; color: #fff;
+    border: 1px solid #727272; border-radius: 6px; font-family: inherit; font-size: 1rem; outline: none;
+}
+.acc-input:hover { border-color: #fff; }
+.acc-input:focus { border-color: var(--yellow); box-shadow: 0 0 0 1px var(--yellow); }
+.acc-pw { position: relative; }
+.acc-pw .acc-input { padding-right: 3rem; }
+.acc-eye { position: absolute; right: .8rem; top: 50%; transform: translateY(-50%); background: none; border: 0; color: #b3b3b3; cursor: pointer; font-size: 1.05rem; }
+.acc-eye:hover { color: #fff; }
+.acc-checks { list-style: none; margin: 0 0 .4rem; padding: 0; }
+.acc-checks li { position: relative; padding-left: 1.5rem; margin: .5rem 0; font-size: .88rem; color: var(--gray-light); }
+.acc-checks li::before {
+    content: ""; position: absolute; left: 0; top: .15rem; width: .8rem; height: .8rem;
+    border: 1.5px solid #8a8a8a; border-radius: 50%;
+}
+.acc-checks li.ok { color: #fff; }
+.acc-checks li.ok::before { background: var(--yellow); border-color: var(--yellow); }
+.acc-err { color: #f15e6c; font-size: .85rem; min-height: 1.1rem; margin: .9rem 0 0; }
+.acc-err.ok { color: #4cd964; }
+.acc-danger {
+    display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.4rem; padding: 0;
+    background: none; border: 0; color: #f15e6c; font-family: inherit; font-size: .95rem; font-weight: 700; cursor: pointer;
+}
+.acc-danger:hover { text-decoration: underline; }
+.acc-actions { display: flex; justify-content: flex-end; gap: .8rem; margin-top: 2rem; padding-bottom: 2rem; }
+.acc-btn {
+    padding: .9rem 1.6rem; border: 0; border-radius: 999px; background: #2a2a2a; color: #fff;
+    font-family: inherit; font-size: .95rem; font-weight: 800; cursor: pointer; transition: .15s;
+}
+.acc-btn:hover:not(:disabled) { transform: scale(1.04); background: #3a3a3a; }
+.acc-btn.primary { background: var(--yellow); color: #000; }
+.acc-btn.primary:hover:not(:disabled) { background: var(--gold); }
+.acc-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* =====================================================
+   Phone frame saat di-hide ikut transparan (Transparansi Card)
+   ===================================================== */
+@media (min-width: 901px) and (hover: hover) {
+    body.np-hidden.ambient-on .now-playing-panel:not(:fullscreen) .phone-frame,
+    body.np-hidden.has-wallpaper .now-playing-panel:not(:fullscreen) .phone-frame {
+        background: rgba(18, 18, 18, var(--card-alpha, .68)) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+}

@@ -1,5 +1,5 @@
 // ===== Login / Sign up ala Spotify =====
-// Login : email ATAU username -> link ke email (passwordless) / password, phone, Google
+// Login : EMAIL -> link ke email (passwordless) / password, phone, Google
 // Sign up: email -> password -> Name + Username (unik) -> terms
 // Login langsung tanpa punya akun -> dialog "No Spotiware account found"
 (() => {
@@ -200,8 +200,8 @@
     function renderLogin() {
         body.innerHTML = `
             <h1 class="lp-title">Welcome back</h1>
-            <label class="lp-label" for="lpId">Email or username</label>
-            <input class="lp-input" id="lpId" type="text" autocomplete="username" autocapitalize="none" value="${esc(flow.id || '')}">
+            <label class="lp-label" for="lpId">Email address</label>
+            <input class="lp-input" id="lpId" type="email" autocomplete="email" autocapitalize="none" value="${esc(flow.id || '')}">
             <p class="lp-error" id="lpError"></p>
             <button class="lp-primary" id="lpContinue">Continue</button>
             <div class="lp-or">or</div>
@@ -225,45 +225,30 @@
 
     async function onLoginContinue() {
         const btn = $('lpContinue');
-        const raw = $('lpId').value.trim();
+        const v = $('lpId').value.trim().toLowerCase();
         setError('');
-        if (!raw) { setError('Enter your email or username.'); return; }
-        flow.id = raw;
+        if (!EMAIL_RE.test(v)) { setError('Please enter a valid email address.'); return; }
+        flow.id = v;
+        flow.email = v;
         busy(btn, true, 'Continue');
-
         try {
-            if (raw.includes('@') && !raw.startsWith('@')) {
-                if (!EMAIL_RE.test(raw)) { busy(btn, false, 'Continue'); setError('Please enter a valid email address.'); return; }
-                flow.email = raw.toLowerCase();
-                flow.byUsername = false;
-                let registered = false;
-                try { registered = (await emailRef(flow.email).get()).exists; } catch (_) {}
-                if (registered) await sendLink(); else renderPassword();
-            } else {
-                const u = raw.replace(/^@/, '').toLowerCase();
-                if (u.length < 3 || u.length > 15 || !USER_RE.test(u)) {
-                    busy(btn, false, 'Continue'); showNoAccount('username'); return;
-                }
-                const snap = await unameRef(u).get();
-                if (!snap.exists) { busy(btn, false, 'Continue'); showNoAccount('username'); return; }
-                const d = snap.data();
-                if (!d.email) {
-                    busy(btn, false, 'Continue');
-                    setError('This account has no email. Log in with phone number or Google instead.');
-                    return;
-                }
-                flow.email = d.email;
-                flow.byUsername = true;
-                flow.username = u;
-                await sendLink();
-            }
+            // terdaftar -> kirim link; belum tercatat (akun lama) -> langsung ke password
+            if (await emailTaken(v)) await sendLink(); else renderPassword();
         } catch (err) {
             busy(btn, false, 'Continue');
             setError(friendlyError(err));
         }
     }
 
-    // ----- link login ke email (pengganti kode 6 digit) -----
+    // ----- link login ke email -----
+    function linkErrorText(err) {
+        if (err.code === 'auth/operation-not-allowed')
+            return 'Email link login is not enabled yet. Turn on "Email link" in Firebase > Authentication > Sign-in method > Email/Password.';
+        if (err.code === 'auth/unauthorized-continue-uri' || err.code === 'auth/invalid-continue-uri')
+            return 'This domain (' + location.hostname + ') is not authorized. Add it in Firebase > Authentication > Settings > Authorized domains.';
+        return friendlyError(err);
+    }
+
     async function sendLink() {
         try {
             await auth.sendSignInLinkToEmail(flow.email, {
@@ -273,8 +258,8 @@
             try { localStorage.setItem(LINK_KEY, flow.email); } catch (_) {}
             renderCheckEmail();
         } catch (err) {
-            console.warn('Email link gagal:', err.code);
-            renderPassword();     // link belum aktif di Firebase -> langsung ke password
+            console.warn('Email link gagal:', err.code, err.message);
+            renderPassword(linkErrorText(err));     // tampilkan alasannya, jangan diam saja
         }
     }
 
@@ -282,18 +267,18 @@
         body.innerHTML = `
             ${BACK}
             <h1 class="lp-step-title big">Check your email</h1>
-            <p class="lp-sub lp-left">We sent a log in link to <b>${esc(maskEmail(flow.email))}</b>. Open it on this device to continue.</p>
+            <p class="lp-sub lp-left">We sent a log in link to <b>${esc(maskEmail(flow.email))}</b>. Open it in this browser to continue. Also check your spam folder.</p>
             <button type="button" class="lp-outline" id="lpResend" style="padding-left:1rem;">Resend link</button>
             <button type="button" class="lp-linkbtn" id="lpUsePw">Log in with a password</button>`;
         $('lpBack').addEventListener('click', renderLogin);
-        $('lpUsePw').addEventListener('click', renderPassword);
+        $('lpUsePw').addEventListener('click', () => renderPassword());
         $('lpResend').addEventListener('click', async () => {
             const b = $('lpResend');
             b.disabled = true;
             try {
                 await auth.sendSignInLinkToEmail(flow.email, { url: location.origin + location.pathname, handleCodeInApp: true });
                 showToast('Link sent');
-            } catch (err) { showToast(friendlyError(err)); }
+            } catch (err) { showToast(linkErrorText(err)); }
             setTimeout(() => { b.disabled = false; }, 15000);
         });
     }
@@ -315,6 +300,7 @@
                 await rejectNew(cred.user, 'email address');
             } else {
                 holdClose = false;
+                showToast('Logged in');
             }
         } catch (err) {
             holdClose = false;
@@ -323,19 +309,20 @@
     }
 
     // ----- login pakai password -----
-    function renderPassword() {
+    function renderPassword(note) {
         body.innerHTML = `
             ${BACK}
             <h1 class="lp-step-title big">Log in with a password</h1>
             <div id="lpBannerSlot"></div>
-            <label class="lp-label">${flow.byUsername ? 'Username' : 'Email'}</label>
-            <input class="lp-input" type="text" value="${esc(flow.byUsername ? flow.username : flow.email)}" readonly>
+            <label class="lp-label">Email</label>
+            <input class="lp-input" type="text" value="${esc(flow.email)}" readonly>
             <label class="lp-label" for="lpPass">Password</label>
             <div class="lp-pw"><input class="lp-input" id="lpPass" type="password" autocomplete="current-password">${EYE}</div>
             <button class="lp-primary" id="lpSubmit">Log in</button>
             <button type="button" class="lp-linkbtn" id="lpNoPw">Log in without password</button>
             <div class="lp-foot lp-foot-tight"><a href="#" id="lpForgot">Forgot your password?</a></div>`;
         wireEye('lpPass');
+        if (note) banner(note);
         const pass = $('lpPass');
         pass.focus();
         pass.addEventListener('keydown', (e) => { if (e.key === 'Enter') $('lpSubmit').click(); });
@@ -351,17 +338,12 @@
             } catch (err) {
                 busy(btn, false, 'Log in');
                 const bad = ['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'];
-                banner(bad.includes(err.code)
-                    ? `Incorrect ${flow.byUsername ? 'username' : 'email address'} or password.`
-                    : friendlyError(err));
+                banner(bad.includes(err.code) ? 'Incorrect email address or password.' : friendlyError(err));
             }
         });
 
         $('lpNoPw').addEventListener('click', async () => {
             banner('');
-            let registered = false;
-            try { registered = (await emailRef(flow.email).get()).exists; } catch (_) {}
-            if (!registered) { banner("Couldn't send a log in link. Use your password instead."); return; }
             await sendLink();
         });
 
@@ -481,6 +463,26 @@
     // ============================================================
     //  SIGN UP
     // ============================================================
+    // cek email: koleksi acct_emails + metode login Firebase (kalau fiturnya aktif)
+    async function emailTaken(v) {
+        try { if ((await emailRef(v).get()).exists) return true; } catch (_) {}
+        try { return (await auth.fetchSignInMethodsForEmail(v)).length > 0; } catch (_) {}
+        return false;
+    }
+
+    function showEmailTaken(v) {
+        const el = $('lpError');
+        if (!el) return;
+        el.classList.remove('ok');
+        el.innerHTML = 'This email is already registered. <a href="#" id="lpGoLogin">Log in instead</a>';
+        $('lpGoLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            mode = 'login';
+            flow = { id: v };      // email langsung terisi di halaman login
+            renderLogin();
+        });
+    }
+
     function renderSignupEmail() {
         body.innerHTML = `
             <h1 class="lp-title">Sign up to start listening</h1>
@@ -499,19 +501,26 @@
         input.focus();
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter') $('lpNext').click(); });
 
+        // cek otomatis begitu email selesai diketik
+        let timer = null, token = 0;
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            setError('');
+            const v = input.value.trim().toLowerCase();
+            if (!EMAIL_RE.test(v)) return;
+            const my = ++token;
+            timer = setTimeout(async () => {
+                if (await emailTaken(v) && my === token) showEmailTaken(v);
+            }, 500);
+        });
+
         $('lpNext').addEventListener('click', async () => {
             const btn = $('lpNext');
             const v = input.value.trim().toLowerCase();
             setError('');
             if (!EMAIL_RE.test(v)) { setError('Please enter a valid email address.'); return; }
             busy(btn, true, 'Next');
-            let taken = false;
-            try { taken = (await emailRef(v).get()).exists; } catch (_) {}
-            if (taken) {
-                busy(btn, false, 'Next');
-                setError('This email is already connected to an account. Log in instead.');
-                return;
-            }
+            if (await emailTaken(v)) { busy(btn, false, 'Next'); showEmailTaken(v); return; }
             flow.email = v;
             renderSignupPassword();
         });
@@ -659,6 +668,8 @@
     }
 
     // simpan username + email ke Firestore (transaksi supaya username benar-benar unik)
+    // Email TIDAK disimpan di acct_usernames dan username TIDAK disimpan di acct_emails,
+    // supaya dokumen yang bisa dibaca publik tidak membocorkan data pasangannya.
     async function claimProfile(user) {
         const u = flow.username;
         const email = (user.email || '').toLowerCase();
@@ -666,8 +677,8 @@
             await db.runTransaction(async (tx) => {
                 const snap = await tx.get(unameRef(u));
                 if (snap.exists) throw new Error('taken');
-                tx.set(unameRef(u), { uid: user.uid, email: email || null });
-                if (email) tx.set(emailRef(email), { uid: user.uid, username: u });
+                tx.set(unameRef(u), { uid: user.uid });
+                if (email) tx.set(emailRef(email), { uid: user.uid });
             });
         } catch (err) {
             if (err.message === 'taken') return 'taken';
@@ -701,11 +712,17 @@
             close();
         } catch (err) {
             holdClose = false;
+            if (err.code === 'auth/email-already-in-use') { renderSignupEmail(); showEmailTaken(flow.email); return; }
             if (user) await deleteQuietly(user);
             busy(btn, false, 'Sign up');
             banner(friendlyError(err));
         }
     }
+    auth.onAuthStateChanged((user) => {
+        if (user && user.email) {
+            emailRef(user.email.toLowerCase()).set({ uid: user.uid }, { merge: true }).catch(() => {});
+        }
+    });
 
     completeEmailLink();
 })();
