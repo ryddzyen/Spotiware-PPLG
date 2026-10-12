@@ -377,7 +377,7 @@
                 <p class="pfe-hint">PNG, JPG, GIF, MP4 atau WEBM. Video maksimal ${BANNER_MAX_SEC} detik dan ${BANNER_MAX_MB} MB.</p>
 
                 <label class="pfe-label" for="pfeName">Display name</label>
-                <input type="text" id="pfeName" class="create-playlist-modal-input" maxlength="40">
+                <input type="text" id="pfeName" class="create-playlist-modal-input" maxlength="15">
                 
                 <div class="pfe-label">Display name color</div>
                 <div class="pfe-namecolor">
@@ -389,7 +389,7 @@
                 </div>
 
                 <label class="pfe-label" for="pfeUsername">Username</label>
-                <input type="text" id="pfeUsername" class="create-playlist-modal-input" maxlength="20" placeholder="huruf kecil, angka, . atau _">
+                <input type="text" id="pfeUsername" class="create-playlist-modal-input" maxlength="15" placeholder="huruf kecil, angka, . atau _">
 
                 <label class="pfe-label" for="pfePronouns">Pronouns</label>
                 <input type="text" id="pfePronouns" class="create-playlist-modal-input" maxlength="24" placeholder="mis. he/him, she/her">
@@ -572,11 +572,11 @@
 
         modal.querySelector('#pfeSave').addEventListener('click', async () => {
             const name = pfeName.value.trim();
-            const unCheck = pfeUsername.value.trim().toLowerCase().replace(/[^a-z0-9._]/g, '');
-            if (unCheck && window.Social) {
-                try {
-                    if (!(await Social.isUsernameFree(unCheck))) { showToast('Username sudah dipakai'); return; }
-                } catch (_) {}
+            if (name && (name.length < 3 || name.length > 15)) { showToast('Name must be 3–15 characters'); return; }
+            const unNew = pfeUsername.value.trim().toLowerCase();
+            if (unNew && unNew !== getUsername(currentUser) && window.Username) {
+                const r = await Username.claim(unNew);   // cek + simpan atomik, username lama otomatis dilepas
+                if (!r.ok) { showToast(r.msg); return; }
             }
             try {
                 if (name && name !== currentUser.displayName) {

@@ -18,14 +18,15 @@
     }
 
     // ---------- Recent searches (disimpan di localStorage) ----------
-    const RECENT_KEY = 'spotiware_recent_searches';
+    const recentKey = () => 'spotiware_recent_searches_' + ((firebase.auth().currentUser || {}).uid || 'guest');
+    try { localStorage.removeItem('spotiware_recent_searches'); } catch (e) {}
 
     function getRecents() {
-        try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; }
+        try { return JSON.parse(localStorage.getItem(recentKey())) || []; }
         catch (e) { return []; }
     }
     function saveRecents(list) {
-        try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 10))); } catch (e) {}
+        try { localStorage.setItem(recentKey(), JSON.stringify(list.slice(0, 10))); } catch (e) {}
     }
     // item: {type:'song', id} | {type:'query', text} | {type:'profile', id, name, username, photo}
     function addRecent(item) {
@@ -695,4 +696,5 @@
     audio.addEventListener('play', refreshRows);
     audio.addEventListener('pause', refreshRows);
     audio.addEventListener('playing', refreshRows);
+    firebase.auth().onAuthStateChanged(() => { closeDropdown(); });
 })();

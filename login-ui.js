@@ -349,7 +349,7 @@
 
         $('lpForgot').addEventListener('click', async (e) => {
             e.preventDefault();
-            try { await auth.sendPasswordResetEmail(flow.email); showToast('Password reset email sent'); }
+            try { await auth.sendPasswordResetEmail(flow.email); showToast('If this email has a password, a reset link was sent. Check your inbox and spam folder.'); }
             catch (err) { banner(friendlyError(err)); }
         });
     }
@@ -376,7 +376,7 @@
         }
         flow.pendingUser = cred.user;
         flow.social = true;
-        flow.name = cred.user.displayName || '';
+        flow.name = (cred.user.displayName || '').slice(0, 15);
         flow.username = '';
         renderProfileStep();
     }
@@ -591,8 +591,8 @@
             <h1 class="lp-step-title">Tell us about yourself</h1>
             <div id="lpBannerSlot"></div>
             <label class="lp-label" for="lpName">Name</label>
-            <p class="lp-hint">This name will appear on your profile (3–30 characters).</p>
-            <input class="lp-input" id="lpName" type="text" maxlength="30" autocomplete="name" value="${esc(flow.name || '')}">
+            <p class="lp-hint">This name will appear on your profile (3–15 characters).</p>
+            <input class="lp-input" id="lpName" type="text" maxlength="15" autocomplete="name" value="${esc(flow.name || '')}">
             <label class="lp-label" for="lpUser">Username</label>
             <p class="lp-hint">3–15 characters. Letters, numbers, underscore (_) and dot (.) only. Must be unique.</p>
             <input class="lp-input" id="lpUser" type="text" maxlength="15" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(flow.username || '')}">
@@ -621,7 +621,7 @@
             const name = nameEl.value.trim();
             const u = userEl.value.trim().toLowerCase();
             setError('');
-            if (name.length < 3 || name.length > 30) { setError('Name must be 3–30 characters.'); return; }
+            if (name.length < 3 || name.length > 15) { setError('Name must be 3–15 characters.'); return; }
             busy(btn, true, social ? 'Sign up' : 'Next');
             const r = await checkUsername(u);
             if (!r.ok) { busy(btn, false, social ? 'Sign up' : 'Next'); setError(r.msg); return; }
