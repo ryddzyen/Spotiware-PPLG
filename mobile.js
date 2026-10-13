@@ -29,13 +29,30 @@
     rightPart.prepend(homeBlock);
     const mhGrid = homeBlock.querySelector('#mhGrid');
 
+    // (a) playlist Library + playlist orang lain yang pernah diputar, digabung dan diurutkan waktu terakhir
     function renderHomeGrid() {
         try { ensureLikedPlaylist(); } catch (e) {}
-        const list = getPlaylists().slice()
-            .sort((a, b) => getPlaylistTimestamp(b, 'lastPlayedAt') - getPlaylistTimestamp(a, 'lastPlayedAt'))
-            .slice(0, 8);
+        const mine = getPlaylists();
+        const copied = new Set(mine.map((p) => p.savedFrom).filter(Boolean));
 
-        mhGrid.innerHTML = list.map((p) => {
+        const lib = mine.map((p) => ({ t: getPlaylistTimestamp(p, 'lastPlayedAt'), p }));
+        const ext = (window.RecentPL ? RecentPL.list() : [])
+            .filter((x) => !copied.has(x.id))            // sudah disimpan ke Library -> jangan dobel
+            .map((x) => ({ t: x.t || 0, x }));
+
+        const list = lib.concat(ext).sort((a, b) => b.t - a.t).slice(0, 8);
+
+        mhGrid.innerHTML = list.map((e) => {
+            if (e.x) {
+                const src = (window.Social && Social.coverOf) ? Social.coverOf(e.x) : null;
+                const img = src ? `<img src="${esc(src)}" alt="">` : '<i class="fa-solid fa-music"></i>';
+                return `
+                    <div class="mh-tile" data-ext="${esc(e.x.id)}">
+                        <div class="mh-cover">${img}</div>
+                        <div class="mh-name">${esc(e.x.name)}</div>
+                    </div>`;
+            }
+            const p = e.p;
             const liked = p.id === LIKED_PLAYLIST_ID;
             const src = getPlaylistCoverSrc(p);
             const img = src ? `<img src="${esc(src)}" alt="">`
@@ -48,9 +65,11 @@
         }).join('');
     }
 
+    // (b) klik kotak: playlist orang lain dibuka lewat RecentPL, playlist Library seperti biasa
     mhGrid.addEventListener('click', (e) => {
         const tile = e.target.closest('.mh-tile');
         if (!tile) return;
+        if (tile.dataset.ext) { if (window.RecentPL) RecentPL.open(tile.dataset.ext); return; }
         const p = getPlaylists().find((x) => x.id === tile.dataset.pid);
         if (p) openPlaylistDetailView(p, p.id === LIKED_PLAYLIST_ID);
     });
@@ -210,6 +229,10 @@
         if (miPage.classList.contains('show')) renderInbox();
     });
     window.addEventListener('spotiware:chats', updateInboxDot);
+
+    // (c) kotak beranda ikut diperbarui saat riwayat playlist berubah / akun berganti
+    window.addEventListener('spotiware:recent-playlists', renderHomeGrid);
+    firebase.auth().onAuthStateChanged(renderHomeGrid);
 
     renderHomeGrid();
 })();

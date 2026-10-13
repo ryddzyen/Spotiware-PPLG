@@ -296,12 +296,21 @@
     }
 
     // yang diawali kata kunci tampil lebih dulu, lalu yang hanya mengandung kata kunci
+    // urutan: diawali kata kunci -> awal salah satu kata -> hanya mengandung.
+    // Kalau kata kunci cuma 1 huruf, hanya yang diawali huruf itu yang ditampilkan.
     function rankBy(list, q, getKeys) {
         const scored = [];
         list.forEach((x) => {
             const keys = getKeys(x).filter(Boolean).map((k) => String(k).toLowerCase());
-            if (!keys.some((k) => k.includes(q))) return;
-            scored.push([keys.some((k) => k.startsWith(q)) ? 0 : 1, x]);
+            let best = 9;
+            keys.forEach((k) => {
+                if (k.startsWith(q)) best = Math.min(best, 0);
+                else if (k.split(/[\s._-]+/).some((w) => w.startsWith(q))) best = Math.min(best, 1);
+                else if (k.includes(q)) best = Math.min(best, 2);
+            });
+            if (best === 9) return;
+            if (q.length < 2 && best > 1) return;
+            scored.push([best, x]);
         });
         return scored.sort((a, b) => a[0] - b[0]).map((s) => s[1]);
     }
@@ -319,7 +328,7 @@
         const q = raw.toLowerCase().trim();
         if (!q) return [];
         return rankBy(await loadAll('publicPlaylists'), q,
-            (p) => [p.nameLower, p.ownerName, p.ownerUsername]);
+            (p) => [p.nameLower]);
     }
 
     // =====================================================

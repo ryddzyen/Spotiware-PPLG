@@ -3,7 +3,7 @@
     const KEY = (u) => 'spotiware_settings_' + u;
     const WP_KEY = (u) => 'spotiware_wallpaper_' + u;
     const DEFAULTS = {
-        ambient: false, ambIntensity: 55,
+        ambient: false,
         cardTransparency: 32,
         wpEnabled: false, wpOpacity: 60, wpSize: 'cover',
         cursorDesign: 'default', cursorSize: 36
@@ -13,7 +13,6 @@
     const CURSOR_FRAMES = 30;
     const CURSOR_FPS = 24;
     const TEXT_SEL = 'textarea, input:not([type=range]):not([type=checkbox]):not([type=file]):not([type=button]):not([type=submit])';
-    // Elemen yang bikin kursor berubah jadi "mau klik" (sword, atau versi scale-down untuk desain SVG)
     const CLICKABLE_SEL = [
         'a', 'button', '[role=button]', '[onclick]', 'input[type=range]',
         '.music-card', '.playlist-item', '.playMusic', '.music-play-btn',
@@ -25,10 +24,6 @@
     ].join(', ');
     const canCursor = !window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-    // ---- Daftar desain kursor ----
-    // kind 'system' = kursor bawaan browser (mati)
-    // kind 'sprite' = sprite PNG 30 frame, otomatis ganti ke 'hoverSrc' saat di atas elemen klik-able
-    // kind 'svg'    = SVG inline; tambahkan class 'cur-pulse'/'cur-spin' untuk animasi
     const CURSOR_DESIGNS = [
         { id: 'default', name: 'Default', kind: 'system' },
         {
@@ -101,8 +96,8 @@
                 </div>
                 <div class="st-controls">
                     <div class="st-field">
-                        <label for="stAmbIntensity">Intensitas cahaya <b id="stAmbIntensityVal">55%</b></label>
-                        <input type="range" class="st-range" id="stAmbIntensity" min="0" max="100" value="55">
+                        <label for="stCardTransAmb">Transparansi card <b id="stCardTransAmbVal">32%</b></label>
+                        <input type="range" class="st-range" id="stCardTransAmb" min="0" max="95" value="32">
                     </div>
                 </div>
             </div>
@@ -119,8 +114,13 @@
 
                 <div class="st-wp-preview" id="stWpPreview">
                     <div class="stwp-layer" id="stWpLayer"></div>
+                    <div class="stwp-card"><i class="fa-solid fa-music"></i></div>
                     <span class="stwp-empty" id="stWpEmpty">Belum ada gambar</span>
                 </div>
+                <p class="st-hint">
+                    <span class="st-hint-d">Rekomendasi ukuran gambar: 1920 × 1080 (16:9).</span>
+                    <span class="st-hint-m">Rekomendasi ukuran gambar: 1080 × 1920 (9:16, layar HP).</span>
+                </p>
 
                 <div class="st-controls">
                     <button class="pd-pill-btn" id="stWpChoose"><i class="fa-solid fa-upload"></i> Pilih gambar</button>
@@ -129,6 +129,11 @@
                     <div class="st-field">
                         <label for="stWpOpacity">Opacity <b id="stWpOpacityVal">60%</b></label>
                         <input type="range" class="st-range" id="stWpOpacity" min="0" max="100" value="60">
+                    </div>
+
+                    <div class="st-field">
+                        <label for="stCardTransWp">Transparansi card <b id="stCardTransWpVal">32%</b></label>
+                        <input type="range" class="st-range" id="stCardTransWp" min="0" max="95" value="32">
                     </div>
 
                     <div class="st-field">
@@ -145,22 +150,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="st-card st-col">
-                <div class="st-row">
-                    <div class="st-icon"><i class="fa-regular fa-clone"></i></div>
-                    <div class="st-info">
-                        <h3>Transparansi Card</h3>
-                        <p>Atur transparansi semua card (sidebar, panel, navbar, player). Terlihat saat Ambient Light atau Wallpaper aktif.</p>
-                    </div>
-                </div>
-                <div class="st-controls">
-                    <div class="st-field">
-                        <label for="stCardTrans">Transparansi <b id="stCardTransVal">32%</b></label>
-                        <input type="range" class="st-range" id="stCardTrans" min="0" max="95" value="32">
-                    </div>
-                </div>
-            </div>
         </section>`;
     rightPart.prepend(view);
 
@@ -171,16 +160,16 @@
     const elCursorSizeWrap = $('stCursorSizeWrap');
     const elAmbient = $('stAmbient');
     const elAmbPreview = $('stAmbPreview');
-    const elAmbIntensity = $('stAmbIntensity');
-    const elAmbIntensityVal = $('stAmbIntensityVal');
     const elWpEnabled = $('stWpEnabled');
     const elWpLayer = $('stWpLayer');
     const elWpEmpty = $('stWpEmpty');
     const elOpacity = $('stWpOpacity');
     const elOpacityVal = $('stWpOpacityVal');
     const elFile = $('stWpFile');
-    const elCardTrans = $('stCardTrans');
-    const elCardTransVal = $('stCardTransVal');
+    const elCardTransA = $('stCardTransAmb');
+    const elCardTransAV = $('stCardTransAmbVal');
+    const elCardTransW = $('stCardTransWp');
+    const elCardTransWV = $('stCardTransWpVal');
 
     function paintRange(el) {
         const min = +el.min || 0, max = +el.max || 100;
@@ -220,10 +209,23 @@
     }
 
     function applyVars() {
-        ambLayer.style.setProperty('--amb-intensity', settings.ambIntensity / 100);
-        elAmbPreview.style.setProperty('--amb-prev', Math.min(1, settings.ambIntensity / 100 * 1.4));
         body.style.setProperty('--card-alpha', (1 - settings.cardTransparency / 100).toFixed(2));
     }
+
+    // ---- Transparansi card: satu nilai, dua slider (Ambient & Wallpaper) ----
+    function paintCardTrans() {
+        [[elCardTransA, elCardTransAV], [elCardTransW, elCardTransWV]].forEach(([el, lbl]) => {
+            el.value = settings.cardTransparency;
+            lbl.textContent = settings.cardTransparency + '%';
+            paintRange(el);
+        });
+    }
+    [elCardTransA, elCardTransW].forEach(el => el.addEventListener('input', () => {
+        settings.cardTransparency = parseInt(el.value);
+        paintCardTrans();
+        applyVars();
+        saveSettings();
+    }));
 
     // ================= Kursor (sprite + SVG, swap otomatis saat hover) =================
     const cursorEl = document.createElement('div');
@@ -235,8 +237,8 @@
 
     const sheetCache = {};
     let cursorOn = false, cursorSeen = false, isHoveringClickable = false;
-    let activeDesignId = 'default';   // desain yang tersimpan & aktif
-    let previewDesignId = null;       // desain sementara (saat hover kartu galeri)
+    let activeDesignId = 'default';
+    let previewDesignId = null;
     let curFrame = -1, rafId = null, cx = -100, cy = -100, cursorW = 0, cursorH = 0;
     let normalSheet = null, hoverSheet = null;
 
@@ -363,7 +365,7 @@
                 renderCursorGallery();
                 return applyCursor();
             }
-            if (currentDesign().id !== design.id) return; // pilihan sudah berubah selama loading
+            if (currentDesign().id !== design.id) return;
             cursorEl.querySelectorAll('.cur-svg').forEach(el => el.remove());
             cursorCanvas.style.display = 'block';
         }
@@ -541,7 +543,6 @@
         elWpEmpty.style.display = src ? 'none' : 'block';
     }
 
-    // sinkronkan toggle + tampilan setelah mode berubah
     function refreshModes() {
         elAmbient.checked = settings.ambient;
         elWpEnabled.checked = settings.wpEnabled && !!wallpaper;
@@ -549,7 +550,7 @@
         updateAmbient();
     }
 
-    // ---- Ambient: toggle & intensitas ----
+    // ---- Ambient: toggle ----
     elAmbient.addEventListener('change', () => {
         if (elAmbient.checked) {
             if (settings.wpEnabled) showToast('Wallpaper dimatikan, hanya satu mode yang bisa aktif');
@@ -560,23 +561,6 @@
         }
         saveSettings();
         refreshModes();
-    });
-
-    elAmbIntensity.addEventListener('input', () => {
-        settings.ambIntensity = parseInt(elAmbIntensity.value);
-        elAmbIntensityVal.textContent = settings.ambIntensity + '%';
-        paintRange(elAmbIntensity);
-        applyVars();
-        saveSettings();
-    });
-
-    // ---- Transparansi card ----
-    elCardTrans.addEventListener('input', () => {
-        settings.cardTransparency = parseInt(elCardTrans.value);
-        elCardTransVal.textContent = settings.cardTransparency + '%';
-        paintRange(elCardTrans);
-        applyVars();
-        saveSettings();
     });
 
     // ---- Wallpaper: kontrol ----
@@ -618,7 +602,7 @@
         settings.wpOpacity = draft.opacity;
         settings.wpSize = draft.size;
         settings.wpEnabled = true;
-        settings.ambient = false;      // hanya satu mode
+        settings.ambient = false;
         saveSettings();
         pendingWp = null;
         refreshModes();
@@ -662,13 +646,7 @@
         elCursorSizeVal.textContent = settings.cursorSize + 'px';
         paintRange(elCursorSize);
 
-        elAmbIntensity.value = settings.ambIntensity;
-        elAmbIntensityVal.textContent = settings.ambIntensity + '%';
-        paintRange(elAmbIntensity);
-
-        elCardTrans.value = settings.cardTransparency;
-        elCardTransVal.textContent = settings.cardTransparency + '%';
-        paintRange(elCardTrans);
+        paintCardTrans();
 
         draft.opacity = settings.wpOpacity;
         draft.size = settings.wpSize;

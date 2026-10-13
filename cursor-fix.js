@@ -11,13 +11,8 @@
     function overElementScrollbar(e) {
         let el = e.target;
         while (el && el.nodeType === 1 && el !== root) {
+            if (!el.clientWidth || !el.clientHeight) { el = el.parentElement; continue; }   // elemen inline (link/teks) tidak punya scrollbar
             const r = el.getBoundingClientRect();
-            const sbw = el.offsetWidth - el.clientLeft * 2 - el.clientWidth;    // lebar scrollbar vertikal
-            const sbh = el.offsetHeight - el.clientTop * 2 - el.clientHeight;   // tinggi scrollbar horizontal
-            if (sbw > 0 && e.clientX >= r.right - el.clientLeft - sbw - 1 && e.clientX <= r.right) return true;
-            if (sbh > 0 && e.clientY >= r.bottom - el.clientTop - sbh - 1 && e.clientY <= r.bottom) return true;
-            el = el.parentElement;
-        }
         return false;
     }
 

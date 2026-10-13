@@ -1,10 +1,27 @@
-// ===== playlist-view.js : tampilan playlist milik ORANG LAIN =====
-// Tampil hanya saat membuka playlist publik orang lain. Playlist sendiri tidak diubah.
+// ===== playlist-view.js : playlist milik ORANG LAIN (termasuk salinan yang disimpan ke Library) =====
 (() => {
     const db = firebase.firestore();
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // ---------- Ikon "Add to your library" di menu mana pun -> love ----------
+    let iconRaf = null;
+    function fixIcons() {
+        document.querySelectorAll('i[class*="fa-plus"], i[class*="fa-square-plus"]').forEach((i) => {
+            const t = (i.parentElement ? i.parentElement.textContent : '').trim().toLowerCase();
+            if (t !== 'add to your library') return;
+            i.className = 'fa-regular fa-heart';
+        });
+        document.querySelectorAll('i[class*="fa-heart"]').forEach((i) => {
+            const t = (i.parentElement ? i.parentElement.textContent : '').trim().toLowerCase();
+            if (t === 'remove from your library') i.className = 'fa-solid fa-heart';
+        });
+    }
+    new MutationObserver(() => {
+        if (iconRaf) return;
+        iconRaf = requestAnimationFrame(() => { iconRaf = null; fixIcons(); });
+    }).observe(document.body, { childList: true, subtree: true });
 
     const shuffleBtn = $('playlistShuffleBtn');
     const detailView = $('playlistDetailView');
@@ -38,9 +55,13 @@
 
     // ---------- Data ----------
     const me = () => firebase.auth().currentUser;
-    const isMine = () => !!(item && me() && item.ownerUid === me().uid);
+    const isMine = () => !!(item && item.ownerUid && me() && item.ownerUid === me().uid);
     const songsOf = () => ((item && item.songIds) || []).map((id) => songs.find((s) => s.id === id)).filter(Boolean);
     const savedCopy = () => (item ? getPlaylists().find((p) => p.savedFrom === item.id) || null : null);
+    const localSaved = () => {
+        const id = typeof pdCurrentPlaylistId === 'string' ? pdCurrentPlaylistId : null;
+        return id ? (getPlaylists().find((p) => p.id === id && p.savedFrom) || null) : null;
+    };
 
     async function load(docId) {
         const s = await db.collection('publicPlaylists').doc(docId).get();
@@ -60,8 +81,9 @@
         list.forEach((s) => { p.addedDates[s.id] = Date.now(); });
         if (item.description) p.description = item.description;
         if (item.cover) p.coverImage = item.cover;
-        p.savedFrom = item.id;
+        p.savedFrom = item.id;                       // penanda: ini playlist orang lain (hanya lihat & putar)
         p.savedFromOwner = item.ownerName || '';
+        p.savedFromOwnerUid = item.ownerUid || '';
         savePlaylists(all);
         return p;
     }
@@ -77,8 +99,18 @@
         if (!item || isMine()) return;
         if (!me()) { showToast('Log in first'); return; }
         const c = savedCopy();
-        if (c) { deletePlaylist(c.id); showToast('Removed from Your Library'); }
-        else { ensureCopy(); showToast('Added to Your Library'); }
+        if (c) {
+            deletePlaylist(c.id);
+            showToast('Removed from Your Library');
+            if (curId && curId.startsWith('loc_')) {      // sedang membuka salinan itu -> tutup halamannya
+                renderPlaylistList();
+                closePlaylistDetailView();
+                return;
+            }
+        } else {
+            ensureCopy();
+            showToast('Added to Your Library');
+        }
         renderPlaylistList();
         refresh();
     }
@@ -105,7 +137,6 @@
         showToast('Added to Queue', isMobileView() ? 'Open' : null, () => openMobileSheet('queue'));
     }
 
-    // link yang bisa dibuka siapa saja (format sama dengan "Copy link to playlist" di share.js)
     function toB64Url(str) {
         const bytes = new TextEncoder().encode(str);
         let bin = '';
@@ -160,44 +191,94 @@
     }, true);
     window.addEventListener('scroll', () => menu.classList.remove('show'), true);
 
-    // nama pembuat playlist -> buka profilnya
+    // nama pembuat -> buka profilnya
     document.addEventListener('click', (e) => {
         const a = e.target.closest('.pv-owner');
         if (!a) return;
         e.preventDefault();
-        if (window.Social) Social.openProfile(a.dataset.uid);
-    });
+        e.stopPropagation();
+        if (a.dataset.uid && window.Social) Social.openProfile(a.dataset.uid);
+    }, true);
 
-    // ---------- Deteksi: sedang membuka playlist orang lain? ----------
+    // ---------- Baris pembuat playlist (foto + nama) ----------
     function decorate() {
         const type = document.querySelector('.playlist-detail-type');
         if (type) type.textContent = 'Public Playlist';
         const desc = $('playlistDetailDescription');
-        if (!desc || desc.querySelector('.pv-owner')) return;
-        desc.innerHTML = (item.description ? esc(item.description) + ' • ' : '') +
-            'By <a href="#" class="pv-owner" data-uid="' + esc(item.ownerUid) + '">' + esc(item.ownerName || 'Unknown') + '</a>';
+        if (desc) desc.textContent = item.description || '';
+
+        let by = $('pvBy');
+        if (!by) {
+            by = document.createElement('div');
+            by.id = 'pvBy';
+            by.className = 'pv-by';
+            $('playlistDetailMeta').before(by);
+        }
+        if (by.dataset.k === curId) return;
+        by.dataset.k = curId;
+
+        const my = item;
+        const paint = (photo) => {
+            by.innerHTML =
+                `<span class="pv-by-av">${photo ? `<img src="${esc(photo)}" alt="">` : '<i class="fa-solid fa-user"></i>'}</span>` +
+                `<a href="#" class="pv-owner" data-uid="${esc(my.ownerUid || '')}">${esc(my.ownerName || 'Unknown')}</a>`;
+        };
+        paint(null);
+        if (my.ownerUid && window.Social && Social.core) {
+            Social.core.getUser(my.ownerUid).then((u) => { if (item === my && u) paint(u.photo); }).catch(() => {});
+        }
     }
 
+    // ---------- Deteksi: sedang membuka playlist orang lain? ----------
     async function sync() {
-        const pub = detailView.classList.contains('show') &&
-            document.body.classList.contains('pd-readonly') &&
+        const shown = detailView.classList.contains('show');
+        const fromPub = document.body.classList.contains('pd-readonly') &&
             typeof pdCurrentPlaylistId === 'string' && pdCurrentPlaylistId.startsWith('pub_');
+        const loc = shown && !fromPub ? localSaved() : null;
+        const pub = shown && (fromPub || !!loc);
         document.body.classList.toggle('pv-public', pub);
 
-        if (!pub) { curId = null; item = null; menu.classList.remove('show'); document.body.classList.remove('pv-mine'); return; }
+        if (!pub) {
+            curId = null; item = null;
+            menu.classList.remove('show');
+            document.body.classList.remove('pv-mine');
+            return;
+        }
 
-        const docId = pdCurrentPlaylistId.slice(4);
-        if (docId !== curId) {
-            curId = docId;
+        const key = fromPub ? pdCurrentPlaylistId : 'loc_' + loc.id;
+        if (key !== curId) {
+            curId = key;
             item = null;
-            try { item = await load(docId); } catch (_) {}
-            if (curId !== docId) return;      // pengguna sudah pindah halaman
+            if (fromPub) {
+                try { item = await load(pdCurrentPlaylistId.slice(4)); } catch (_) {}
+            } else {
+                item = {
+                    id: loc.savedFrom, name: loc.name, description: loc.description || '',
+                    cover: loc.coverImage || null, songIds: loc.songIds,
+                    ownerName: loc.savedFromOwner || '', ownerUid: loc.savedFromOwnerUid || ''
+                };
+                if (!item.ownerUid) {      // salinan lama: cari pemiliknya dari playlist aslinya
+                    try {
+                        const d = await load(loc.savedFrom);
+                        if (d) { item.ownerUid = d.ownerUid; item.ownerName = d.ownerName || item.ownerName; }
+                    } catch (_) {}
+                }
+            }
+            if (curId !== key) return;      // pengguna sudah pindah halaman
         }
         if (!item) return;
         document.body.classList.toggle('pv-mine', isMine());
         decorate();
         refresh();
     }
+
+    // tandai "playlist orang lain" SEKARANG juga, supaya tombol Add / Name and details tidak sempat berkedip
+    const _open = openPlaylistDetailView;
+    openPlaylistDetailView = function (pl, isLiked) {
+        document.body.classList.toggle('pv-public',
+            !!(pl && (pl.savedFrom || String(pl.id).startsWith('pub_'))));
+        _open(pl, isLiked);
+    };
 
     const kick = () => {
         if (raf) return;

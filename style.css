@@ -6278,12 +6278,64 @@ body.pv-public .cover-upload-overlay{ display: none; }
 .pv-owner{ color: #fff; font-weight: 700; text-decoration: none; }
 .pv-owner:hover{ text-decoration: underline; }
 
-/* Preview wallpaper di HP: bentuk layar HP (9:16) */
+/* HP: preview wallpaper berbentuk layar HP (9:16) */
 @media (max-width: 768px), (hover: none) and (pointer: coarse){
     .st-wp-preview{
-        width: 12.4rem;
-        height: 22rem;
-        margin-left: auto;
-        margin-right: auto;
+        height: auto;
+        aspect-ratio: 9 / 16;
+        width: 11rem;
+        max-width: 60%;
+        margin: 1rem auto 0;
     }
+    .st-wp-preview .stwp-card{ width: 70%; height: 22%; }
+    .st-hint{ text-align: center; }
+    .st-hint-d{ display: none; }
+    .st-hint-m{ display: inline; }
+}
+
+/* ===== Your Library fullscreen: kartu ikut transparan ===== */
+body.ambient-on .main.library-expanded .playlist-item,
+body.has-wallpaper .main.library-expanded .playlist-item{
+    background-color: rgba(24,24,24,var(--card-alpha,0.68));
+}
+body.ambient-on .main.library-expanded .playlist-item:hover,
+body.has-wallpaper .main.library-expanded .playlist-item:hover{
+    background-color: rgba(34,34,34,var(--card-alpha,0.68));
+}
+
+/* ===== Baris pembuat playlist (foto + nama) ===== */
+.pv-by{ display: none; align-items: center; gap: 0.5rem; margin: 0.5rem 0; }
+body.pv-public .pv-by{ display: flex; }
+.pv-by-av{
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #3a3a3a;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.pv-by-av img{ width: 100%; height: 100%; object-fit: cover; }
+.pv-owner{ color: #fff; font-weight: 700; font-size: 0.9rem; text-decoration: none; cursor: pointer; }
+.pv-owner:hover{ text-decoration: underline; }
+body.pv-public #ctxRemoveFromPlaylist{ display: none !important; }
+
+/* ===== Menu profil HP: lebih kecil ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .md-drawer{
+        width: 72%;
+        max-width: 17rem;
+        padding: 0.6rem;
+        padding-top: calc(0.6rem + env(safe-area-inset-top, 0px));
+    }
+    .md-head{ padding: 0.6rem; gap: 0.7rem; margin-bottom: 0.3rem; }
+    .md-avatar{ width: 2.8rem; height: 2.8rem; font-size: 1.1rem; }
+    .md-name{ font-size: 1rem; }
+    .md-sub{ font-size: 0.78rem; }
+    .md-item{ padding: 0.75rem 0.6rem; font-size: 0.9rem; gap: 0.8rem; }
+    .md-item i{ width: 1.2rem; font-size: 1rem; }
 }

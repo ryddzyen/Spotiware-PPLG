@@ -358,6 +358,32 @@
     document.addEventListener('mousedown', (e) => { if (!frMenu.contains(e.target)) frMenu.classList.remove('show'); }, true);
     window.addEventListener('scroll', () => frMenu.classList.remove('show'), true);
 
+        // urutan gabungan lagu + profil + playlist: yang diawali kata kunci tampil lebih dulu
+    function relScore(q, texts) {
+        let best = 3;
+        texts.forEach((t) => {
+            t = String(t || '').toLowerCase();
+            if (t.startsWith(q)) best = Math.min(best, 0);
+            else if (t.split(/[\s._()-]+/).some((w) => w.startsWith(q))) best = Math.min(best, 1);
+            else if (t.includes(q)) best = Math.min(best, 2);
+        });
+        return best;
+    }
+    function mixedHTML(raw, S, P, L) {
+        const q = raw.toLowerCase().trim();
+        const items = [];
+        S.forEach((s, i) => items.push([relScore(q, [s.songName, s.songDes]), i * 3, rowHTML(s)]));
+        P.forEach((u, i) => items.push([relScore(q, [u.displayName, u.username]), i * 3 + 1, userRowHTML(u)]));
+        L.forEach((p, i) => items.push([relScore(q, [p.name]), i * 3 + 2, playlistRowHTML(p)]));
+        return items.sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((x) => x[2]);
+    }
+
+    // library yang sedang fullscreen -> kembali ke ukuran normal saat mulai mencari
+    function leaveLibraryFull() {
+        const m = document.querySelector('.main');
+        if (m && m.classList.contains('library-expanded')) document.getElementById('libraryExpandBtn')?.click();
+    }
+
     function renderRecents() {
         const list = getRecents();
         dropdownList = [];
@@ -402,13 +428,7 @@
                 : `<div class="sd-empty">No results found for "${esc(q)}"</div>`;
             return;
         }
-        const out = [];
-        const max = Math.max(S.length, P.length, L.length);
-        for (let i = 0; i < max; i++) {
-            if (S[i]) out.push(rowHTML(S[i]));
-            if (P[i]) out.push(userRowHTML(P[i]));
-            if (L[i]) out.push(playlistRowHTML(L[i]));
-        }
+        const out = mixedHTML(q, S, P, L);
         dropdown.innerHTML =
             sug.map((t) => `
                 <div class="sd-sug" data-text="${esc(t)}">
@@ -617,13 +637,7 @@
             P.forEach((u) => { cardItems[u.id] = u; });
             L.forEach((p) => { cardItems[p.id] = p; });
 
-            const out = [];
-            const max = Math.max(S.length, P.length, L.length);
-            for (let i = 0; i < max; i++) {
-                if (S[i]) out.push(rowHTML(S[i]));
-                if (P[i]) out.push(userRowHTML(P[i]));
-                if (L[i]) out.push(playlistRowHTML(L[i]));
-            }
+            const out = mixedHTML(q, S, P, L);
 
             if (!out.length) {
                 svList.innerHTML = `<div class="sd-empty">No results found for "${esc(q)}"<br><small>${esc(note || 'Please make sure your words are spelled correctly.')}</small></div>`;
