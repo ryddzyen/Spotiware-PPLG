@@ -131,7 +131,7 @@
             'auth/invalid-phone-number': 'Invalid phone number.',
             'auth/invalid-verification-code': 'Incorrect verification code.',
             'auth/code-expired': 'The code has expired. Request a new one.',
-            'auth/quota-exceeded': 'SMS quota exceeded. Try again later.',
+            'auth/quota-exceeded': 'Daily limit reached. Try again later.',
             'auth/captcha-check-failed': 'reCAPTCHA check failed. Try again.',
             'auth/invalid-action-code': 'This link is invalid or has expired. Request a new one.',
             'auth/expired-action-code': 'This link has expired. Request a new one.',
@@ -233,7 +233,7 @@
         busy(btn, true, 'Continue');
         try {
             // terdaftar -> kirim link; belum tercatat (akun lama) -> langsung ke password
-            if (await emailTaken(v)) await sendLink(); else renderPassword();
+            renderPassword();  
         } catch (err) {
             busy(btn, false, 'Continue');
             setError(friendlyError(err));
@@ -246,6 +246,8 @@
             return 'Email link login is not enabled yet. Turn on "Email link" in Firebase > Authentication > Sign-in method > Email/Password.';
         if (err.code === 'auth/unauthorized-continue-uri' || err.code === 'auth/invalid-continue-uri')
             return 'This domain (' + location.hostname + ') is not authorized. Add it in Firebase > Authentication > Settings > Authorized domains.';
+        if (err.code === 'auth/quota-exceeded')
+            return 'Too many log in emails were sent today. Please log in with your password instead.';
         return friendlyError(err);
     }
 
