@@ -470,5 +470,25 @@
         }).observe(dd, { childList: true });
     }
 
+    // =====================================================
+    // Autoplay: setelah lagu terakhir playlist -> lanjut ke lagu ACAK dari beranda
+    // (bukan mengulang playlist yang sama). Antrean `order` diperpanjang saat lagu terakhir mulai.
+    // =====================================================
+    function ensureAutoplayTail() {
+        try {
+            if (!playerBar.classList.contains('show')) return;
+            if (songOnRepeat || queue.length > 0) return;       // repeat / antrean manual tetap menang
+            if (order.length >= visibleSongs.length) return;    // konteks beranda/pencarian sudah panjang
+            if (currentIndex < order.length - 1) return;        // masih ada lagu berikutnya di playlist
+            const inList = new Set(order.map((s) => s.id));
+            const pool = visibleSongs.filter((s) => !inList.has(s.id));
+            if (!pool.length) return;
+            order.push(...shuffleSongs(pool).slice(0, 30));
+            preloadedPath = null;
+            try { renderQueuePanel(); renderMobileSheet(); } catch (e) {}
+        } catch (e) {}
+    }
+    ['play', 'playing'].forEach((ev) => audio.addEventListener(ev, ensureAutoplayTail));
+
     window.PLX = { decorate, set: (k, it) => { items[k] = it; }, playKey, syncPlayIcons, syncHearts };
 })();

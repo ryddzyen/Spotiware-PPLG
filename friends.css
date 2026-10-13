@@ -506,3 +506,10 @@ body.ambient-on .st-group, body.has-wallpaper .st-group { background-color: rgba
 body:has(.dm-view.show) .bottom-nav{
     display: none;
 }
+
+/* Grid Home (chip All + 8 playlist) harus hilang saat halaman lain sedang terbuka
+   (mis. playlist dari link share, profil, pencarian, settings). */
+.main-right-part:has(.playlist-detail-view.show, .show-all-view.show, .profile-view.show, .history-view.show,
+    .settings-view.show, .search-view.show, .fv-view.show, .dm-view.show, .m-page.show) > .mh-section {
+    display: none !important;
+}
