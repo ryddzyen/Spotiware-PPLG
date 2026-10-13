@@ -938,13 +938,12 @@ function formatAddedDate(timestamp) {
 function updatePlaylistPlayIcon() {
     const iconEl = document.querySelector('#playlistPlayBtn i');
     if (!iconEl) return;
-    if (!audio.paused && playerBar.classList.contains('show')) {
-        iconEl.classList.remove('fa-play');
-        iconEl.classList.add('fa-pause');
-    } else {
-        iconEl.classList.remove('fa-pause');
-        iconEl.classList.add('fa-play');
-    }
+    const ids = Array.from(document.querySelectorAll('#playlistTrackTableBody tr[data-song-id]'))
+        .map((r) => parseInt(r.dataset.songId));
+    const playingHere = playerBar.classList.contains('show') && !audio.paused &&
+        ids.includes(getCurrentSong().id);
+    iconEl.classList.toggle('fa-pause', playingHere);
+    iconEl.classList.toggle('fa-play', !playingHere);
 }
 
 function updatePlaylistRowIcons() {
@@ -998,6 +997,7 @@ function highlightCurrentSong() {
     }
     play.classList.remove('fa-circle-play');
     play.classList.add('fa-circle-pause');
+    updatePlaylistPlayIcon();
 }
 
 function updateNowPlayingPanel() {

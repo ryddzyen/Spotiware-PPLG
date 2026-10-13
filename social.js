@@ -284,29 +284,42 @@
     // =====================================================
     // 3. Pencarian profil & playlist publik
     // =====================================================
-    async function prefixQuery(col, field, q) {
-        const s = await db.collection(col).where(field, '>=', q).where(field, '<=', q + '\uf8ff').limit(24).get();
-        return s.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // ambil dokumen koleksi (maks 500), disimpan 30 detik supaya hemat baca
+    const colCache = {};
+    async function loadAll(col) {
+        const c = colCache[col];
+        if (c && Date.now() - c.t < 30000) return c.docs;
+        const s = await db.collection(col).limit(500).get();
+        const docs = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+        colCache[col] = { t: Date.now(), docs };
+        return docs;
+    }
+
+    // yang diawali kata kunci tampil lebih dulu, lalu yang hanya mengandung kata kunci
+    function rankBy(list, q, getKeys) {
+        const scored = [];
+        list.forEach((x) => {
+            const keys = getKeys(x).filter(Boolean).map((k) => String(k).toLowerCase());
+            if (!keys.some((k) => k.includes(q))) return;
+            scored.push([keys.some((k) => k.startsWith(q)) ? 0 : 1, x]);
+        });
+        return scored.sort((a, b) => a[0] - b[0]).map((s) => s[1]);
     }
 
     async function searchProfiles(raw) {
         if (!me) throw new Error('login');
         const q = raw.toLowerCase().trim().replace(/^@/, '');
         if (!q) return [];
-        const [a, b] = await Promise.all([
-            prefixQuery('users', 'usernameLower', q),
-            prefixQuery('users', 'nameLower', q)
-        ]);
-        const map = new Map();
-        [...a, ...b].forEach((u) => map.set(u.id, u));
-        return [...map.values()];
+        return rankBy(await loadAll('users'), q,
+            (u) => [u.usernameLower, u.nameLower || (u.displayName || '').toLowerCase()]);
     }
 
     async function searchPlaylists(raw) {
         if (!me) throw new Error('login');
         const q = raw.toLowerCase().trim();
         if (!q) return [];
-        return prefixQuery('publicPlaylists', 'nameLower', q);
+        return rankBy(await loadAll('publicPlaylists'), q,
+            (p) => [p.nameLower, p.ownerName, p.ownerUsername]);
     }
 
     // =====================================================
