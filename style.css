@@ -6118,3 +6118,14 @@ body.pd-readonly .cover-upload-overlay{ display: none; }
 }
 
 .app-toast{ z-index: 7000; }
+
+/* ===== Centang verified ===== */
+.vf-badge{
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 0.35em;
+    width: 1em;
+    height: 1em;
+}
+.vf-badge svg{ width: 100%; height: 100%; display: block; }
+.pf-name .vf-badge{ width: 0.55em; height: 0.55em; margin-left: 0.25em; }
