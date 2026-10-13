@@ -481,7 +481,7 @@
                 }
             }
 
-            const S = songsFound.slice(0, 8), P = profs.slice(0, 4), L = pls.slice(0, 4);
+            const S = songsFound, P = profs, L = pls;
             resultList = S;
             P.forEach((u) => { cardItems[u.id] = u; });
             L.forEach((p) => { cardItems[p.id] = p; });
