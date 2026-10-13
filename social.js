@@ -751,6 +751,8 @@
     window.Social = {
         searchProfiles, searchPlaylists, openProfile, openPublicPlaylist, isUsernameFree, coverOf,
         renderInbox,
+        relationWith: (uid) => (me ? relationWith(uid) : { state: 'none' }),
+        sendRequest,
         pendingCount: () => pendingIn().length,
         core: {
             friendships: () => friendships,

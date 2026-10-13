@@ -276,6 +276,88 @@
     }
     function closeDropdown() { dropdown.classList.remove('show'); }
 
+        // ---------- Ikon "berteman" di hasil profil + klik kanan ----------
+    const FR_UI = {
+        none:     ['fa-user-plus',  'Add friend', ''],
+        sent:     ['fa-user-clock', 'Request sent (tap to cancel)', 'on'],
+        received: ['fa-user-check', 'Accept friend request', 'on'],
+        friends:  ['fa-user-check', 'Friends (tap to remove)', 'ok']
+    };
+    const FR_LABEL = { none: 'Add friend', sent: 'Cancel friend request', received: 'Accept friend request', friends: 'Remove friend' };
+
+    function friendState(uid) {
+        const me = firebase.auth().currentUser;
+        if (!me || me.uid === uid || !window.Social || !Social.relationWith) return null;   // diri sendiri / belum login: tanpa ikon
+        return Social.relationWith(uid);
+    }
+
+    function friendBtnHTML(uid) {
+        const r = friendState(uid);
+        if (!r) return '';
+        const [icon, title, cls] = FR_UI[r.state];
+        return `<button type="button" class="fr-add ${cls}" data-act="friend" data-uid="${esc(uid)}" title="${title}"><i class="fa-solid ${icon}"></i></button>`;
+    }
+
+    async function friendAction(uid) {
+        const r = friendState(uid);
+        if (!r) { showToast('Log in to add friends'); return; }
+        try {
+            if (r.state === 'none') { await Social.sendRequest(uid); showToast('Friend request sent'); }
+            else if (r.state === 'sent') { await Social.core.removeFriendship(r.id); showToast('Request canceled'); }
+            else if (r.state === 'received') { await Social.core.acceptRequest(r.id); showToast('You are now friends'); }
+            else if (r.state === 'friends') { if (confirm('Remove this friend?')) await Social.core.removeFriendship(r.id); }
+        } catch (err) { console.warn(err); showToast('Something went wrong'); }
+    }
+
+    function refreshFriendBtns() {
+        document.querySelectorAll('.fr-add').forEach((b) => {
+            const t = document.createElement('div');
+            t.innerHTML = friendBtnHTML(b.dataset.uid);
+            if (t.firstElementChild) b.replaceWith(t.firstElementChild);
+        });
+    }
+    window.addEventListener('spotiware:friends', refreshFriendBtns);   // status berubah -> ikon ikut berubah
+
+    // menu klik kanan pada orang
+    const frMenu = document.createElement('div');
+    frMenu.className = 'context-menu';
+    frMenu.innerHTML = `
+        <div class="context-menu-item" data-act="friend"><i class="fa-solid fa-user-plus"></i><span>Add friend</span></div>
+        <div class="context-menu-item" data-act="view"><i class="fa-solid fa-user"></i><span>View profile</span></div>`;
+    document.body.appendChild(frMenu);
+    let frMenuUid = null;
+
+    document.addEventListener('contextmenu', (e) => {
+        const el = e.target.closest('.sv-item[data-kind="profile"], .sv-card[data-kind="profile"]');
+        if (!el || !(dropdown.contains(el) || view.contains(el))) return;
+        e.preventDefault();
+        e.stopPropagation();
+        frMenuUid = el.dataset.id;
+        const r = friendState(frMenuUid);
+        const row = frMenu.querySelector('[data-act="friend"]');
+        if (r) {
+            row.style.display = '';
+            row.querySelector('span').textContent = FR_LABEL[r.state];
+            row.querySelector('i').className = 'fa-solid ' + FR_UI[r.state][0];
+        } else {
+            row.style.display = 'none';
+        }
+        frMenu.classList.add('show');
+        frMenu.style.left = Math.min(e.clientX, window.innerWidth - (frMenu.offsetWidth || 200) - 8) + 'px';
+        frMenu.style.top = Math.min(e.clientY, window.innerHeight - (frMenu.offsetHeight || 100) - 8) + 'px';
+    }, true);
+
+    frMenu.addEventListener('click', (e) => {
+        const it = e.target.closest('[data-act]');
+        if (!it) return;
+        const uid = frMenuUid;
+        frMenu.classList.remove('show');
+        if (it.dataset.act === 'friend') friendAction(uid);
+        else if (window.Social) { closeDropdown(); Social.openProfile(uid); }
+    });
+    document.addEventListener('mousedown', (e) => { if (!frMenu.contains(e.target)) frMenu.classList.remove('show'); }, true);
+    window.addEventListener('scroll', () => frMenu.classList.remove('show'), true);
+
     function renderRecents() {
         const list = getRecents();
         dropdownList = [];
@@ -308,13 +390,24 @@
         else closeDropdown();
     }
 
-    function renderDropdown(q) {
-        const sug = suggestions(q);
-        dropdownList = matchSongs(q).slice(0, 6);
+    // jumlah maksimal baris per jenis di rekomendasi (ubah kalau mau lebih banyak)
+    const DD_SONGS = 8, DD_OTHERS = 6;
+    let ddToken = 0;
+    let ddItems = {};
 
-        if (!sug.length && !dropdownList.length) {
-            dropdown.innerHTML = `<div class="sd-empty">No results found for "${esc(q)}"</div>`;
+    function paintDropdown(q, sug, S, P, L, loading) {
+        if (!sug.length && !S.length && !P.length && !L.length) {
+            dropdown.innerHTML = loading
+                ? '<div class="sd-empty">Searching…</div>'
+                : `<div class="sd-empty">No results found for "${esc(q)}"</div>`;
             return;
+        }
+        const out = [];
+        const max = Math.max(S.length, P.length, L.length);
+        for (let i = 0; i < max; i++) {
+            if (S[i]) out.push(rowHTML(S[i]));
+            if (P[i]) out.push(userRowHTML(P[i]));
+            if (L[i]) out.push(playlistRowHTML(L[i]));
         }
         dropdown.innerHTML =
             sug.map((t) => `
@@ -325,12 +418,33 @@
                         <i class="fa-solid fa-arrow-up" style="transform:rotate(-45deg)"></i>
                     </button>
                 </div>`).join('') +
-            (dropdownList.length ? '<div class="sd-divider"></div>' : '') +
-            dropdownList.map(rowHTML).join('');
+            (out.length ? '<div class="sd-divider"></div>' : '') +
+            out.join('');
+    }
+
+    function renderDropdown(q) {
+        const my = ++ddToken;
+        const sug = suggestions(q);
+        const S = matchSongs(q).slice(0, DD_SONGS);
+        dropdownList = S;
+        ddItems = {};
+        paintDropdown(q, sug, S, [], [], !!window.Social);   // lagu langsung tampil, profil & playlist menyusul
+
+        if (!window.Social) return;
+        Promise.allSettled([Social.searchProfiles(q), Social.searchPlaylists(q)]).then(([pr, pl]) => {
+            if (my !== ddToken || !dropdown.classList.contains('show')) return;
+            const P = pr.status === 'fulfilled' ? pr.value.slice(0, DD_OTHERS) : [];
+            const L = pl.status === 'fulfilled' ? pl.value.slice(0, DD_OTHERS) : [];
+            if (!P.length && !L.length && (sug.length || S.length)) return;   // tidak ada tambahan, biarkan
+            P.forEach((u) => { ddItems[u.id] = u; });
+            L.forEach((p) => { ddItems[p.id] = p; });
+            paintDropdown(q, sug, S, P, L, false);
+        });
     }
 
     dropdown.addEventListener('click', (e) => {
-        // hapus satu item recent
+        const fb = e.target.closest('[data-act="friend"]');
+        if (fb) { e.stopPropagation(); friendAction(fb.dataset.uid); return; }
         const rm = e.target.closest('[data-act="remove"]');
         if (rm) {
             e.stopPropagation();
@@ -364,6 +478,21 @@
             Social.openProfile(uid);
             return;
         }
+
+        const it = e.target.closest('.sv-item[data-kind]');
+        if (it && window.Social) {
+            const data = ddItems[it.dataset.id];
+            closeDropdown();
+            input.blur();
+            if (it.dataset.kind === 'profile') {
+                if (data) addRecent({ type: 'profile', id: data.id, name: data.displayName || data.username || 'User', username: data.username || '', photo: data.photo || null });
+                Social.openProfile(it.dataset.id);
+            } else if (data) {
+                Social.openPublicPlaylist(data);
+            }
+            return;
+        }
+
         const sug = e.target.closest('.sd-sug');
         if (sug) {
             input.value = sug.dataset.text;
@@ -410,6 +539,7 @@
                 <div class="sv-card-img round">${img}</div>
                 <div class="sv-card-title">${esc(u.displayName || u.username || 'User')}</div>
                 <div class="sv-card-sub">@${esc(u.username || '')}</div>
+                ${friendBtnHTML(u.id)}
             </div>`;
     }
 
@@ -434,6 +564,7 @@
                     <div class="sv-item-title">${esc(u.displayName || u.username || 'User')}</div>
                     <div class="sv-item-sub">@${esc(u.username || '')}</div>
                 </div>
+                ${friendBtnHTML(u.id)}
             </div>`;
     }
 
@@ -540,6 +671,8 @@
     });
 
     svList.addEventListener('click', (e) => {
+        const fb = e.target.closest('[data-act="friend"]');
+        if (fb) { e.stopPropagation(); friendAction(fb.dataset.uid); return; }
         const card = e.target.closest('.sv-card, .sv-item');
         if (!card || !window.Social) return;
         const id = card.dataset.id;
