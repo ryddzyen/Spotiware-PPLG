@@ -259,7 +259,7 @@ const songs = [
     { id: 256, songName: "Love Me Like You Do", songDes: "Ellie Goulding", songImage: "Art Cover/13_ellie_goulding_love_me_like_you_do.webp", songPath: "Lagu/1000 Tahun Lamanya.mp3" },
     { id: 257, songName: "Pede", songDes: "Sheila On 7", songImage: "Art Cover/14_sheila_on_7_pede.webp", songPath: "Lagu/12 - Sal Priadi - Gala bunga matahari.mp3" },
     { id: 258, songName: "Beautiful (feat. Camila Cabello)", songDes: "Bazzi, Camila Cabello", songImage: "Art Cover/15_bazzi_beautiful__feat__camila_cabello_.webp", songPath: "Lagu/12_45 - Stripped.mp3" },
-    { id: 259, songName: "I Like Me Better", songDes: "Lauv", songImage: "Art Cover/16_lauv_i_like_me_better.webp", songPath: "Lagu/13 - Feast - Nina.mp3" },
+    { id: 259, songName: "I Like Me Better", songDes: "Lauv", songImage: "Art Cover/200_lauv_i_like_me_better.webp", songPath: "Lagu/13 - Feast - Nina.mp3" },
     { id: 260, songName: "Mean It", songDes: "Lauv, LANY", songImage: "Art Cover/17_lauv_mean_it.webp", songPath: "Lagu/15 - Hindia - everything u are.mp3" },
     { id: 261, songName: "i'm so tired...", songDes: "Lauv, Troye Sivan", songImage: "Art Cover/18_lauv_i_m_so_tired___.webp", songPath: "Lagu/16 - Rizky Febian - Hingga Tua Bersama.mp3" },
     { id: 262, songName: "Feelings", songDes: "Lauv", songImage: "Art Cover/19_lauv_feelings.webp", songPath: "Lagu/17 - Idgitaf - Sedia Aku Sebelum Hujan.mp3" },
