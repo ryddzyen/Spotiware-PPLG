@@ -6339,3 +6339,32 @@ body.pv-public #ctxRemoveFromPlaylist{ display: none !important; }
     .md-item{ padding: 0.75rem 0.6rem; font-size: 0.9rem; gap: 0.8rem; }
     .md-item i{ width: 1.2rem; font-size: 1rem; }
 }
+
+/* ===== Kotak riwayat playlist di beranda: tombol play kuning ===== */
+.mh-tile{ position: relative; }
+.mh-play{
+    display: none;
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--yellow);
+    color: #000;
+    font-size: 1rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: 0.15s;
+    z-index: 2;
+}
+@media (hover: hover) and (pointer: fine){
+    .mh-tile:hover .mh-play,
+    .mh-play.on{ display: flex; opacity: 1; transform: translateY(-50%); }
+    .mh-play:hover{ transform: translateY(-50%) scale(1.06); }
+}

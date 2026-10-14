@@ -90,8 +90,21 @@
         ? Social.coverOf({ cover: it.cover || it.coverImage, songIds: it.songIds })
         : (it.cover || it.coverImage || null);
 
-    const isOwn = (key, it) => key.startsWith('loc:') || !!(it && it.ownerUid && it.ownerUid === myUid());
-    const inLibrary = (key, it) => isOwn(key, it) || getPlaylists().some((p) => p.savedFrom === key);
+    const rawId = (key) => key.replace(/^pub:/, '');
+    // playlist di Library yang punya penanda savedFrom = salinan playlist ORANG LAIN (bukan milikmu)
+    const isOwn = (key, it) => {
+        if (key.startsWith('loc:')) return !(it && it.savedFrom);
+        return !!(it && it.ownerUid && it.ownerUid === myUid());
+    };
+    const srcKey = (key, it) => key.startsWith('loc:') ? ((it && it.savedFrom) || null) : rawId(key);
+    const savedCopyOf = (key, it) => {
+        const s = srcKey(key, it);
+        return s ? (getPlaylists().find((p) => p.savedFrom === s || p.savedFrom === 'pub:' + s) || null) : null;
+    };
+    const inLibrary = (key, it) => isOwn(key, it) || !!savedCopyOf(key, it);
+    const localOf = (key, it) => key.startsWith('loc:')
+        ? (getPlaylists().find((p) => p.id === key.slice(4)) || null)
+        : (it && it.playlistId ? (getPlaylists().find((p) => p.id === it.playlistId) || null) : null);
 
     // semua hasil searchPlaylists otomatis terdaftar
     if (window.Social && Social.searchPlaylists) {
@@ -144,18 +157,6 @@
     const svList = document.getElementById('svList');
     if (svList) new MutationObserver(() => decorateSearch(svList)).observe(svList, { childList: true });
 
-    // tile grid Home (dibuat mobile.js) ikut dapat tombol play
-    const mhGrid = document.getElementById('mhGrid');
-    function decorateTiles() {
-        if (!mhGrid) return;
-        mhGrid.querySelectorAll('.mh-tile').forEach((el) => {
-            if (!el.dataset.pl && el.dataset.pid) decorate(el, 'loc:' + el.dataset.pid, null);
-        });
-    }
-    if (mhGrid) {
-        new MutationObserver(decorateTiles).observe(mhGrid, { childList: true });
-        decorateTiles();
-    }
 
     // =====================================================
     // Play / pause playlist
@@ -195,14 +196,14 @@
     // =====================================================
     // Aksi: library, playlist saya, queue, share
     // =====================================================
-    function saveToLibrary(key) {
+    // salinan playlist orang lain di Library: ditandai savedFrom -> hanya lihat & putar, bukan milikmu
+    function ensureCopy(key) {
         const it = getItem(key);
-        if (!it) return;
-        if (inLibrary(key, it)) { showToast('Already in Your Library'); return; }
+        const ex = savedCopyOf(key, it);
+        if (ex) return ex;
         const created = createPlaylist(it.name);
         const list = getPlaylists();
         const p = list.find((x) => x.id === created.id);
-        if (!p) return;
         const now = Date.now();
         p.songIds = songsOf(it).map((s) => s.id);
         p.addedDates = {};
@@ -210,24 +211,36 @@
         if (it.description) p.description = it.description;
         const cover = it.cover || it.coverImage;
         if (cover) p.coverImage = cover;
-        p.savedFrom = key;
+        p.savedFrom = srcKey(key, it);
+        p.savedFromOwner = it.ownerName || '';
+        p.savedFromOwnerUid = it.ownerUid || '';
         savePlaylists(list);
-        renderPlaylistList();
-        syncHearts();
-        showToast('Added to Your Library');
-    }
-
-    function removeFromLibrary(key) {
-        savePlaylists(getPlaylists().filter((p) => p.savedFrom !== key));
-        renderPlaylistList();
-        syncHearts();
-        showToast('Removed from Your Library');
+        return p;
     }
 
     function toggleLibrary(key) {
         const it = getItem(key);
         if (!it || isOwn(key, it)) return;
-        if (inLibrary(key, it)) removeFromLibrary(key); else saveToLibrary(key);
+        const c = savedCopyOf(key, it);
+        if (c) { deletePlaylist(c.id); showToast('Removed from Your Library'); }
+        else { ensureCopy(key); showToast('Added to Your Library'); }
+        renderPlaylistList();
+        syncHearts();
+    }
+
+    function toggleProfile(key) {
+        const it = getItem(key);
+        if (!it || isOwn(key, it)) return;
+        if (!myUid()) { showToast('Log in first'); return; }
+        const c = ensureCopy(key);
+        const all = getPlaylists();
+        const p = all.find((x) => x.id === c.id);
+        if (!p) return;
+        p.isPublic = !p.isPublic;
+        savePlaylists(all);
+        renderPlaylistList();
+        syncHearts();
+        showToast(p.isPublic ? 'Added to your profile' : 'Removed from your profile');
     }
 
     function syncHearts() {
@@ -262,8 +275,13 @@
         const it = getItem(key);
         if (!it) return;
         if (!(it.songIds || []).length) { showToast('Add some songs first, then share'); return; }
-        const url = location.origin + location.pathname + '#share=' +
-            toB64Url(JSON.stringify({ v: 1, n: it.name, d: it.description || '', s: it.songIds }));
+        const u = (window.firebase && firebase.auth().currentUser) || {};
+        const own = isOwn(key, it);
+        const url = location.origin + location.pathname + '#share=' + toB64Url(JSON.stringify({
+            v: 1, n: it.name, d: it.description || '', s: it.songIds,
+            o: own ? (u.uid || '') : (it.ownerUid || it.savedFromOwnerUid || ''),
+            on: own ? (u.displayName || '') : (it.ownerName || it.savedFromOwner || '')
+        }));
         let ok = false;
         try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {}
         if (ok) showToast('Link copied'); else window.prompt('Copy this link:', url);
@@ -286,7 +304,7 @@
         pickKey = key;
         ensureLikedPlaylist();
         const srcId = key.startsWith('loc:') ? key.slice(4) : null;
-        const lists = getPlaylists().filter((p) => p.id !== srcId);
+        const lists = getPlaylists().filter((p) => p.id !== srcId && !p.savedFrom);
         pick.querySelector('#plxPickList').innerHTML = lists.map((p) => `
             <div class="add-to-playlist-row" data-pid="${esc(p.id)}" style="cursor:pointer;">
                 <div class="add-to-playlist-left">
@@ -313,42 +331,72 @@
         showToast(n ? `Added ${n} song${n !== 1 ? 's' : ''} to ${target.name}` : 'Songs already in that playlist');
     });
 
-    // ----- menu (titik 3 / klik kanan) -----
+    // ----- menu (titik 3 / klik kanan): beda untuk playlist sendiri vs milik orang lain -----
     const menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.id = 'plxMenu';
-    menu.innerHTML = `
-        <div class="context-menu-item" data-m="lib"><i class="fa-regular fa-square-plus"></i> <span>Add to your library</span></div>
-        <div class="context-menu-item" data-m="pl"><i class="fa-solid fa-plus"></i> Add to your playlist</div>
-        <div class="context-menu-item" data-m="queue"><i class="fa-solid fa-layer-group"></i> Add to queue</div>
-        <div class="context-menu-item" data-m="share"><i class="fa-solid fa-link"></i> Share link</div>`;
     document.body.appendChild(menu);
     let menuKey = null;
+
+    const mrow = (m, icon, label, danger) =>
+        `<div class="context-menu-item" data-m="${m}"${danger ? ' style="color:#ff7b87"' : ''}>` +
+        `<i class="${icon}"${danger ? ' style="color:#ff7b87"' : ''}></i><span>${label}</span></div>`;
 
     function openMenu(x, y, key) {
         const it = getItem(key);
         if (!it) return;
         menuKey = key;
-        const libItem = menu.querySelector('[data-m="lib"]');
-        libItem.style.display = isOwn(key, it) ? 'none' : 'flex';
-        libItem.querySelector('span').textContent = inLibrary(key, it) ? 'Remove from your library' : 'Add to your library';
+        let html;
+        if (isOwn(key, it)) {
+            const lp = localOf(key, it);
+            html = mrow('queue', 'fa-solid fa-layer-group', 'Add to queue');
+            if (lp) {
+                html += mrow('edit', 'fa-solid fa-pen', 'Edit details') +
+                    mrow('delete', 'fa-regular fa-circle-xmark', 'Delete', true) +
+                    mrow('vis', lp.isPublic ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open', lp.isPublic ? 'Make private' : 'Make public');
+            }
+            html += mrow('share', 'fa-solid fa-link', 'Share link');
+        } else {
+            const c = savedCopyOf(key, it);
+            html = mrow('lib', (c ? 'fa-solid' : 'fa-regular') + ' fa-heart', c ? 'Remove from your library' : 'Add to your library') +
+                mrow('pl', 'fa-solid fa-plus', 'Add to playlist') +
+                mrow('queue', 'fa-solid fa-layer-group', 'Add to queue') +
+                mrow('prof', 'fa-regular fa-user', c && c.isPublic ? 'Remove from profile' : 'Add to profile') +
+                mrow('share', 'fa-solid fa-link', 'Share link');
+        }
+        menu.innerHTML = html;
         menu.classList.add('show');
-        const w = menu.offsetWidth || 230, h = menu.offsetHeight || 180;
+        const w = menu.offsetWidth || 230, h = menu.offsetHeight || 200;
         menu.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + 'px';
         menu.style.top = Math.max(8, Math.min(y, window.innerHeight - h - 8)) + 'px';
     }
     const closeMenu = () => { menu.classList.remove('show'); menuKey = null; };
 
     menu.addEventListener('click', (e) => {
-        const it = e.target.closest('[data-m]');
-        if (!it || !menuKey) return;
+        const row = e.target.closest('[data-m]');
+        if (!row || !menuKey) return;
         const key = menuKey;
+        const it = getItem(key);
         closeMenu();
-        switch (it.dataset.m) {
+        switch (row.dataset.m) {
             case 'lib': toggleLibrary(key); break;
             case 'pl': openPick(key); break;
             case 'queue': addToQueue(key); break;
+            case 'prof': toggleProfile(key); break;
             case 'share': shareLink(key); break;
+            case 'edit': { const lp = localOf(key, it); if (lp) { openPlaylistDetailView(lp, false); openEditDetailsModal(); } break; }
+            case 'delete': { const lp = localOf(key, it); if (lp) openDeletePlaylistModal(lp.id, lp.name); break; }
+            case 'vis': {
+                if (!myUid()) { showToast('Log in to make playlists public'); break; }
+                const all = getPlaylists();
+                const lp = localOf(key, it) && all.find((x) => x.id === localOf(key, it).id);
+                if (!lp) break;
+                lp.isPublic = !lp.isPublic;
+                savePlaylists(all);
+                renderPlaylistList();
+                showToast(lp.isPublic ? 'Playlist is now public' : 'Playlist is now private');
+                break;
+            }
         }
     });
     window.addEventListener('scroll', closeMenu, true);

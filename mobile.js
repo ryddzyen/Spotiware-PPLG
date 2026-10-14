@@ -35,7 +35,7 @@
         const mine = getPlaylists();
         const copied = new Set(mine.map((p) => p.savedFrom).filter(Boolean));
 
-        const lib = mine.map((p) => ({ t: getPlaylistTimestamp(p, 'lastPlayedAt'), p }));
+        const lib = mine.filter((p) => p.id !== LIKED_PLAYLIST_ID).map((p) => ({ t: getPlaylistTimestamp(p, 'lastPlayedAt'), p }));
         const ext = (window.RecentPL ? RecentPL.list() : [])
             .filter((x) => !copied.has(x.id))            // sudah disimpan ke Library -> jangan dobel
             .map((x) => ({ t: x.t || 0, x }));

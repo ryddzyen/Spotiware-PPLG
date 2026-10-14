@@ -32,13 +32,15 @@
     const clean = (str, max) => String(str || '').replace(/[<>"&]/g, '').trim().slice(0, max);
 
     function buildShareUrl(playlist) {
+        const u = (window.firebase && firebase.auth().currentUser) || null;
         const payload = {
             v: 1,
             n: playlist.name,
             d: playlist.description || '',
-            s: playlist.songIds
+            s: playlist.songIds,
+            o: playlist.ownerUid || playlist.savedFromOwnerUid || (u ? u.uid : ''),
+            on: playlist.ownerName || playlist.savedFromOwner || (u ? (u.displayName || '') : '')
         };
-        return location.origin + location.pathname + SHARE_PREFIX + toB64Url(JSON.stringify(payload));
     }
 
     function parseShareHash() {
@@ -55,6 +57,8 @@
                 name: clean(data.n, 60) || 'Shared Playlist',
                 description: clean(data.d, 300),
                 songIds: ids,
+                ownerUid: String(data.o || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 40),
+                ownerName: clean(data.on, 40),
                 shared: true
             };
         } catch (e) {
@@ -128,7 +132,7 @@ if (editBtn) editBtn.after(moreBtn);
     saveSharedBtn.className = 'pd-pill-btn pd-primary';
     saveSharedBtn.id = 'pdSaveSharedBtn';
     saveSharedBtn.style.display = 'none';
-    saveSharedBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Save to Library';
+    saveSharedBtn.innerHTML = '<i class="fa-regular fa-heart"></i> Save to Library';
     if (spacer) spacer.before(saveSharedBtn);
 
     // Menu dropdown (pakai gaya .context-menu bawaan)
@@ -244,17 +248,34 @@ if (editBtn) editBtn.after(moreBtn);
 
     saveSharedBtn.addEventListener('click', () => {
         if (!currentShared) return;
-        const created = createPlaylist(currentShared.name);
-        currentShared.songIds.forEach(id => addSongToPlaylist(created.id, id));
-        if (currentShared.description) updatePlaylistDescription(created.id, currentShared.description);
+        const s = currentShared;
+        let h = 0;
+        const sig = s.songIds.join(',') + '|' + s.name;
+        for (let i = 0; i < sig.length; i++) h = (h * 31 + sig.charCodeAt(i)) >>> 0;
+        const srcId = 'share_' + h.toString(36);
+
+        let saved = getPlaylists().find(p => p.savedFrom === srcId);
+        if (saved) {
+            showToast('Already in Your Library');
+        } else {
+            const created = createPlaylist(s.name);
+            const all = getPlaylists();
+            saved = all.find(p => p.id === created.id);
+            saved.songIds = [...s.songIds];
+            saved.addedDates = {};
+            s.songIds.forEach(id => { saved.addedDates[id] = Date.now(); });
+            if (s.description) saved.description = s.description;
+            saved.savedFrom = srcId;                    // penanda: milik orang lain, hanya lihat & putar
+            saved.savedFromOwner = s.ownerName || '';
+            saved.savedFromOwnerUid = s.ownerUid || '';
+            savePlaylists(all);
+            showToast('Saved to Your Library');
+        }
 
         currentShared = null;
         history.replaceState(null, '', location.pathname + location.search);
         renderPlaylistList();
-        showToast('Saved to Your Library');
-
-        const saved = getPlaylists().find(p => p.id === created.id);
-        if (saved) openPlaylistDetailView(saved, false);
+        openPlaylistDetailView(saved, false);
     });
 
     // ---------- Bungkus fungsi bawaan script.js ----------
@@ -275,6 +296,13 @@ if (editBtn) editBtn.after(moreBtn);
         moreBtn.style.display = isLikedPlaylist ? 'none' : 'flex';
 
         if (isShared) {
+            const dEl = document.getElementById('playlistDetailDescription');
+            if (dEl && playlist.ownerName) {
+                const by = playlist.ownerUid
+                    ? `<a href="#" class="pv-owner" data-uid="${playlist.ownerUid}">${playlist.ownerName}</a>`
+                    : playlist.ownerName;
+                dEl.innerHTML = (playlist.description ? playlist.description + ' • ' : '') + 'By ' + by;
+            }
             // Mode baca-saja: sembunyikan edit/tambah lagu, cover tidak bisa diganti
             if (pdAddSongsBtn) pdAddSongsBtn.style.display = 'none';
             if (pdEditDetailsBtn) pdEditDetailsBtn.style.display = 'none';

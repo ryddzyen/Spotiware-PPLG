@@ -48,6 +48,7 @@
     menu.id = 'pvMenu';
     menu.innerHTML = `
         <div class="context-menu-item" data-act="library"><i class="fa-regular fa-heart"></i><span>Add to your library</span></div>
+                <div class="context-menu-item" data-act="playlist"><i class="fa-solid fa-plus"></i><span>Add to playlist</span></div>
         <div class="context-menu-item" data-act="queue"><i class="fa-solid fa-layer-group"></i><span>Add to queue</span></div>
         <div class="context-menu-item" data-act="profile"><i class="fa-regular fa-user"></i><span>Add to your profile</span></div>
         <div class="context-menu-item" data-act="share"><i class="fa-solid fa-link"></i><span>Share link</span></div>`;
@@ -179,6 +180,7 @@
         menu.classList.remove('show');
         const a = it.dataset.act;
         if (a === 'library') toggleLibrary();
+                if (a === 'playlist' && window.PlaylistPicker) PlaylistPicker.open(songsOf().map((s) => s.id), item ? item.name : '');
         if (a === 'queue') addToQueue();
         if (a === 'profile') addToProfile();
         if (a === 'share') shareLink();
