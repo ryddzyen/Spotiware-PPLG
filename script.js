@@ -978,6 +978,7 @@ function attachAddToPlaylistButtonEvents() {
 function renderSongs(songsToRender, options = {}) {
     const { playlistId = null } = options;
     lastRenderedSongs = songsToRender;
+    const isHomeList = songsToRender === homeSongsOrder;
 
     let sec1 = document.getElementById('section-1');
     let sec2 = document.getElementById('section-2');
@@ -1021,7 +1022,9 @@ function renderSongs(songsToRender, options = {}) {
             if (sec2) sec2.innerHTML += cardHTML;
         } else if (index < 90) {
             if (sec3) sec3.innerHTML += cardHTML;
-        } else {
+        } else if (index < 120 || !isHomeList) {
+            // Beranda: Made For You dibatasi 30 lagu (urutan 90-119).
+            // Hasil pencarian tetap menampilkan semua lagu yang cocok.
             if (sec4) sec4.innerHTML += cardHTML;
         }
     });
