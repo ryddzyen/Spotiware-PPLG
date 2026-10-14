@@ -61,13 +61,21 @@
     const sameSet = (a, b) => a.length === b.length && b.every((s) => a.some((x) => x.id === s.id));
     const isCtx = (list) => playerBar.classList.contains('show') && sameSet(currentContextList, list);
 
+    const tileKey = (tile) => tile.dataset.pid ? 'loc:' + tile.dataset.pid : 'ext:' + tile.dataset.ext;
+
     function togglePlay(tile) {
         const k = kindOf(tile);
         if (!k) return;
         const list = songsOf(k);
         if (!list.length) { showToast('This playlist is empty'); return; }
-        if (isCtx(list)) play.click();
-        else playSongFromList(list[0].id, list);
+        const key = tileKey(tile);
+        if (window.PlayKey && PlayKey.is(key)) {
+            play.click();
+        } else {
+            const first = songOnShuffle ? list[Math.floor(Math.random() * list.length)] : list[0];
+            window.__plKey = key;
+            playSongFromList(first.id, list);
+        }
         setTimeout(refreshPlay, 80);
     }
 
@@ -75,9 +83,7 @@
         grid.querySelectorAll('.mh-tile').forEach((tile) => {
             const btn = tile.querySelector('.mh-play');
             if (!btn) return;
-            const k = kindOf(tile);
-            const list = k ? songsOf(k) : [];
-            const on = list.length > 0 && isCtx(list) && !audio.paused;
+            const on = !audio.paused && !!window.PlayKey && PlayKey.is(tileKey(tile));
             btn.classList.toggle('on', on);
             btn.title = on ? 'Pause' : 'Play';
             btn.querySelector('i').className = 'fa-solid ' + (on ? 'fa-pause' : 'fa-play');
@@ -96,6 +102,7 @@
     audio.addEventListener('play', refreshPlay);
     audio.addEventListener('pause', refreshPlay);
     audio.addEventListener('playing', refreshPlay);
+    window.addEventListener('spotiware:activepl', refreshPlay);
     enhance();
 
     document.addEventListener('click', (e) => {

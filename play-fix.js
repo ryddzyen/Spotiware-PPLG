@@ -3,33 +3,18 @@
     const $ = (id) => document.getElementById(id);
 
     // =====================================================
-    // 1. SHUFFLE
+    // 1. SHUFFLE + penanda playlist yang SEDANG diputar
     // =====================================================
     const shuffleBtn = $('shuffle');
     const plShuffle = $('playlistShuffleBtn');
+    const plPlay = $('playlistPlayBtn');
 
-    // lagu yang sedang diputar jadi urutan pertama, sisanya diacak
-    // -> SEMUA lagu playlist terputar dulu sebelum autoplay pindah ke lagu lain
-    function mixCurrentFirst() {
-        const cur = getCurrentSong();
-        order = [cur, ...shuffleSongs(order.filter((s) => s.id !== cur.id))];
-        currentIndex = 0;
-        preloadedPath = null;
-        try { renderQueuePanel(); renderMobileSheet(); } catch (e) {}
-    }
+    // playlist yang sedang diputar: 'loc:<id>' atau 'ext:<id>' (null = bukan dari playlist)
+    let activeKey = null;
 
-    // jalan SETELAH handler shuffle bawaan (script.js), jadi berlaku untuk semua tombol shuffle
-    if (shuffleBtn) {
-        shuffleBtn.addEventListener('click', () => {
-            if (songOnShuffle && !songOnRepeat && playerBar.classList.contains('show')) mixCurrentFirst();
-        });
-    }
-
-    // shuffle sedang menyala lalu memutar playlist / lagu lain -> urutannya ikut diacak
-    const _play = playSongFromList;
-    playSongFromList = function (songId, songList) {
-        _play(songId, songList);
-        if (songOnShuffle && !songOnRepeat) mixCurrentFirst();
+    const detailKey = () => {
+        const v = $('playlistDetailView');
+        return (v && v.classList.contains('show') && pdCurrentPlaylistId) ? 'loc:' + pdCurrentPlaylistId : null;
     };
 
     // lagu yang sedang tampil di halaman playlist
@@ -40,23 +25,65 @@
     }
     const sameSet = (a, b) => a.length === b.length && b.every((s) => a.some((x) => x.id === s.id));
 
-    // tombol shuffle di samping play (dipasang di fase capture supaya mengalahkan handler lama)
-    if (plShuffle) {
-        plShuffle.addEventListener('click', (e) => {
+    // lagu yang sedang diputar jadi urutan pertama, sisanya diacak
+    function mixCurrentFirst() {
+        const cur = getCurrentSong();
+        order = [cur, ...shuffleSongs(order.filter((s) => s.id !== cur.id))];
+        currentIndex = 0;
+        preloadedPath = null;
+        try { renderQueuePanel(); renderMobileSheet(); } catch (e) {}
+    }
+
+    // tombol shuffle (now bar) menyala -> sisa lagu diacak
+    if (shuffleBtn) {
+        shuffleBtn.addEventListener('click', () => {
+            if (songOnShuffle && !songOnRepeat && playerBar.classList.contains('show')) mixCurrentFirst();
+        });
+    }
+
+    // semua pemutaran playlist lewat sini: catat playlist mana yang diputar
+    const _play = playSongFromList;
+    playSongFromList = function (songId, songList) {
+        let key = window.__plKey || null;
+        window.__plKey = null;
+        if (!key) {   // klik lagu di halaman playlist yang sedang terbuka
+            const dk = detailKey();
+            if (dk && sameSet(songList, shownSongs())) key = dk;
+        }
+        activeKey = key;
+        _play(songId, songList);
+        if (songOnShuffle && !songOnRepeat) mixCurrentFirst();
+        updatePlaylistPlayIcon();
+        window.dispatchEvent(new Event('spotiware:activepl'));
+    };
+
+    // ikon play/pause di halaman playlist: pause HANYA untuk playlist yang benar-benar diputar
+    updatePlaylistPlayIcon = function () {
+        const icon = document.querySelector('#playlistPlayBtn i');
+        if (icon) {
+            const on = !audio.paused && playerBar.classList.contains('show') && !!activeKey && activeKey === detailKey();
+            icon.classList.toggle('fa-pause', on);
+            icon.classList.toggle('fa-play', !on);
+        }
+        if (plShuffle) plShuffle.classList.toggle('active', songOnShuffle);
+    };
+
+    // tombol Play besar: kalau shuffle menyala, mulai dari lagu ACAK
+    if (plPlay) {
+        plPlay.addEventListener('click', (e) => {
             e.stopImmediatePropagation();
             const list = shownSongs();
-            if (!list.length) { showToast('This playlist is empty'); return; }
-
-            // playlist ini sedang diputar -> cukup nyalakan / matikan shuffle
-            const active = playerBar.classList.contains('show') && sameSet(currentContextList, list);
-            if (active) { shuffleBtn.click(); return; }
-
-            // belum diputar -> mulai dari lagu ACAK di dalam playlist, shuffle menyala
-            const pick = list[Math.floor(Math.random() * list.length)];
-            playSongFromList(pick.id, list);
-            if (!songOnShuffle) shuffleBtn.click();
+            if (!list.length) return;
+            const key = detailKey();
+            if (activeKey === key && playerBar.classList.contains('show')) { play.click(); return; }
+            const first = songOnShuffle ? list[Math.floor(Math.random() * list.length)] : list[0];
+            window.__plKey = key;
+            playSongFromList(first.id, list);
         }, true);
     }
+
+    // dipakai kotak riwayat beranda
+    window.PlayKey = { is: (k) => !!k && activeKey === k && playerBar.classList.contains('show') };
 
     // =====================================================
     // 2. LAGU PILIHAN LEBIH CEPAT DIMUAT
@@ -147,4 +174,40 @@
             want = null;
         });
     }
+
+    togglePlay// =====================================================
+    // 3. HP: tombol Back bawaan HP menutup Now Playing layar penuh dengan benar
+    // =====================================================
+    const panel = document.querySelector('.now-playing-panel');
+    if (panel) {
+        const mobile = () => typeof isMobileView === 'function' && isMobileView();
+        const closePanel = () => {
+            panel.classList.remove('mobile-open');
+            const bn = document.querySelector('.bottom-nav');
+            if (bn) bn.style.display = '';
+        };
+        let pushed = false;
+
+        // panel dibuka -> catat satu langkah riwayat; ditutup -> hapus langkah itu
+        new MutationObserver(() => {
+            const open = panel.classList.contains('mobile-open');
+            if (open && !pushed && mobile()) { history.pushState({ np: 1 }, ''); pushed = true; }
+            else if (!open && pushed) { pushed = false; if (history.state && history.state.np) history.back(); }
+        }).observe(panel, { attributes: true, attributeFilter: ['class'] });
+
+        // Back HP pertama kali hanya keluar dari layar penuh -> tutup panelnya juga
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && panel.classList.contains('mobile-open')) closePanel();
+        });
+
+        // Back HP ketika tidak sedang layar penuh
+        window.addEventListener('popstate', () => {
+            if (panel.classList.contains('mobile-open')) {
+                if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+                pushed = false;
+                closePanel();
+            }
+        });
+    }
+
 })();

@@ -870,6 +870,14 @@
         _closePD();
     };
 
+    // membuka playlist (mis. dari Your Library) saat chat / halaman Friends terbuka -> keduanya ditutup dulu
+    const _openPD = openPlaylistDetailView;
+    openPlaylistDetailView = function (pl, isLiked) {
+        fvView.classList.remove('show');
+        closeDm();
+        _openPD(pl, isLiked);
+    };
+
     window.addEventListener('spotiware:friends', () => {
         me = core.getMe();
         syncPresence();
