@@ -362,7 +362,7 @@ const songs = [
     { id: 360, songName: "Rumah Ke Rumah", songDes: "Hindia", songImage: "Art Cover/117_hindia_rumah_ke_rumah.webp", songPath: "Lagu/Rumah Ke Rumah.mp3" },
     { id: 361, songName: "Akad", songDes: "Payung Teduh", songImage: "Art Cover/118_payung_teduh_akad.webp", songPath: "Lagu/Akad.mp3" },
     { id: 362, songName: "Gala bunga matahari", songDes: "Sal Priadi", songImage: "Art Cover/119_sal_priadi_gala_bunga_matahari.webp", songPath: "Lagu/12 - Sal Priadi - Gala bunga matahari.mp3" },
-    { id: 363, songName: "Jakarta Hari Ini", songDes: "For Revenge, Stereo Wall", songImage: "Art Cover/120_for_revenge_jakarta_hari_ini.webp", songPath: "Lagu/Jakarta Hari Ini.mp3" },
+    { id: 363, songName: "Jakarta Hari Ini", songDes: "For Revenge, Stereo Wall", songImage: "Art Cover/149_for_revenge_jakarta_hari_ini.webp", songPath: "Lagu/Jakarta Hari Ini.mp3" },
     { id: 364, songName: "Satu Bulan", songDes: "Bernadya", songImage: "Art Cover/121_bernadya_satu_bulan.webp", songPath: "Lagu/Satu Bulan.mp3" },
     { id: 365, songName: "Lantas", songDes: "Juicy Luicy", songImage: "Art Cover/122_juicy_luicy_lantas.webp", songPath: "Lagu/Lantas.mp3" },
     { id: 366, songName: "Interaksi", songDes: "Tulus", songImage: "Art Cover/123_tulus_interaksi.webp", songPath: "Lagu/Interaksi.mp3" },
