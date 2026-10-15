@@ -6368,3 +6368,110 @@ body.pv-public #ctxRemoveFromPlaylist{ display: none !important; }
     .mh-play.on{ display: flex; opacity: 1; transform: translateY(-50%); }
     .mh-play:hover{ transform: translateY(-50%) scale(1.06); }
 }
+
+/* ===== Back HP: Now Playing yang tertinggal (bukan layar penuh) tetap tampil rapi ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .now-playing-panel.mobile-open:not(:fullscreen){
+        width: 100%; min-width: 0; height: 100%; padding: 0; flex: none; align-items: center;
+    }
+    .now-playing-panel.mobile-open:not(:fullscreen) .phone-frame{
+        width: 78%; max-width: 15.5rem; height: auto; padding: 0.8rem;
+        border-radius: 1.2rem; justify-content: flex-start;
+    }
+    .now-playing-panel.mobile-open:not(:fullscreen) .np-art{
+        position: static; flex: none; aspect-ratio: 1 / 1; max-height: 30vh;
+        margin-bottom: 0.8rem; border-radius: 0.7rem;
+    }
+    .now-playing-panel.mobile-open:not(:fullscreen) .np-art img{ position: static; inset: auto; }
+    .now-playing-panel.mobile-open:not(:fullscreen) .np-title{ font-size: 1rem; }
+    .now-playing-panel.mobile-open:not(:fullscreen) .np-artist{ font-size: 0.85rem; }
+    .now-playing-panel.mobile-open:not(:fullscreen) #npPlay{ font-size: 2.1rem; }
+    .now-playing-panel.mobile-open:not(:fullscreen) #npBackward,
+    .now-playing-panel.mobile-open:not(:fullscreen) #npForward{ font-size: 1.55rem; }
+}
+
+/* ===== Your Library di HP: tanpa tombol hapus, ukuran gambar seragam ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .main-left-part .playlist-delete-btn{ display: none !important; }
+
+    #playlistList:not(.view-grid):not(.view-gridlarge) .playlist-item .playlist-icon,
+    #playlistList:not(.view-grid):not(.view-gridlarge) .playlist-item .playlist-thumb{
+        width: 4.2rem; height: 4.2rem; flex: 0 0 4.2rem;
+        aspect-ratio: 1 / 1; object-fit: cover; border-radius: 4px; margin: 0;
+    }
+    #playlistList:not(.view-grid):not(.view-gridlarge) .playlist-item .history-title{ font-size: 1rem; }
+    #playlistList:not(.view-grid):not(.view-gridlarge) .playlist-item .history-artist{ font-size: 0.85rem; }
+}
+
+/* ===== Halaman "Add to this playlist" ===== */
+.addv{ display: none; flex-direction: column; min-height: 0; color: #fff; }
+body.addv-open .addv{ display: flex; }
+
+.addv-head{ display: flex; align-items: center; gap: 0.9rem; padding: 1.2rem 1.5rem 0.6rem; flex-shrink: 0; }
+.addv-back{
+    width: 2.4rem; height: 2.4rem; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.08); color: #d1d5db; font-size: 1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.addv-back:hover{ color: #fff; background: rgba(255,255,255,0.15); }
+.addv-title{ font-size: 1.4rem; font-weight: 800; color: #fff; }
+.addv-sub{ color: var(--gray-mid); font-size: 0.85rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.addv-gap{ display: none; }
+
+.addv-chips{ display: flex; gap: 0.6rem; padding: 0.6rem 1.5rem; overflow-x: auto; flex-shrink: 0; scrollbar-width: none; }
+.addv-chips::-webkit-scrollbar{ display: none; }
+.addv-chip{
+    background: #2a2a2a; color: #fff; border: none; border-radius: 999px;
+    padding: 0.5rem 1rem; font-family: inherit; font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+}
+.addv-chip.active{ background: var(--yellow); color: #000; }
+
+.addv-list{ flex: 1; min-height: 0; overflow-y: auto; padding: 0.4rem 1rem 1rem; }
+.addv-row{ display: flex; align-items: center; gap: 0.9rem; padding: 0.45rem 0.5rem; border-radius: 8px; }
+.addv-row:hover{ background: rgba(255,255,255,0.07); }
+.addv-cover{ position: relative; width: 3.4rem; height: 3.4rem; flex-shrink: 0; border-radius: 4px; overflow: hidden; cursor: pointer; background: #2f2f2f; }
+.addv-cover img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.addv-cover i{
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 0.9rem; background: rgba(0,0,0,0.2); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.addv-info{ flex: 1; min-width: 0; }
+.addv-t{ color: #fff; font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.addv-a{ color: var(--gray-mid); font-size: 0.85rem; margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.addv-btn{ background: none; border: none; color: #b3b3b3; font-size: 1.7rem; cursor: pointer; padding: 0.2rem; flex-shrink: 0; display: flex; }
+.addv-btn:hover{ color: #fff; transform: scale(1.06); }
+.addv-btn.on{ color: var(--yellow); }
+.addv-empty{ color: var(--gray-mid); text-align: center; padding: 2.5rem 1rem; font-size: 0.9rem; }
+
+.addv-search{
+    flex-shrink: 0; display: flex; align-items: center; gap: 0.7rem;
+    margin: 0.5rem 1.5rem 1.2rem; padding: 0 1.1rem; height: 3.2rem;
+    background: #242424; border: 1px solid rgba(255,255,255,0.5); border-radius: 999px;
+}
+.addv-search input{ flex: 1; min-width: 0; background: none; border: none; outline: none; color: #fff; font-size: 1rem; font-family: inherit; }
+.addv-search i{ color: #fff; }
+
+/* laptop: mengisi seluruh card tengah */
+@media (min-width: 769px) and (not ((hover: none) and (pointer: coarse))){
+    body.addv-open .main-right-part > *:not(.addv){ display: none !important; }
+    body.addv-open .main-right-part{ overflow: hidden; }
+    body.addv-open .addv{ height: 100%; }
+}
+
+/* HP: layar penuh */
+@media (max-width: 768px), (hover: none) and (pointer: coarse){
+    .addv{ position: fixed; inset: 0; z-index: 3500; background: #121212; }
+    body.addv-open{ overflow: hidden; }
+    .addv-head{
+        display: grid; grid-template-columns: 2.6rem 1fr 2.6rem; text-align: center;
+        padding: calc(0.9rem + env(safe-area-inset-top, 0px)) 0.8rem 0.9rem; background: #2a2a2a;
+    }
+    .addv-back{ background: none; }
+    .addv-title{ font-size: 1.05rem; }
+    .addv-sub{ display: none; }
+    .addv-gap{ display: block; }
+    .addv-chips{ padding: 0.7rem 1rem; }
+    .addv-list{ padding: 0.3rem 0.8rem 1rem; }
+    .addv-search{ margin: 0.4rem 1rem calc(0.8rem + env(safe-area-inset-bottom, 0px)); }
+}
