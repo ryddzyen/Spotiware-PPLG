@@ -85,7 +85,7 @@
                         <div class="addv-a">${esc(s.songDes)}</div>
                     </div>
                     <button type="button" class="addv-btn${on ? ' on' : ''}" title="${on ? 'Remove from playlist' : 'Add to playlist'}">
-                        <i class="${on ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle-plus'}"></i>
+                        <i class="fa-solid ${on ? 'fa-check' : 'fa-plus'}"></i>
                     </button>
                 </div>`;
         }).join('');
@@ -124,7 +124,7 @@
         const on = !!(now && now.songIds.includes(id));
         b.classList.toggle('on', on);
         b.title = on ? 'Remove from playlist' : 'Add to playlist';
-        b.querySelector('i').className = on ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle-plus';
+        b.querySelector('i').className = 'fa-solid ' + (on ? 'fa-check' : 'fa-plus');
     });
 
     // ---------- buka / tutup ----------
