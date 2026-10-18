@@ -362,6 +362,15 @@
         return ans;
     }
 
+    function centerActive(jump) {
+        const el = lineEls[activeIdx];
+        if (!el || !bodyEl.clientHeight) return;
+        const top = bodyEl.scrollTop
+            + (el.getBoundingClientRect().top - bodyEl.getBoundingClientRect().top)
+            - bodyEl.clientHeight / 2 + el.offsetHeight / 2;
+        bodyEl.scrollTo({ top: Math.max(0, top), behavior: jump ? 'auto' : 'smooth' });
+    }
+
     function setActive(i, jump) {
         if (i === activeIdx && !jump) return;
         if (lineEls[activeIdx]) lineEls[activeIdx].classList.remove('active');
@@ -369,13 +378,16 @@
         const el = lineEls[i];
         if (!el) return;
         el.classList.add('active');
-        if (Date.now() > userScrollUntil) {
-            bodyEl.scrollTo({
-                top: el.offsetTop - bodyEl.clientHeight / 2 + el.clientHeight / 2,
-                behavior: jump ? 'auto' : 'smooth'
-            });
-        }
+        if (Date.now() > userScrollUntil) centerActive(jump);
     }
+
+    // cadangan: kalau loop animasi berhenti, lirik tetap mengikuti lagu
+    audio.addEventListener('timeupdate', () => {
+        if (!open || !lines.length) return;
+        const i = currentIndex(audio.currentTime);
+        if (i !== activeIdx) setActive(i);
+        if (!rafId) rafId = requestAnimationFrame(tick);
+    });
 
     // jangan rebut kendali saat pengguna menggulir sendiri
     ['wheel', 'touchmove'].forEach(ev =>
@@ -549,21 +561,24 @@
         const f = document.fullscreenElement;
         return !!f && f.classList.contains('now-playing-panel');
     };
-    // layar penuh di laptop: lirik bergeser masuk di samping card lagu
-    const sideMode = () => isPanelFs() && !mobileView();
+    // laptop + layar penuh: lirik menjadi bagian dari card lagu (satu card yang melebar)
+    const cardMode = () => isPanelFs() && !mobileView();
 
     function clearInline() {
         ['top', 'left', 'right', 'bottom', 'width', 'height'].forEach((p) => { box.style[p] = ''; });
     }
 
+    // posisikan ulang baris yang sedang dinyanyikan (setelah card melebar / layar berubah)
+    function recenter() {
+        if (!open || !lines.length || Date.now() < userScrollUntil) return;
+        setActive(currentIndex(audio.currentTime), true);
+    }
+
     function layout() {
         const ph = phoneEl();
-        if (sideMode()) {
-            box.classList.remove('over');
-            clearInline();
-            if (ph) box.style.height = ph.offsetHeight + 'px';   // setinggi card lagu
-            return;
-        }
+        if (ph) ph.classList.toggle('with-lyrics', open && cardMode());   // card melebar hanya saat lirik terbuka
+
+        if (cardMode()) { box.classList.remove('over'); clearInline(); return; }
         if (!open || isPanelFs() || mobileView()) { box.classList.remove('over'); clearInline(); return; }
 
         // laptop biasa: menimpa persis card Now Playing (phone frame)
@@ -589,6 +604,11 @@
     new MutationObserver(relayout).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     if (panelEl) new MutationObserver(relayout).observe(panelEl, { attributes: true, attributeFilter: ['class'] });
     if (window.ResizeObserver && phoneEl()) new ResizeObserver(relayout).observe(phoneEl());
+    if (window.ResizeObserver) new ResizeObserver(() => recenter()).observe(bodyEl);
+
+    // selesai melebar -> lirik dipusatkan lagi
+    const phNow = phoneEl();
+    if (phNow) phNow.addEventListener('transitionend', (e) => { if (e.propertyName === 'padding-right') recenter(); });
 
     // ---------- Buka / tutup ----------
     function openLyrics() {
@@ -614,15 +634,20 @@
         if (e.key === 'Escape' && open && !(document.activeElement && document.activeElement.tagName === 'INPUT')) closeLyrics();
     });
 
-    // layar penuh: hanya isi elemen fullscreen yang tampil, jadi panel dipindah ke dalamnya
+    // layar penuh: laptop -> panel lirik masuk ke dalam card lagu; HP -> menutupi seluruh layar
     document.addEventListener('fullscreenchange', () => {
         const fs = document.fullscreenElement;
-        const side = sideMode();
-        (fs || document.body).appendChild(box);
-        box.classList.toggle('side', side);
-        box.classList.toggle('in-fs', !!fs && !side);     // HP: lirik menutupi seluruh layar
+        const card = cardMode();
+        const ph = phoneEl();
+        if (card && ph) ph.appendChild(box);
+        else (fs || document.body).appendChild(box);
+        box.classList.remove('side');
+        box.classList.toggle('in-card', card);
+        box.classList.toggle('in-fs', !!fs && !card);
         layout();
-        if (open && lines.length) setTimeout(() => setActive(currentIndex(audio.currentTime), true), 520);   // setelah animasi
+        // memindahkan elemen mereset posisi scroll, jadi dipusatkan lagi setelah pindah dan setelah animasi
+        setTimeout(recenter, 120);
+        setTimeout(recenter, 700);
     });
 
     window.Lyrics = { open: openLyrics, close: closeLyrics, toggle };

@@ -188,7 +188,7 @@
         });
     }
 
-    togglePlay// =====================================================
+    // =====================================================
     // 3. HP: tombol Back bawaan HP menutup Now Playing layar penuh dengan benar
     // =====================================================
     const panel = document.querySelector('.now-playing-panel');
@@ -222,5 +222,4 @@
             }
         });
     }
-
 })();
