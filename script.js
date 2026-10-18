@@ -509,7 +509,10 @@ const songs = [
     { id: 507, songName: "Like 1999", songDes: "Valley", songImage: "Art Cover/276_valley_like_1999.webp", songPath: "Lagu/Like 1999.mp3" },
     { id: 508, songName: "FRIENDS", songDes: "Marshmello, Anne-Marie", songImage: "Art Cover/277_marshmello_friends.webp", songPath: "Lagu/FRIENDS.mp3" },
     { id: 509, songName: "Sakura", songDes: "Rossa", songImage: "Art Cover/278_rossa_sakura.webp", songPath: "Lagu/Sakura.mp3" },
-    { id: 510, songName: "boba date", songDes: "Stream Cafe", songImage: "Art Cover/279_boba_date__stream_cafe.webp", songPath: "Lagu/SpotiDownloader.com - boba date - Stream Cafe.mp3" }
+    { id: 510, songName: "boba date", songDes: "Stream Cafe", songImage: "Art Cover/279_boba_date__stream_cafe.webp", songPath: "Lagu/SpotiDownloader.com - boba date - Stream Cafe.mp3" },
+    { id: 511, songName: "Kimi Dake wo Mamoritai", songDes: "Takeshi Tsuruno", songImage: "Art Cover/Kimi Dake wo Mamoritai.webp", songPath: "Lagu/Kimi Dake wo Mamoritai.mp3", hidden: true, keyword: ["takeshi tsuruno", "kimi dake wo mamoritai"] },
+    { id: 512, songName: "Kupu - Kupu", songDes: "Tiara Andini", songImage: "Art Cover/Kupu - Kupu.webp", songPath: "Lagu/Kupu - Kupu.mp3" },
+    { id: 513, songName: "Ultraman Orb | Versão Brasileira", songDes: "YouDubb", songImage: "Art Cover/Ultraman Orb _ Versão Brasileira.webp", songPath: "Lagu/Ultraman Orb _ Versão Brasileira.mp3", hidden: true, keyword: ["youdubb", "ultraman orb", "versao brasileira"] }
 ];
 
 const visibleSongs = songs.filter(s => !s.hidden);

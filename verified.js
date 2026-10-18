@@ -19,16 +19,22 @@
 
     function decorate() {
         const me = firebase.auth().currentUser;
-
-        // nama di halaman profil sendiri
         if (me && ids.has(me.uid)) addBadge(document.getElementById('profileName'));
 
-        // hasil pencarian + riwayat pencarian (profil orang lain)
-        document.querySelectorAll('.sv-item[data-kind="profile"], .sv-card[data-kind="profile"]').forEach((card) => {
-            if (ids.has(card.dataset.id)) addBadge(card.querySelector('.sv-item-title, .sv-card-title'));
-        });
-        document.querySelectorAll('.sd-prof[data-uid]').forEach((row) => {
-            if (ids.has(row.dataset.uid)) addBadge(row.querySelector('.sv-item-title'));
+        // [elemen baris, atribut uid, elemen nama di dalamnya]
+        [
+            ['.sv-item[data-kind="profile"], .sv-card[data-kind="profile"]', 'id', '.sv-item-title, .sv-card-title'],
+            ['.sd-prof[data-uid]', 'uid', '.sv-item-title'],
+            ['.fv-row[data-uid]', 'uid', '.fv-name'],
+            ['.msg-row[data-chat]', 'chat', '.msg-name'],
+            ['.msg-row[data-prof]', 'prof', '.msg-name'],
+            ['.msg-note[data-chat]', 'chat', '.msg-note-name'],
+            ['.dm-msg[data-uid]', 'uid', '.dm-meta b'],
+            ['.dm-head[data-uid]', 'uid', '.dm-name']
+        ].forEach(([rows, attr, name]) => {
+            document.querySelectorAll(rows).forEach((row) => {
+                if (ids.has(row.dataset[attr])) addBadge(row.querySelector(name));
+            });
         });
     }
 

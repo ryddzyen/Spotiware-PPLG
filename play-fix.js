@@ -11,6 +11,14 @@
 
     // playlist yang sedang diputar: 'loc:<id>' atau 'ext:<id>' (null = bukan dari playlist)
     let activeKey = null;
+    let activeIds = new Set();
+    const ctxSame = () => {
+        if (!activeKey) return false;
+        const ctx = currentContextList.map((s) => s.id);
+        return ctx.length === activeIds.size && ctx.every((id) => activeIds.has(id));
+    };
+    const isActive = (key) => !!key && key === activeKey && playerBar.classList.contains('show') &&
+        ctxSame() && activeIds.has(getCurrentSong().id);
 
     const detailKey = () => {
         const v = $('playlistDetailView');
@@ -51,6 +59,7 @@
             if (dk && sameSet(songList, shownSongs())) key = dk;
         }
         activeKey = key;
+        activeIds = new Set(songList.map((s) => s.id));
         _play(songId, songList);
         if (songOnShuffle && !songOnRepeat) mixCurrentFirst();
         updatePlaylistPlayIcon();
@@ -75,7 +84,7 @@
             const list = shownSongs();
             if (!list.length) return;
             const key = detailKey();
-            if (activeKey === key && playerBar.classList.contains('show')) { play.click(); return; }
+                        if (isActive(key)) { play.click(); return; }
             const first = songOnShuffle ? list[Math.floor(Math.random() * list.length)] : list[0];
             window.__plKey = key;
             playSongFromList(first.id, list);
@@ -83,7 +92,11 @@
     }
 
     // dipakai kotak riwayat beranda
-    window.PlayKey = { is: (k) => !!k && activeKey === k && playerBar.classList.contains('show') };
+    window.PlayKey = { is: isActive };
+    ['play', 'pause', 'playing'].forEach((ev) => audio.addEventListener(ev, () => {
+        updatePlaylistPlayIcon();
+        window.dispatchEvent(new Event('spotiware:activepl'));
+    }));
 
     // =====================================================
     // 2. LAGU PILIHAN LEBIH CEPAT DIMUAT

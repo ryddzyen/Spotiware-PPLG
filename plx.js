@@ -165,7 +165,9 @@
         const it = getItem(key);
         if (!it || playingKey !== key || audio.paused || !playerBar.classList.contains('show')) return false;
         const cur = getCurrentSong().id;
-        return songsOf(it).some((s) => s.id === cur);
+        const L = songsOf(it);
+        return L.some((s) => s.id === cur) && L.length === currentContextList.length &&
+            L.every((s) => currentContextList.some((c) => c.id === s.id));
     }
     function syncPlayIcons() {
         document.querySelectorAll('[data-pl] .pl-play').forEach((b) => {

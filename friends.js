@@ -432,6 +432,7 @@
     function updateDmHead() {
         if (!dmPeerUser) return;
         const u = dmPeerUser;
+        dmView.querySelector('.dm-head').dataset.uid = u.id;
         dmView.querySelector('.dm-avwrap').innerHTML = avHTML(u);
         const n = dmView.querySelector('.dm-name');
         n.textContent = u.displayName || u.username || 'User';
