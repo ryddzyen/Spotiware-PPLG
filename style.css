@@ -6545,3 +6545,30 @@ body.addv-open .addv{ display: flex; }
     .playlist-track-table td.track-duration,
     .playlist-track-table th.track-duration{ display: none !important; }
 }
+
+/* ===== Lirik: menimpa phone frame (laptop, tidak layar penuh) ===== */
+#lyricsPanel.over{ min-width: 0; border-radius: 10px; box-shadow: none; }
+
+/* ===== Lirik: layar penuh laptop -> bergeser masuk di samping card lagu ===== */
+#lyricsPanel.side{
+    position: relative; top: auto; right: auto; bottom: auto; left: auto;
+    display: flex; flex: 0 0 auto; z-index: 1;
+    width: 0; min-width: 0; margin-left: 0; padding: 0;
+    border: 0 solid rgba(255,255,255,0.1); border-radius: 2rem;
+    background: rgba(30,30,30,0.55);
+    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+    box-shadow: none; opacity: 0; pointer-events: none; overflow: hidden;
+    transition: width 0.5s cubic-bezier(.22,.8,.3,1), margin-left 0.5s cubic-bezier(.22,.8,.3,1),
+                opacity 0.35s ease, border-width 0.5s;
+}
+#lyricsPanel.side.show{
+    width: min(34rem, 42vw); margin-left: 1.5rem;
+    opacity: 1; pointer-events: auto; border-width: 1px;
+}
+#lyricsPanel.side .lyr-bg{ display: none; }
+/* isi tidak ikut gepeng saat lebar masih beranimasi */
+#lyricsPanel.side .lyr-head,
+#lyricsPanel.side .lyr-body,
+#lyricsPanel.side .lyr-foot{ min-width: min(34rem, 42vw); box-sizing: border-box; }
+#lyricsPanel.side .lyr-head{ padding: 1.4rem 1.5rem 0.4rem; }
+#lyricsPanel.side .lyr-body{ padding: 22% 1.6rem; }
