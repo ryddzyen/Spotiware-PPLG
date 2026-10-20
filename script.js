@@ -512,7 +512,13 @@ const songs = [
     { id: 510, songName: "boba date", songDes: "Stream Cafe", songImage: "Art Cover/279_boba_date__stream_cafe.webp", songPath: "Lagu/SpotiDownloader.com - boba date - Stream Cafe.mp3" },
     { id: 511, songName: "Kimi Dake wo Mamoritai", songDes: "Takeshi Tsuruno", songImage: "Art Cover/Kimi Dake wo Mamoritai.webp", songPath: "Lagu/Kimi Dake wo Mamoritai.mp3", hidden: true, keyword: ["takeshi tsuruno", "kimi dake wo mamoritai"] },
     { id: 512, songName: "Kupu - Kupu", songDes: "Tiara Andini", songImage: "Art Cover/Kupu - Kupu.webp", songPath: "Lagu/Kupu - Kupu.mp3" },
-    { id: 513, songName: "Ultraman Orb | Versão Brasileira", songDes: "YouDubb", songImage: "Art Cover/Ultraman Orb _ Versão Brasileira.webp", songPath: "Lagu/Ultraman Orb _ Versão Brasileira.mp3", hidden: true, keyword: ["youdubb", "ultraman orb", "versao brasileira"] }
+    { id: 513, songName: "Ultraman Orb | Versão Brasileira", songDes: "YouDubb", songImage: "Art Cover/Ultraman Orb _ Versão Brasileira.webp", songPath: "Lagu/Ultraman Orb _ Versão Brasileira.mp3", hidden: true, keyword: ["youdubb", "ultraman orb", "versao brasileira"] },
+    { id: 514, songName: "Love of My Life", songDes: "Queen", songImage: "Art Cover/Love of My Life.webp", songPath: "Lagu/Love of My Life.mp3" },
+    { id: 515, songName: "I'm Yours", songDes: "Jason Mraz", songImage: "Art Cover/SpotiDown.App - I'm Yours - Jason Mraz.png", songPath: "Lagu/SpotiDown.App - I'm Yours - Jason Mraz.mp3" },
+    { id: 516, songName: "If the World Was Ending (feat. Julia Michaels)", songDes: "JP Saxe", songImage: "Art Cover/SpotiDown.App - If the World Was Ending (feat. Julia Michaels) - JP Saxe, Julia Michaels.png", songPath: "Lagu/SpotiDown.App - If the World Was Ending (feat. Julia Michaels) - JP Saxe, Julia Michaels.mp3" },
+    { id: 517, songName: "Intentions (feat. Quavo)", songDes: "Justin Bieber", songImage: "Art Cover/SpotiDown.App - Intentions (feat. Quavo) - Justin Bieber, Quavo.png", songPath: "Lagu/SpotiDown.App - Intentions (feat. Quavo) - Justin Bieber, Quavo.mp3" },
+    { id: 518, songName: "Little Bit Better", songDes: "Caleb Hearn, ROSIE", songImage: "Art Cover/SpotiDown.App - Little Bit Better - Caleb Hearn, ROSIE.jpg", songPath: "Lagu/SpotiDown.App - Little Bit Better - Caleb Hearn, ROSIE.mp3" },
+    { id: 519, songName: "Anything You Want", songDes: "Reality Club", songImage: "Art Cover/SpotiDown.App - Anything You Want - Reality Club.jpg", songPath: "Lagu/SpotiDown.App - Anything You Want - Reality Club.mp3" }
 ];
 
 const visibleSongs = songs.filter(s => !s.hidden);

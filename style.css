@@ -6579,3 +6579,47 @@ body.addv-open .addv{ display: flex; }
 }
 #lyricsPanel.in-card .lyr-line{ font-size: 1.35rem; }
 #lyricsPanel.in-card .lyr-foot{ padding: 0.4rem 0 0; line-height: 1.5; }
+
+/* ===== Lirik: mulai dari atas, lalu baris aktif ikut ke tengah ===== */
+#lyricsPanel .lyr-body{ padding: 1.2rem 1.4rem 50vh; }
+#lyricsPanel .lyr-body.picking{ padding: 1rem 1.4rem 2rem; }
+#lyricsPanel .lyr-line{ padding-right: 0.6rem; }
+#lyricsPanel .lyr-line.active{ transform: scale(1.02); }
+
+/* ===== Layar penuh laptop: teks tidak mepet kanan ===== */
+:root{ --lyr-r: 2.2rem; }
+.now-playing-panel:fullscreen .phone-frame.with-lyrics{
+    padding-right: calc(var(--lyr-r) + var(--lyr-w) + var(--lyr-gap));
+}
+#lyricsPanel.in-card{ right: var(--lyr-r); }
+#lyricsPanel.in-card .lyr-body{
+    padding: 1.2rem 1.2rem 50vh 0.2rem;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 88%, transparent 100%);
+}
+
+/* ===== Laptop: kartu lirik berada di bawah menu foto profil ===== */
+@media (min-width: 769px) and (hover: hover){
+    body #lyricsPanel{ z-index: 90; }
+}
+
+/* ===== Your Library: daftar playlist scroll di dalam card (laptop) ===== */
+@media (min-width: 901px) and (hover: hover){
+    .main:not(.library-expanded) .main-left-part:not(.collapsed){ display: flex; flex-direction: column; min-height: 0; }
+    .main:not(.library-expanded) .main-left-part:not(.collapsed) > *{ flex-shrink: 0; }
+    .main:not(.library-expanded) .main-left-part:not(.collapsed) > #playlistList{
+        flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    }
+}
+
+/* ===== Lirik layar penuh: lebih kecil, teks mulai lebih atas ===== */
+:root{ --lyr-w: min(22rem, 30vw); }
+#lyricsPanel.in-card .lyr-head{ position: absolute; top: 0; right: 0; padding: 0; z-index: 4; }
+#lyricsPanel.in-card .lyr-close{ padding: 0.3rem 0.5rem; font-size: 1rem; }
+#lyricsPanel.in-card .lyr-body{
+    padding: 0 1rem 50vh 0.2rem;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent 100%);
+}
+#lyricsPanel.in-card .lyr-line{ font-size: 1.15rem; margin: 0.9rem 0; }
+#lyricsPanel.in-card .lyr-line:first-child{ padding-right: 2.2rem; }

@@ -30,6 +30,7 @@
             ['.msg-row[data-prof]', 'prof', '.msg-name'],
             ['.msg-note[data-chat]', 'chat', '.msg-note-name'],
             ['.dm-msg[data-uid]', 'uid', '.dm-meta b'],
+            ['.user-profile[data-uid]', 'uid', '#upName'],
             ['.dm-head[data-uid]', 'uid', '.dm-name']
         ].forEach(([rows, attr, name]) => {
             document.querySelectorAll(rows).forEach((row) => {

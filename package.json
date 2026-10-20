@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "music-metadata": "^12.2.3"
+  }
+}

@@ -687,6 +687,7 @@
         }
         userCache[uid] = u;
         viewUid = uid;
+        view.dataset.uid = uid;
 
         closePlaylistDetailView();
         closeShowAllView();
