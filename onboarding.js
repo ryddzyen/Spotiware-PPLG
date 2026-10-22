@@ -1,4 +1,4 @@
-// onboarding.js — Tahap 2a: pilih genre & artis favorit (disimpan per akun)
+// onboarding.js — pilih genre & artis favorit. Muncul SEKALI saja per akun (tidak bisa dibuka lagi).
 (function () {
     const MIN_GENRE = 3, MIN_ARTIST = 3, MAX_ARTIST_SHOWN = 18;
     let step = 1, selGenres = new Set(), selArtists = new Set(), overlay = null;
@@ -41,8 +41,6 @@
             .ob-next{background:#fff;color:#000;border:none;border-radius:2rem;padding:.65rem 1.6rem;font:inherit;font-weight:700;cursor:pointer}
             .ob-next:disabled{opacity:.35;cursor:not-allowed}
             .ob-count{font-size:.85rem;opacity:.7;flex:1;text-align:center}
-            .ht-prefs-btn{margin-left:auto;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:2rem;padding:.45rem 1rem;font:inherit;font-size:.82rem;cursor:pointer}
-            .ht-prefs-btn:hover{background:rgba(255,255,255,.15)}
         `;
         document.head.appendChild(css);
     }
@@ -93,9 +91,8 @@
 
     function open() {
         if (overlay) return;
-        const old = getPrefs();
-        selGenres = new Set(old && old.genres || []);
-        selArtists = new Set(old && old.artists || []);
+        selGenres = new Set();
+        selArtists = new Set();
         step = 1;
 
         overlay = document.createElement('div');
@@ -122,7 +119,6 @@
             if (e.target.id === 'obNext') {
                 if (step === 1) {
                     step = 2;
-                    // buang artis lama yang genre-nya sudah tidak dipilih
                     const valid = new Set(artistList().map(a => a.name));
                     selArtists = new Set([...selArtists].filter(a => valid.has(a)));
                     return render();
@@ -134,28 +130,16 @@
         render();
     }
 
+    // hanya muncul kalau akun ini belum pernah memilih / melewati
     function checkAndShow() {
-        const p = getPrefs();
-        if (!p) open();
+        if (!getPrefs()) open();
     }
 
-    function addButton() {
-        const bar = document.querySelector('.ht-bar');
-        if (!bar) return setTimeout(addButton, 400);
-        if (bar.querySelector('.ht-prefs-btn')) return;
-        const b = document.createElement('button');
-        b.className = 'ht-prefs-btn';
-        b.textContent = 'Atur selera';
-        b.addEventListener('click', open);
-        bar.appendChild(b);
-    }
-
-    window.Prefs = { get: getPrefs, open };
+    window.Prefs = { get: getPrefs };
 
     function init() {
         if (typeof getSongsByGenre !== 'function' || !window.GENRE_ARTISTS) return setTimeout(init, 300);
         injectStyle();
-        addButton();
         setTimeout(checkAndShow, 1500);   // beri waktu login Firebase menentukan akun
         window.addEventListener('spotiware:account-changed', () => setTimeout(() => { if (!overlay) checkAndShow(); }, 400));
     }

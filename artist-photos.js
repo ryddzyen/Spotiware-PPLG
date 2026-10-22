@@ -1,0 +1,1 @@
+window.ARTIST_PHOTOS = {};

@@ -6623,3 +6623,25 @@ body.addv-open .addv{ display: flex; }
 }
 #lyricsPanel.in-card .lyr-line{ font-size: 1.15rem; margin: 0.9rem 0; }
 #lyricsPanel.in-card .lyr-line:first-child{ padding-right: 2.2rem; }
+/* ===== Tabel playlist: selalu muat, durasi dan ⋯ tidak terpotong ===== */
+@media (min-width: 769px) and (not ((hover: none) and (pointer: coarse))){
+    .playlist-track-table{ table-layout: fixed; width: 100%; }
+    .playlist-track-table th, .playlist-track-table td{ box-sizing: border-box; }
+    .playlist-track-table th:nth-child(1), .playlist-track-table td:nth-child(1){ width: 3.4rem; }
+    .playlist-track-table th.pd-album-col{ width: 26%; }
+    .playlist-track-table th.pd-compact-only{ width: 20%; }
+    .playlist-track-table th.pd-list-only{ width: 11rem; }
+    .playlist-track-table th.track-actions{ width: 3rem; }
+    .playlist-track-table th.track-duration{ width: 4.4rem; }
+    .playlist-track-table th.track-more-col{ width: 3.4rem; }
+
+    .playlist-track-table td.pd-album-col, .playlist-track-table th.pd-album-col,
+    .playlist-track-table td.pd-list-only, .playlist-track-table th.pd-list-only,
+    .playlist-track-table td.pd-compact-only, .playlist-track-table th.pd-compact-only{
+        padding-left: 0.8rem; padding-right: 0.8rem; max-width: none;
+    }
+    .playlist-track-table th:nth-child(2), .playlist-track-table td:nth-child(2){ padding-right: 1rem; overflow: hidden; }
+    .track-title-cell{ min-width: 0; }
+    .track-title-text{ flex: 1 1 0; min-width: 0; }
+    .track-title-text .t-name, .track-title-text .t-artist{ max-width: 100%; }
+}
