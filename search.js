@@ -1,4 +1,4 @@
-// ===== Pencarian ala Spotify: saran teks + daftar lagu kecil + hasil (All / Songs / Playlists / Profiles) + recent searches =====
+// ===== Pencarian ala Spotify: saran teks + daftar lagu kecil + hasil (All / Songs / Artists / Playlists / Profiles) + recent searches =====
 (() => {
     const input = document.querySelector('.input-box');
     const bar = document.querySelector('.search-bar');
@@ -16,6 +16,169 @@
     function centerSearchBar(on) {
         document.body.classList.toggle('search-centered', on);
     }
+
+    // ---------- Data artis: kategori Artists, Top result, artis mirip ----------
+    const normT = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const wordsOf = (s) => normT(s).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    const hashStr = (str) => { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return h; };
+    const STOP = new Set(['the', 'and', 'you', 'your', 'for', 'with', 'feat', 'of', 'to', 'in', 'on', 'a', 'i', 'me', 'my', 'it', 'is',
+        'di', 'dan', 'yang', 'ke', 'aku', 'kamu', 'dia', 'ini', 'itu']);
+    const artistsOf = (s) => s.artists || String(s.songDes || '').split(',').map((x) => x.trim()).filter(Boolean);
+
+    function lev(a, b, max) {
+        if (Math.abs(a.length - b.length) > max) return max + 1;
+        let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+        for (let i = 1; i <= a.length; i++) {
+            const row = [i]; let min = i;
+            for (let j = 1; j <= b.length; j++) {
+                row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+                if (row[j] < min) min = row[j];
+            }
+            if (min > max) return max + 1;
+            prev = row;
+        }
+        return prev[b.length];
+    }
+    const nearWord = (w, k) => { const m = k.length >= 7 ? 2 : 1; return k.length >= 4 && lev(w, k, m) <= m; };
+
+    let artistCache = null;
+    function artistStats() {
+        if (artistCache) return artistCache;
+        const map = {};
+        visibleSongs.forEach((s) => {
+            const names = artistsOf(s);
+            names.forEach((a) => {
+                if (!a || a === 'Unknown') return;
+                const o = map[a] || (map[a] = { name: a, songs: [], genre: s.genre || 'Lainnya', collab: {} });
+                o.songs.push(s);
+                names.forEach((b) => { if (b !== a) o.collab[b] = (o.collab[b] || 0) + 1; });
+            });
+        });
+        artistCache = { list: Object.values(map), by: map };
+        return artistCache;
+    }
+
+    const artistImg = (a) => (window.ARTIST_PHOTOS || {})[a.name] || (a.songs[0] && a.songs[0].songImage) || 'img/pplglogo.png';
+
+    function artistScore(name, nq, toks) {
+        const n = normT(name);
+        if (n === nq) return 100;
+        if (n.startsWith(nq)) return 90;
+        if (n.includes(nq)) return 70;
+        if (!toks.length) return 0;
+        const nw = wordsOf(name);
+        const hit = toks.filter((k) => nw.some((w) => w === k || w.startsWith(k) || nearWord(w, k))).length;
+        return hit === toks.length ? 55 : 0;
+    }
+
+    // artis yang cocok + artis yang mirip (genre sama / pernah kolaborasi)
+    function findArtists(raw) {
+        const nq = normT(raw).trim();
+        const qw = wordsOf(raw);
+        let toks = qw.filter((w) => w.length >= 3 && !STOP.has(w));
+        if (!toks.length) toks = qw;
+        const st = artistStats();
+
+        const matched = st.list.map((a) => ({ a, sc: artistScore(a.name, nq, toks) }))
+            .filter((x) => x.sc > 0)
+            .sort((x, y) => y.sc - x.sc || y.a.songs.length - x.a.songs.length);
+
+        const list = [], seen = new Set();
+        const add = (a) => { if (a && !seen.has(a.name)) { seen.add(a.name); list.push(a); } };
+        matched.slice(0, 6).forEach((x) => add(x.a));
+        matchSongs(raw).slice(0, 12).forEach((s) => artistsOf(s).forEach((n) => add(st.by[n])));
+        list.slice(0, 2).forEach((sd) => {
+            st.list.filter((a) => !seen.has(a.name) && a.songs.length >= 2 &&
+                ((a.genre === sd.genre && sd.genre !== 'Lainnya') || sd.collab[a.name]))
+                .sort((x, y) => ((sd.collab[y.name] || 0) * 10 + y.songs.length) - ((sd.collab[x.name] || 0) * 10 + x.songs.length))
+                .slice(0, 10).forEach(add);
+        });
+        return { matched, list: list.slice(0, 24) };
+    }
+
+    function openArtist(name) {
+        if (typeof window.openArtistPage === 'function') window.openArtistPage(name);
+        else openShowAllView(name, visibleSongs.filter((s) => artistsOf(s).includes(name)));
+    }
+
+    function playArtist(name) {
+        const list = visibleSongs.filter((s) => artistsOf(s).includes(name));
+        if (list.length) playSongFromList(list[0].id, list);
+    }
+
+    function artistRowHTML(a) {
+        return `
+            <div class="sv-item" data-kind="artist" data-name="${esc(a.name)}">
+                <div class="sv-item-img round"><img src="${esc(artistImg(a))}" alt="" loading="lazy"></div>
+                <div class="sv-item-info">
+                    <div class="sv-item-title">${esc(a.name)}</div>
+                    <div class="sv-item-sub">Artist</div>
+                </div>
+            </div>`;
+    }
+
+    function artistCardHTML(a) {
+        return `
+            <div class="sv-card" data-kind="artist" data-name="${esc(a.name)}">
+                <div class="sv-card-img round"><img src="${esc(artistImg(a))}" alt="" loading="lazy"></div>
+                <div class="sv-card-title">${esc(a.name)}</div>
+                <div class="sv-card-sub">Artist</div>
+            </div>`;
+    }
+
+    function pickTop(AR, S) {
+        if (AR.matched[0] && AR.matched[0].sc >= 70) return { type: 'artist', a: AR.matched[0].a };
+        if (S[0]) return { type: 'song', s: S[0] };
+        if (AR.matched[0]) return { type: 'artist', a: AR.matched[0].a };
+        return null;
+    }
+
+    function topResultHTML(t) {
+        if (t.type === 'artist') {
+            const a = t.a;
+            return `
+                <div class="sv-top artist" data-name="${esc(a.name)}">
+                    <img src="${esc(artistImg(a))}" alt="">
+                    <div class="sv-top-name">${esc(a.name)}</div>
+                    <div class="sv-top-sub">Artist</div>
+                    <button type="button" class="sv-top-play" data-name="${esc(a.name)}" title="Play"><i class="fa-solid fa-play"></i></button>
+                </div>`;
+        }
+        const s = t.s;
+        return `
+            <div class="sv-top song" data-song-id="${s.id}">
+                <img src="${esc(s.songImage)}" alt="">
+                <div class="sv-top-name">${esc(s.songName)}</div>
+                <div class="sv-top-sub">Song • ${esc(s.songDes)}</div>
+                <button type="button" class="sv-top-play" data-song-id="${s.id}" title="Play"><i class="fa-solid fa-play"></i></button>
+            </div>`;
+    }
+
+    (function injectArtistStyle() {
+        const css = document.createElement('style');
+        css.textContent = `
+            .sv-h{font-size:1.3rem;margin:1.2rem 0 .6rem}
+            .sv-h-row{display:flex;align-items:center;justify-content:space-between}
+            .sv-link{font-size:.8rem;font-weight:700;opacity:.7;cursor:pointer}
+            .sv-link:hover{opacity:1;text-decoration:underline}
+            .sv-topgrid{display:flex;gap:1.8rem;flex-wrap:wrap;align-items:flex-start}
+            .sv-topcol{flex:0 0 400px;max-width:100%}
+            .sv-songscol{flex:1 1 340px;min-width:0}
+            @media (max-width:768px){.sv-topcol,.sv-songscol{flex-basis:100%}}
+            .sv-top{position:relative;background:rgba(255,255,255,.07);border-radius:12px;padding:1.5rem;min-height:230px;box-sizing:border-box;cursor:pointer;transition:background .2s}
+            .sv-top:hover{background:rgba(255,255,255,.14)}
+            .sv-top img{width:120px;height:120px;object-fit:cover;border-radius:8px;display:block;margin-bottom:1.2rem;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+            .sv-top.artist img{border-radius:50%}
+            .sv-top-name{font-size:2.2rem;font-weight:800;line-height:1.1;margin-bottom:.5rem;overflow:hidden;text-overflow:ellipsis;
+                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+            .sv-top-sub{font-size:.9rem;opacity:.75}
+            .sv-top-play{position:absolute;right:1.2rem;bottom:1.2rem;width:52px;height:52px;border-radius:50%;border:none;
+                background:var(--yellow,#1ed760);color:#000;font-size:1.15rem;cursor:pointer;
+                display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(0,0,0,.4)}
+            .sv-top-play:hover{transform:scale(1.06)}
+        `;
+        document.head.appendChild(css);
+    })();
 
     // ---------- Recent searches (disimpan di localStorage) ----------
     const recentKey = () => 'spotiware_recent_searches_' + ((firebase.auth().currentUser || {}).uid || 'guest');
@@ -44,7 +207,7 @@
         saveRecents(list);
     }
 
-    // ---------- Pencocokan lagu (lagu rahasia tetap lewat keyword) ----------
+    // ---------- Pencocokan lagu: ketat (untuk dropdown & mencari artis dari lagu) ----------
     function matchSongs(raw) {
         const q = raw.toLowerCase().trim();
         if (!q) return [];
@@ -65,6 +228,77 @@
         return found.map((s, i) => [s, i])
             .sort((x, y) => rank(x[0]) - rank(y[0]) || x[1] - y[1])
             .map((x) => x[0]);
+    }
+
+    // ---------- Pencocokan lagu: longgar + terkait (untuk halaman hasil) ----------
+    function songScore(s, nq, toks) {
+        const t = normT(s.songName), a = normT(s.songDes);
+        const all = wordsOf(s.songName).concat(wordsOf(s.songDes));
+        let sc = 0;
+        if (t.includes(nq)) sc += t.startsWith(nq) ? 120 : 90;
+        if (a.includes(nq)) sc += 80;
+        let hit = 0;
+        toks.forEach((k) => {
+            let b = 0;
+            if (all.includes(k)) b = 25;
+            else if (all.some((w) => w.startsWith(k))) b = 18;
+            else if (k.length >= 4 && (t.includes(k) || a.includes(k))) b = 14;
+            else if (all.some((w) => nearWord(w, k))) b = 10;      // salah ketik kecil
+            if (b) { hit++; sc += b; }
+        });
+        if (toks.length > 1 && hit === toks.length) sc += 30;
+        return sc;
+    }
+
+    // hasil utama dulu, lalu lagu lain dari artis yang sama, artis mirip, dan satu genre
+    function expandSongs(raw) {
+        const nq = normT(raw).trim();
+        const qw = wordsOf(raw);
+        let toks = qw.filter((w) => w.length >= 3 && !STOP.has(w));
+        if (!toks.length) toks = qw;
+
+        const prim = [];
+        songs.forEach((s) => {
+            if (s.hidden) {      // lagu rahasia: hanya lewat keyword
+                const keys = [].concat(s.keyword || s.songName).map(normT);
+                if (keys.some((k) => k.includes(nq))) prim.push({ s, sc: 200 });
+                return;
+            }
+            const sc = songScore(s, nq, toks);
+            if (sc >= 10) prim.push({ s, sc });
+        });
+        prim.sort((a, b) => b.sc - a.sc || a.s.songName.localeCompare(b.s.songName));
+
+        const out = [], seen = new Set();
+        const push = (s) => { if (s && !seen.has(s.id)) { seen.add(s.id); out.push(s); } };
+        prim.slice(0, 60).forEach((x) => push(x.s));
+        if (!out.length) return out;
+
+        const st = artistStats();
+
+        // 1) lagu lain dari artis hasil teratas
+        const names = [];
+        out.slice(0, 5).forEach((s) => { const n = artistsOf(s)[0]; if (n && !names.includes(n)) names.push(n); });
+        names.slice(0, 3).forEach((n) => visibleSongs.filter((s) => artistsOf(s).includes(n)).forEach(push));
+
+        // 2) lagu dari artis yang mirip (genre sama / pernah kolaborasi)
+        const base = st.by[names[0]];
+        if (base) {
+            st.list.filter((a) => a.name !== base.name && a.songs.length >= 2 &&
+                ((a.genre === base.genre && base.genre !== 'Lainnya') || base.collab[a.name]))
+                .sort((x, y) => ((base.collab[y.name] || 0) * 10 + y.songs.length) - ((base.collab[x.name] || 0) * 10 + x.songs.length))
+                .slice(0, 5)
+                .forEach((a) => a.songs.slice(0, 3).forEach(push));
+        }
+
+        // 3) sedikit lagu segenre (urutan stabil, tidak berubah-ubah)
+        const g = out[0].genre;
+        if (g && g !== 'Lainnya') {
+            visibleSongs.filter((s) => s.genre === g && !seen.has(s.id))
+                .sort((x, y) => hashStr(x.songName + nq) - hashStr(y.songName + nq))
+                .slice(0, 12).forEach(push);
+        }
+        return out.slice(0, 120);
     }
 
     // ---------- Saran teks (judul & nama artis dari lagu yang terlihat) ----------
@@ -174,6 +408,24 @@
             </div>`;
     }
 
+    // tombol play/pause di kartu Top result ikut berubah
+    function syncTop() {
+        const btn = document.querySelector('#svList .sv-top-play');
+        if (!btn) return;
+        const cid = currentId();
+        let on = false;
+        if (cid !== null && !audio.paused) {
+            if (btn.dataset.name) {
+                const cs = songs.find((s) => s.id === cid);
+                on = !!cs && artistsOf(cs).includes(btn.dataset.name);
+            } else {
+                on = parseInt(btn.dataset.songId) === cid;
+            }
+        }
+        const i = btn.querySelector('i');
+        if (i) i.className = 'fa-solid ' + (on ? 'fa-pause' : 'fa-play');
+    }
+
     function refreshRows() {
         const cur = currentId();
         document.querySelectorAll('.sr-row').forEach((row) => {
@@ -195,6 +447,7 @@
                 btn.querySelector('i').className = (liked ? 'fa-solid' : 'fa-regular') + ' fa-heart';
             }
         });
+        syncTop();
     }
 
     function playFromSearch(id) {
@@ -358,7 +611,7 @@
     document.addEventListener('mousedown', (e) => { if (!frMenu.contains(e.target)) frMenu.classList.remove('show'); }, true);
     window.addEventListener('scroll', () => frMenu.classList.remove('show'), true);
 
-        // urutan gabungan lagu + profil + playlist: yang diawali kata kunci tampil lebih dulu
+        // urutan gabungan lagu + profil + playlist + artis: yang diawali kata kunci tampil lebih dulu
     function relScore(q, texts) {
         let best = 3;
         texts.forEach((t) => {
@@ -369,12 +622,14 @@
         });
         return best;
     }
-    function mixedHTML(raw, S, P, L) {
+    function mixedHTML(raw, S, P, L, A) {
+        A = A || [];
         const q = raw.toLowerCase().trim();
         const items = [];
-        S.forEach((s, i) => items.push([relScore(q, [s.songName, s.songDes]), i * 3, rowHTML(s)]));
-        P.forEach((u, i) => items.push([relScore(q, [u.displayName, u.username]), i * 3 + 1, userRowHTML(u)]));
-        L.forEach((p, i) => items.push([relScore(q, [p.name]), i * 3 + 2, playlistRowHTML(p)]));
+        S.forEach((s, i) => items.push([relScore(q, [s.songName, s.songDes]), i * 4, rowHTML(s)]));
+        P.forEach((u, i) => items.push([relScore(q, [u.displayName, u.username]), i * 4 + 1, userRowHTML(u)]));
+        L.forEach((p, i) => items.push([relScore(q, [p.name]), i * 4 + 2, playlistRowHTML(p)]));
+        A.forEach((a, i) => items.push([relScore(q, [a.name]), i * 4 + 3, artistRowHTML(a)]));
         return items.sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((x) => x[2]);
     }
 
@@ -417,18 +672,19 @@
     }
 
     // jumlah maksimal baris per jenis di rekomendasi (ubah kalau mau lebih banyak)
-    const DD_SONGS = 8, DD_OTHERS = 6;
+    const DD_SONGS = 8, DD_OTHERS = 6, DD_ARTISTS = 3;
     let ddToken = 0;
     let ddItems = {};
 
-    function paintDropdown(q, sug, S, P, L, loading) {
-        if (!sug.length && !S.length && !P.length && !L.length) {
+    function paintDropdown(q, sug, S, P, L, loading, A) {
+        A = A || [];
+        if (!sug.length && !S.length && !P.length && !L.length && !A.length) {
             dropdown.innerHTML = loading
                 ? '<div class="sd-empty">Searching…</div>'
                 : `<div class="sd-empty">No results found for "${esc(q)}"</div>`;
             return;
         }
-        const out = mixedHTML(q, S, P, L);
+        const out = mixedHTML(q, S, P, L, A);
         dropdown.innerHTML =
             sug.map((t) => `
                 <div class="sd-sug" data-text="${esc(t)}">
@@ -446,19 +702,20 @@
         const my = ++ddToken;
         const sug = suggestions(q);
         const S = matchSongs(q).slice(0, DD_SONGS);
+        const A = findArtists(q).matched.slice(0, DD_ARTISTS).map((x) => x.a);
         dropdownList = S;
         ddItems = {};
-        paintDropdown(q, sug, S, [], [], !!window.Social);   // lagu langsung tampil, profil & playlist menyusul
+        paintDropdown(q, sug, S, [], [], !!window.Social, A);   // lagu & artis langsung tampil, profil & playlist menyusul
 
         if (!window.Social) return;
         Promise.allSettled([Social.searchProfiles(q), Social.searchPlaylists(q)]).then(([pr, pl]) => {
             if (my !== ddToken || !dropdown.classList.contains('show')) return;
             const P = pr.status === 'fulfilled' ? pr.value.slice(0, DD_OTHERS) : [];
             const L = pl.status === 'fulfilled' ? pl.value.slice(0, DD_OTHERS) : [];
-            if (!P.length && !L.length && (sug.length || S.length)) return;   // tidak ada tambahan, biarkan
+            if (!P.length && !L.length && (sug.length || S.length || A.length)) return;   // tidak ada tambahan, biarkan
             P.forEach((u) => { ddItems[u.id] = u; });
             L.forEach((p) => { ddItems[p.id] = p; });
-            paintDropdown(q, sug, S, P, L, false);
+            paintDropdown(q, sug, S, P, L, false, A);
         });
     }
 
@@ -499,6 +756,15 @@
             return;
         }
 
+        // artis -> halaman artis
+        const ar = e.target.closest('.sv-item[data-kind="artist"]');
+        if (ar) {
+            closeDropdown();
+            input.blur();
+            openArtist(ar.dataset.name);
+            return;
+        }
+
         const it = e.target.closest('.sv-item[data-kind]');
         if (it && window.Social) {
             const data = ddItems[it.dataset.id];
@@ -523,7 +789,7 @@
     });
     bindRows(dropdown, () => dropdownList, () => { closeDropdown(); input.blur(); });
 
-    // ---------- Halaman hasil: All / Songs / Playlists / Profiles ----------
+    // ---------- Halaman hasil: All / Songs / Artists / Playlists / Profiles ----------
     const view = document.createElement('div');
     view.className = 'search-view';
     view.id = 'searchView';
@@ -532,6 +798,7 @@
             <button type="button" class="sv-chip sv-chip-x" data-cat="all" title="Back to all"><i class="fa-solid fa-xmark"></i></button>
             <button type="button" class="sv-chip active" data-cat="all">All</button>
             <button type="button" class="sv-chip" data-cat="songs">Songs</button>
+            <button type="button" class="sv-chip" data-cat="artists">Artists</button>
             <button type="button" class="sv-chip" data-cat="playlists">Playlists</button>
             <button type="button" class="sv-chip" data-cat="profiles">Profiles</button>
         </div>
@@ -606,44 +873,78 @@
         const token = ++searchToken;
         cardItems = {};
 
-        // ===== Songs =====
+        // ===== Songs: hasil utama + lagu terkait =====
         if (category === 'songs') {
-            resultList = matchSongs(q);
+            resultList = expandSongs(q);
             svList.innerHTML = resultList.length
                 ? resultList.map(rowHTML).join('')
                 : `<div class="sd-empty">No results found for "${esc(q)}"<br><small>Please make sure your words are spelled correctly.</small></div>`;
             return;
         }
 
-        // ===== All: campuran lagu + profil + playlist =====
+        // ===== Artists: yang cocok dulu, lalu artis yang mirip =====
+        if (category === 'artists') {
+            const AR = findArtists(q);
+            if (!AR.list.length) {
+                svList.innerHTML = `<div class="sd-empty">No artists found for "${esc(q)}"</div>`;
+                return;
+            }
+            svList.innerHTML = isMobileView()
+                ? AR.list.map(artistRowHTML).join('')
+                : '<div class="sv-grid">' + AR.list.map(artistCardHTML).join('') + '</div>';
+            return;
+        }
+
+        // ===== All: Top result + Songs, lalu campuran artis / lagu / playlist / profil (tanpa duplikat) =====
         if (category === 'all') {
-            const songsFound = matchSongs(q);
-            let profs = [], pls = [], note = '';
+            const S = expandSongs(q);
+            let P = [], L = [], note = '';
             svList.innerHTML = '<div class="sd-empty">Searching…</div>';
 
             if (window.Social) {
                 const [pr, pl] = await Promise.allSettled([Social.searchProfiles(q), Social.searchPlaylists(q)]);
                 if (token !== searchToken) return;
-                if (pr.status === 'fulfilled') profs = pr.value;
-                if (pl.status === 'fulfilled') pls = pl.value;
+                if (pr.status === 'fulfilled') P = pr.value;
+                if (pl.status === 'fulfilled') L = pl.value;
                 if ((pr.status === 'rejected' && pr.reason && pr.reason.message === 'login') ||
                     (pl.status === 'rejected' && pl.reason && pl.reason.message === 'login')) {
                     note = 'Log in to also search profiles and playlists.';
                 }
             }
 
-            const S = songsFound, P = profs, L = pls;
             resultList = S;
             P.forEach((u) => { cardItems[u.id] = u; });
             L.forEach((p) => { cardItems[p.id] = p; });
 
-            const out = mixedHTML(q, S, P, L);
+            const AR = findArtists(q);
+            const top = pickTop(AR, S);
+            const topArtist = top && top.type === 'artist' ? top.a.name : null;
+            const topSongId = top && top.type === 'song' ? top.s.id : null;
 
-            if (!out.length) {
+            // kolom kanan: 4 lagu teratas (tanpa lagu yang sudah jadi top result)
+            const sideSongs = S.filter((s) => s.id !== topSongId).slice(0, 4);
+            const shown = new Set(sideSongs.map((s) => s.id));
+            if (topSongId !== null) shown.add(topSongId);
+
+            // sisanya: hanya yang belum tampil di atas
+            const restS = S.filter((s) => !shown.has(s.id)).slice(0, 30);
+            const restA = AR.list.filter((a) => a.name !== topArtist).slice(0, 8);
+            const rest = mixedHTML(q, restS, P, L, restA).slice(0, 50);
+
+            if (!top && !sideSongs.length && !rest.length) {
                 svList.innerHTML = `<div class="sd-empty">No results found for "${esc(q)}"<br><small>${esc(note || 'Please make sure your words are spelled correctly.')}</small></div>`;
                 return;
             }
-            svList.innerHTML = out.join('') + (note ? `<div class="sd-empty"><small>${esc(note)}</small></div>` : '');
+            svList.innerHTML =
+                '<div class="sv-topgrid">' +
+                (top ? `<div class="sv-topcol"><h3 class="sv-h">Top result</h3>${topResultHTML(top)}</div>` : '') +
+                (sideSongs.length
+                    ? `<div class="sv-songscol"><div class="sv-h-row"><h3 class="sv-h">Songs</h3><span class="sv-link" data-cat="songs">Show all</span></div>${sideSongs.map(rowHTML).join('')}</div>`
+                    : '') +
+                '</div>' +
+                (rest.length ? `<h3 class="sv-h">More results</h3>${rest.join('')}` : '') +
+                (note ? `<div class="sd-empty"><small>${esc(note)}</small></div>` : '');
+            syncTop();
             return;
         }
 
@@ -687,6 +988,42 @@
     svList.addEventListener('click', (e) => {
         const fb = e.target.closest('[data-act="friend"]');
         if (fb) { e.stopPropagation(); friendAction(fb.dataset.uid); return; }
+
+        // "Show all" di kolom Songs
+        const lk = e.target.closest('.sv-link');
+        if (lk) { setChip(lk.dataset.cat); renderResults(); return; }
+
+        // tombol play/pause di kartu Top result
+        const tp = e.target.closest('.sv-top-play');
+        if (tp) {
+            e.stopPropagation();
+            if (tp.dataset.name) {
+                const cid = currentId();
+                const cs = cid !== null ? songs.find((s) => s.id === cid) : null;
+                if (cs && artistsOf(cs).includes(tp.dataset.name)) play.click();   // jeda / lanjut
+                else playArtist(tp.dataset.name);
+            } else {
+                const id = parseInt(tp.dataset.songId);
+                if (id === currentId()) play.click();
+                else { addRecent({ type: 'song', id }); playFromSearch(id); }
+            }
+            refreshRows();
+            return;
+        }
+        // klik kartu Top result: artis -> halaman artis, lagu -> putar
+        const top = e.target.closest('.sv-top');
+        if (top) {
+            if (top.dataset.name) return openArtist(top.dataset.name);
+            const id = parseInt(top.dataset.songId);
+            if (id === currentId()) play.click();
+            else { addRecent({ type: 'song', id }); playFromSearch(id); }
+            refreshRows();
+            return;
+        }
+        // artis (kartu maupun baris)
+        const arEl = e.target.closest('[data-kind="artist"]');
+        if (arEl) return openArtist(arEl.dataset.name);
+
         const card = e.target.closest('.sv-card, .sv-item');
         if (!card || !window.Social) return;
         const id = card.dataset.id;

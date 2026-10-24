@@ -1,0 +1,25 @@
+import { type ObservedArray, YTNode } from '../helpers.js';
+import { type RawNode } from '../index.js';
+import ExpandableVideoDescriptionBody from './ExpandableVideoDescriptionBody.js';
+import HorizontalCardList from './HorizontalCardList.js';
+import VideoDescriptionHeader from './VideoDescriptionHeader.js';
+import VideoDescriptionInfocardsSection from './VideoDescriptionInfocardsSection.js';
+import VideoDescriptionMusicSection from './VideoDescriptionMusicSection.js';
+import VideoDescriptionTranscriptSection from './VideoDescriptionTranscriptSection.js';
+import VideoDescriptionCourseSection from './VideoDescriptionCourseSection.js';
+import VideoAttributesSectionView from './VideoAttributesSectionView.js';
+import HowThisWasMadeSectionView from './HowThisWasMadeSectionView.js';
+import ReelShelf from './ReelShelf.js';
+import ExpandableMetadata from './ExpandableMetadata.js';
+import MerchandiseShelf from './MerchandiseShelf.js';
+import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
+import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
+import ItemSection from './ItemSection.js';
+import VideoTitleHeaderView from './VideoTitleHeaderView.js';
+import VideoDescriptionGamingSection from './VideoDescriptionGamingSection.js';
+import CourseProgressView from './CourseProgressView.js';
+export default class StructuredDescriptionContent extends YTNode {
+    static type: string;
+    items: ObservedArray<VideoTitleHeaderView | VideoDescriptionHeader | VideoDescriptionGamingSection | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView | ItemSection | CourseProgressView>;
+    constructor(data: RawNode);
+}

@@ -8,11 +8,13 @@
         css.textContent = `
             .ra-host{position:relative}
             .ra-btn{position:absolute;top:42%;transform:translateY(-50%);z-index:5;width:38px;height:38px;border-radius:50%;
-                border:none;background:rgba(18,18,18,.88);color:#fff;display:none;align-items:center;justify-content:center;
-                cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.55)}
+                border:none;background:rgba(18,18,18,.88);color:#fff;display:flex;align-items:center;justify-content:center;
+                cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.55);
+                opacity:0;pointer-events:none;transition:opacity .18s ease}
+            .ra-host:hover .ra-btn.on{opacity:1;pointer-events:auto}
             .ra-btn:hover{background:#000;transform:translateY(-50%) scale(1.06)}
             .ra-btn.l{left:6px}.ra-btn.r{right:6px}
-            @media (hover:none){.ra-btn{display:none!important}}
+            @media (hover:none),(pointer:coarse),(max-width:768px){.ra-btn{display:none!important}}
         `;
         document.head.appendChild(css);
     }
@@ -49,8 +51,8 @@
 
         const upd = () => {
             const max = sc.scrollWidth - sc.clientWidth;
-            prev.style.display = sc.scrollLeft > 4 ? 'flex' : 'none';
-            next.style.display = (max > 4 && sc.scrollLeft < max - 4) ? 'flex' : 'none';
+            prev.classList.toggle('on', sc.scrollLeft > 4);
+            next.classList.toggle('on', max > 4 && sc.scrollLeft < max - 4);
         };
         sc.addEventListener('scroll', upd, { passive: true });
         new ResizeObserver(upd).observe(sc);
