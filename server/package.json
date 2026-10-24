@@ -1,0 +1,16 @@
+{
+  "name": "spotiware-yt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "yt-server.mjs",
+  "scripts": {
+    "start": "node yt-server.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "youtubei.js": "^18.3.0"
+  }
+}
