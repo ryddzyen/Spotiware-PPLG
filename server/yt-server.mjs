@@ -16,7 +16,7 @@ const MAX_YTDLP = 2;                    // batasi proses yt-dlp bersamaan (RAM p
 const DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
 // domain yang boleh memanggil server ini (isi lewat env ALLOWED_ORIGINS, pisahkan dengan koma)
-const ALLOWED = (process.env.ALLOWED_ORIGINS || 'https://USERNAME.github.io').split(',').map(s => s.trim()).filter(Boolean);
+const ALLOWED = (process.env.ALLOWED_ORIGINS || 'https://ryddzyen.github.io').split(',').map(s => s.trim()).filter(Boolean);
 const isLocal = o => /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(o);
 function corsFor(req) {
     const o = req.headers.origin;
@@ -224,4 +224,4 @@ const server = http.createServer(async (req, res) => {
 });
 server.keepAliveTimeout = 120000;     // supaya tidak diputus proxy Render
 server.headersTimeout = 125000;
-server.listen(PORT, '0.0.0.0', () => console.log('Server YouTube Music siap di port ' + PORT));
+server.listen(PORT, '127.0.0.1', () => console.log('Server YouTube Music siap di port ' + PORT));

@@ -1,6 +1,7 @@
 // yt-music.js — YouTube Music lewat server lokal (youtubei.js). Array songs lokal tidak diubah strukturnya.
 (function () {
-    const SERVER = 'http://127.0.0.1:3001';
+    const LOCAL = ['127.0.0.1', 'localhost'].includes(location.hostname);
+    const SERVER = LOCAL ? 'http://127.0.0.1:3001' : 'https://desktop-e3bkb1b.tail4eac99.ts.net';
     const ID_BASE = 20000000000;
     const CACHE_KEY = 'spotiware_yt_cache';
     const CACHE_MAX = 800;
