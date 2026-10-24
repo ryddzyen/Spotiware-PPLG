@@ -11,7 +11,7 @@ import { Innertube, UniversalCache } from 'youtubei.js';
 const run = promisify(execFile);
 const YTDLP = fileURLToPath(new URL(process.platform === 'win32' ? './yt-dlp.exe' : './yt-dlp_linux', import.meta.url));
 const PORT = process.env.PORT || 3001;
-const CHUNK = 2 * 1024 * 1024;
+const CHUNK = 10 * 1024 * 1024;
 const MAX_YTDLP = 2;                    // batasi proses yt-dlp bersamaan (RAM paket gratis kecil)
 const DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
@@ -79,6 +79,7 @@ async function search(q) {
 }
 
 // ---------- ambil info audio lewat yt-dlp ----------
+let prefetching = false;     // maksimal 1 prefetch sekaligus supaya klik lagu tidak antre
 const urlCache = new Map();
 const inflight = new Map();    // permintaan bersamaan untuk lagu yang sama hanya menjalankan yt-dlp sekali
 
@@ -103,6 +104,7 @@ async function probeLength(url, ua) {
 }
 
 async function resolveAudio(id) {
+    const t0 = Date.now();
     let stdout;
     try {
         ({ stdout } = await limit(() => run(YTDLP, [
@@ -121,9 +123,17 @@ async function resolveAudio(id) {
     const ua = (j.http_headers && j.http_headers['User-Agent']) || DEFAULT_UA;
     const length = Number(j.filesize) || await probeLength(j.url, ua);
     const mime = j.ext === 'm4a' ? 'audio/mp4' : j.ext === 'webm' ? 'audio/webm' : 'audio/mpeg';
-    const entry = { url: j.url, mime, length, ua, exp: Date.now() + 20 * 60 * 1000 };
+    let exp = Date.now() + 20 * 60 * 1000;
+    try {
+        const e = parseInt(new URL(j.url).searchParams.get('expire'));
+        if (e && e * 1000 - Date.now() > 15 * 60 * 1000) {
+            exp = Math.min(e * 1000 - 10 * 60 * 1000, Date.now() + 5 * 60 * 60 * 1000);
+        }
+    } catch (err) { }
+    const entry = { url: j.url, mime, length, ua, exp };
+    if (urlCache.size > 300) urlCache.clear();
     urlCache.set(id, entry);
-    console.log('[audio]', id, 'via yt-dlp (' + mime + ', ' + length + ' byte)');
+    console.log('[audio]', id, 'via yt-dlp (' + mime + ', ' + length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
     return entry;
 }
 
@@ -182,7 +192,7 @@ async function streamAudio(req, res, id) {
             'Content-Length': end - start + 1,
             'Content-Range': `bytes ${start}-${end}/${a.length}`,
             'Accept-Ranges': 'bytes',
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'private, max-age=3600'
         });
         if (!up.body) return res.end();
         try { await pipeline(Readable.fromWeb(up.body), res); }
@@ -201,6 +211,16 @@ const server = http.createServer(async (req, res) => {
 
     try {
         if (u.pathname === '/' || u.pathname === '/health') return json(res, 200, { ok: true });
+
+        if (u.pathname === '/prefetch') {
+            const id = u.searchParams.get('id');
+            if (id && /^[\w-]{6,20}$/.test(id) && !prefetching && !urlCache.has(id)) {
+                prefetching = true;
+                audioInfo(id).catch(() => { }).finally(() => { prefetching = false; });
+            }
+            res.writeHead(204, res.cors || {});
+            return res.end();
+        }
 
         if (u.pathname === '/search') {
             const q = (u.searchParams.get('q') || '').trim();
