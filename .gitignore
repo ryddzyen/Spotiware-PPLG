@@ -2,3 +2,4 @@ node_modules/
 yt-dlp.exe
 yt-dlp_linux
 yt-server.log
+audio-cache/

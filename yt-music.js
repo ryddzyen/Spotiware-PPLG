@@ -16,6 +16,12 @@
     const idOf = vid => ID_BASE + hash(vid);
     const fmt = sec => (!sec || sec < 0) ? '' : Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
     const toast = (t, label, fn) => { if (typeof showToast === 'function') showToast(t, label, fn); };
+    const prefetched = new Set();
+    const prefetch = vid => {
+        if (mode !== 'yt' || !vid || prefetched.has(vid)) return;
+        prefetched.add(vid);
+        fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vid)).catch(() => { });
+    };
 
     // ---------- lagu YouTube -> format lagu Spotiware (hidden, tidak tercampur di koleksi) ----------
     function toSong(m) {
@@ -213,6 +219,7 @@
             return;
         }
         list = register(data);
+        if (list[0]) prefetch(list[0].yt);      // siapkan hasil pertama
         render(list.length ? '' : 'Tidak ada hasil dari YouTube Music.');
     }
 
@@ -264,6 +271,14 @@
 
         ['play', 'playing', 'pause', 'loadstart'].forEach(ev => audio.addEventListener(ev, markCurrent));
         watchAudioErrors();
+        // saat lagu mulai main, siapkan lagu berikutnya di antrean
+        audio.addEventListener('playing', () => {
+            try {
+                const cur = getCurrentSong();
+                const i = list.findIndex(s => s.id === cur.id);
+                if (i >= 0 && list[i + 1]) prefetch(list[i + 1].yt);
+            } catch (e) { }
+        });
     }
 
     init();

@@ -1725,9 +1725,13 @@ audio.addEventListener('error', () => {
     // Coba sekali lagi untuk lagu yang sama (siapa tahu koneksi cuma kedip)
     if (errorRetriedSrc !== audio.src) {
         errorRetriedSrc = audio.src;
+        const resumeAt = audio.currentTime;      // ingat posisi terakhir
         setTimeout(() => {
             audio.load();
-            audio.play().catch(() => {}); // kalau gagal lagi, event 'error' berikutnya yang menangani
+            audio.addEventListener('loadedmetadata', () => {
+                if (resumeAt > 1) audio.currentTime = resumeAt - 1;   // lanjut dari posisi tadi
+                audio.play().catch(() => {});
+            }, { once: true });
         }, 1200);
         return;
     }
