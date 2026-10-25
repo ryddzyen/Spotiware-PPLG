@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { Innertube, UniversalCache } from 'youtubei.js';
@@ -15,6 +15,7 @@ const YTDLP = fileURLToPath(new URL(process.platform === 'win32' ? './yt-dlp_win
 const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
+const STREAM_WHILE_DOWNLOADING = false;
 const MAX_YTDLP = 3;
 const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
@@ -261,18 +262,45 @@ function getAudio(id) {
     return inflight.get(id);
 }
 
+const sizes = new Map();         // kode video -> ukuran total file (dari yt-dlp, sebelum unduhan)
+
+function runYtdlp(id) {
+    return new Promise((resolve, reject) => {
+        const p = spawn(YTDLP, [
+            '--js-runtimes', 'node',
+            '-f', 'bestaudio[ext=m4a]/bestaudio',
+            '--no-playlist', '--no-warnings', '--no-progress',
+            '--fixup', 'never',                              // jangan ubah file setelah diunduh (ukuran harus tetap)
+            '--no-simulate', '--print', 'before_dl:SIZE:%(filesize)s',
+            '-o', path.join(CACHE_DIR, id + '.%(ext)s'),
+            'https://www.youtube.com/watch?v=' + id
+        ], { windowsHide: true });
+        let out = '', err = '';
+        const timer = setTimeout(() => p.kill(), 120000);
+        p.stdout.on('data', d => {
+            out += d;
+            const m = /SIZE:(\d+)/.exec(out);
+            if (m) sizes.set(id, parseInt(m[1]));
+        });
+        p.stderr.on('data', d => { err += d; });
+        p.on('error', e => { clearTimeout(timer); reject(e); });
+        p.on('close', code => {
+            clearTimeout(timer);
+            if (code === 0) return resolve();
+            const e = new Error('keluar dengan kode ' + code);
+            e.stderr = err;
+            reject(e);
+        });
+    });
+}
+
 async function download(id) {
     const t0 = Date.now();
     let lastErr = null;
     for (let attempt = 1; attempt <= 2; attempt++) {        // coba ulang sekali kalau gagal
         try {
-            await limit(() => run(YTDLP, [
-                '--js-runtimes', 'node',
-                '-f', 'bestaudio[ext=m4a]/bestaudio',
-                '--no-playlist', '--no-warnings', '--no-progress',
-                '-o', path.join(CACHE_DIR, id + '.%(ext)s'),
-                'https://www.youtube.com/watch?v=' + id
-            ], { timeout: 120000, maxBuffer: 10 * 1024 * 1024 }));
+            sizes.delete(id);
+            await limit(() => runYtdlp(id));
             const c = findCached(id);
             if (!c) throw new Error('file audio tidak terbentuk');
             console.log('[audio]', id, 'siap (' + c.mime + ', ' + c.length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
@@ -295,7 +323,7 @@ async function serveAudio(req, res, id) {
         job.catch(() => { });
         const m0 = /^bytes=(\d*)-/.exec(req.headers.range || '');
         const from = m0 && m0[1] !== '' ? parseInt(m0[1]) : 0;
-        if (from === 0 && req.method !== 'HEAD') return serveGrowing(req, res, id, job);
+        if (STREAM_WHILE_DOWNLOADING && from === 0 && req.method !== 'HEAD') return serveGrowing(req, res, id, job);
         a = await job;                            // permintaan loncat ke tengah lagu: tunggu sampai selesai
     }
     return serveFile(req, res, a);
@@ -356,13 +384,28 @@ async function serveGrowing(req, res, id, job) {
     if (closed) return;
     if (failed || !cur) await job;                // melempar error aslinya, dibalas 502 oleh handler
 
-    res.writeHead(200, { ...res.cors, 'Content-Type': cur.mime, 'Cache-Control': 'no-store' });
+    // kalau ukuran total diketahui, beri tahu browser supaya lagu bisa digeser
+    const total = cur.final ? cur.size : (sizes.get(id) || 0);
+    const head = { ...res.cors, 'Content-Type': cur.mime, 'Cache-Control': 'no-store' };
+    if (total > 0) {
+        head['Accept-Ranges'] = 'bytes';
+        head['Content-Length'] = total;
+        if (req.headers.range) {
+            head['Content-Range'] = `bytes 0-${total - 1}/${total}`;
+            res.writeHead(206, head);
+        } else res.writeHead(200, head);
+    } else {
+        res.writeHead(200, head);
+    }
+
     let pos = 0, lastData = Date.now();
     while (!closed) {
+        if (total > 0 && pos >= total) break;                  // semua byte sudah terkirim
         const c = findCached(id) || findPart(id);
         if (c && c.size > pos) {
             try {
-                const buf = await readChunk(c.file, pos, Math.min(c.size - pos, 256 * 1024));
+                const want = Math.min(c.size - pos, 256 * 1024, total > 0 ? total - pos : Infinity);
+                const buf = await readChunk(c.file, pos, want);
                 if (buf.length) {
                     pos += buf.length;
                     lastData = Date.now();
@@ -371,7 +414,10 @@ async function serveGrowing(req, res, id, job) {
                 }
             } catch (e) { /* file baru saja di-rename jadi final: coba lagi */ }
         }
-        if (c && c.final && pos >= c.size) break;           // file akhir sudah terkirim penuh
+        if (c && c.final && pos >= c.size) {                   // file akhir sudah terkirim penuh
+            if (total > 0 && pos < total) { res.destroy(); return; }   // ukuran tidak cocok: putuskan, jangan menggantung
+            break;
+        }
         if (failed) { res.destroy(); return; }
         if (Date.now() - lastData > 60000) break;
         await sleep(120);

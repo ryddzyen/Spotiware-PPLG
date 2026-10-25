@@ -444,11 +444,12 @@
                 if (i >= 0) {
                     const nx = curList.slice(i + 1, i + 3);
                     prefetch(nx.map(s => s.yt));                 // server mengunduh lebih dulu
-                    nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());   // browser menyimpan satu per satu
+                    // nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());
                 }
             } catch (e) { }
         });
     }
 
+    window.YTMusic = { register, idOf };
     init();
 })();
