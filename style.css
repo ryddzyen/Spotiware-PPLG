@@ -6645,3 +6645,16 @@ body.addv-open .addv{ display: flex; }
     .track-title-text{ flex: 1 1 0; min-width: 0; }
     .track-title-text .t-name, .track-title-text .t-artist{ max-width: 100%; }
 }
+
+            .yt-h2{font-size:1.1rem;margin:1.2rem 0 .5rem}
+            .yt-scroll{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.6rem;scrollbar-width:none}
+            .yt-scroll::-webkit-scrollbar{display:none}
+            .yt-card{flex:0 0 150px;width:150px;cursor:pointer}
+            .yt-card img{width:150px;height:150px;object-fit:cover;border-radius:8px;background:#2f2f2f;display:block}
+            .yt-card.round{text-align:center}
+            .yt-card.round img{border-radius:50%}
+            .yt-cn{margin-top:.5rem;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .yt-cs{font-size:.78rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            body.yt-page #ctxRemoveFromPlaylist{display:none!important}
+            body.yt-page .af-page{display:none!important}
+            body.mode-yt .search-dropdown .sr-row,body.mode-yt .search-dropdown .sv-item,body.mode-yt .search-dropdown .sd-divider{display:none!important}

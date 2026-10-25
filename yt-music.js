@@ -10,7 +10,65 @@
     let mode = 'local';
     try { mode = localStorage.getItem(MODE_KEY) === 'yt' ? 'yt' : 'local'; } catch (e) { }
     let block = null, seg = null, list = [], lastQ = '', token = 0, lastWarn = 0;
+    let arts = [], pls = [];
 
+    // permintaan ke server dengan cache singkat (tidak mengulang pencarian yang sama)
+    const memo = new Map();
+    async function getJSON(path, ttl) {
+        const hit = memo.get(path);
+        if (hit && hit.exp > Date.now()) return hit.v;
+        const res = await fetch(SERVER + path);
+        if (!res.ok) throw new Error('status ' + res.status);
+        const v = await res.json();
+        if (memo.size > 60) memo.clear();
+        memo.set(path, { v, exp: Date.now() + (ttl || 300000) });
+        return v;
+    }
+
+    function card(kind, o) {
+        const name = kind === 'a' ? o.name : o.title;
+        const sub = kind === 'a' ? 'Artist' : 'Playlist' + (o.author ? ' • ' + o.author : '');
+        return `<div class="yt-card${kind === 'a' ? ' round' : ''}" data-k="${kind}" data-id="${esc(o.id)}">
+            <img src="${esc(o.thumb || 'img/pplglogo.png')}" alt="" loading="lazy">
+            <div class="yt-cn">${esc(name)}</div><div class="yt-cs">${esc(sub)}</div></div>`;
+    }
+
+    // halaman artis / playlist YouTube: memakai tampilan playlist Spotiware yang sudah ada
+    async function openYtPage(kind, id) {
+        const isA = kind === 'a';
+        toast('Memuat ' + (isA ? 'artis' : 'playlist') + '...');
+        let d;
+        try { d = await getJSON((isA ? '/artist?id=' : '/playlist?id=') + encodeURIComponent(id), 600000); }
+        catch (e) { toast(e.message === 'status 429' ? 'Terlalu banyak permintaan, coba sebentar lagi' : 'Gagal memuat dari YouTube Music'); return; }
+        if (!d || !Array.isArray(d.songs) || !d.songs.length) { toast('Tidak ada lagu di sini'); return; }
+
+        const items = register(d.songs);
+        // isi durasi dari data YouTube supaya kolom durasi tidak memicu pengambilan audio per lagu
+        if (typeof durationCache !== 'undefined') {
+            items.forEach(s => { if (durationCache[s.songPath] === undefined) durationCache[s.songPath] = s.dur || 0; });
+        }
+
+        const fake = {
+            id: 'yt:' + id,
+            name: isA ? (d.name || 'Artist') : (d.title || 'Playlist'),
+            songIds: items.map(s => s.id),
+            description: isA ? '' : (d.author ? 'By ' + d.author : ''),
+            coverImage: d.thumb || '',
+            __artist: isA,
+            __yt: true
+        };
+        document.body.classList.add('yt-page');
+        window.openPlaylistDetailView(fake, false);
+
+        const add = document.getElementById('pdAddSongsBtn'), ed = document.getElementById('pdEditDetailsBtn');
+        if (add) add.style.display = 'none';
+        if (ed) ed.style.display = 'none';
+        if (isA) {
+            document.body.classList.add('artist-page');       // foto bulat, label "Artist"
+            const t = document.querySelector('.playlist-detail-type');
+            if (t) t.textContent = 'Artist';
+        }
+    }
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const hash = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
     const idOf = vid => ID_BASE + hash(vid);
@@ -176,6 +234,9 @@
         if (!block) return;
         block.innerHTML = '<h3 class="yt-h">YouTube Music</h3>' +
             (note ? `<div class="yt-note">${note}</div>` : '') +
+            (arts.length ? '<h4 class="yt-h2">Artists</h4><div class="yt-scroll">' + arts.map(a => card('a', a)).join('') + '</div>' : '') +
+            (pls.length ? '<h4 class="yt-h2">Playlists</h4><div class="yt-scroll">' + pls.map(p => card('p', p)).join('') + '</div>' : '') +
+            (list.length ? '<h4 class="yt-h2">Songs</h4>' : '') +
             list.map((s, i) => `
                 <div class="yt-row" data-i="${i}">
                     <div class="yt-th"><img src="${esc(s.songImage)}" alt="" loading="lazy"><div class="yt-pl"><i class="fa-solid fa-play"></i></div></div>
@@ -202,31 +263,37 @@
         if (mode !== 'yt') return;                       // Mode Lagu Saya: tidak ada request ke server
         q = (q || '').trim();
         if (!q || !block) return;
-        if (q === lastQ && list.length) return;
+        if (q === lastQ && (list.length || arts.length || pls.length)) return;
         lastQ = q;
         const my = ++token;
-        list = [];
+        list = []; arts = []; pls = [];
         render('Mencari di YouTube Music...');
 
-        let data = null, down = false;
-        try {
-            const res = await fetch(SERVER + '/search?q=' + encodeURIComponent(q));
-            if (res.ok) data = await res.json(); else down = res.status === 502 || res.status >= 500;
-        } catch (e) { down = true; }
+        const enc = encodeURIComponent(q);
+        const [rs, ra, rp] = await Promise.allSettled([
+            getJSON('/search?q=' + enc),
+            getJSON('/search?q=' + enc + '&type=artist'),
+            getJSON('/search?q=' + enc + '&type=playlist')
+        ]);
         if (my !== token) return;
 
-        if (!Array.isArray(data)) {
+        if (rs.status !== 'fulfilled' || !Array.isArray(rs.value)) {
             lastQ = '';
-            render(down
-                ? 'Server YouTube Music tidak bisa dihubungi. Pastikan laptop menyala dan server berjalan.<br>' +
-                  '<button type="button" class="ym-back">Beralih ke Mode Lagu Saya</button>'
-                : 'Pencarian YouTube Music gagal. Lihat pesan di terminal server.');
+            const msg = rs.status === 'rejected' ? String(rs.reason && rs.reason.message) : '';
+            if (msg === 'status 429') {
+                render('Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.');
+            } else if (rs.status === 'rejected' && !/^status 4/.test(msg)) {
+                render('Server YouTube Music tidak bisa dihubungi. Pastikan laptop menyala dan server berjalan.<br>' +
+                    '<button type="button" class="ym-back">Beralih ke Mode Lagu Saya</button>');
+            } else {
+                render('Pencarian YouTube Music gagal. Lihat pesan di terminal server.');
+            }
             return;
         }
-        list = register(data);
-        prefetch(list.slice(0, 4).map(s => s.yt));      // siapkan 4 hasil teratas
-        if (list[0]) prefetch(list[0].yt);      // siapkan hasil pertama
-        render(list.length ? '' : 'Tidak ada hasil dari YouTube Music.');
+        list = register(rs.value);
+        arts = ra.status === 'fulfilled' && Array.isArray(ra.value) ? ra.value.slice(0, 12) : [];
+        pls = rp.status === 'fulfilled' && Array.isArray(rp.value) ? rp.value.slice(0, 12) : [];
+        render(list.length || arts.length || pls.length ? '' : 'Tidak ada hasil dari YouTube Music.');
     }
 
     // lagu YouTube gagal diputar -> cek server, tawarkan pindah ke Mode Lagu Saya (maksimal 1x per menit)
@@ -280,6 +347,8 @@
 
         block.addEventListener('click', e => {
             if (e.target.closest('.ym-back')) return setMode('local');
+            const kc = e.target.closest('.yt-card');
+            if (kc) return openYtPage(kc.dataset.k, kc.dataset.id);
             const row = e.target.closest('.yt-row');
             if (!row) return;
             const s = list[parseInt(row.dataset.i)];
@@ -296,6 +365,17 @@
 
         ['play', 'playing', 'pause', 'loadstart'].forEach(ev => audio.addEventListener(ev, markCurrent));
         watchAudioErrors();
+
+        // penanda halaman YouTube dilepas saat pindah ke halaman lain
+        const _open = window.openPlaylistDetailView, _close = window.closePlaylistDetailView;
+        window.openPlaylistDetailView = function (p) {
+            if (!(p && p.__yt)) document.body.classList.remove('yt-page');
+            return _open.apply(this, arguments);
+        };
+        window.closePlaylistDetailView = function () {
+            document.body.classList.remove('yt-page');
+            return _close.apply(this, arguments);
+        };
         setupMediaSession();
         // saat lagu mulai main, siapkan lagu berikutnya di antrean
         audio.addEventListener('playing', () => {
