@@ -244,6 +244,25 @@
         });
     }
 
+    function setupMediaSession() {
+        if (!('mediaSession' in navigator)) return;
+        audio.addEventListener('playing', () => {
+            try {
+                const s = getCurrentSong();
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: s.songName,
+                    artist: s.songDes,
+                    artwork: [{ src: s.songImage, sizes: '512x512' }]
+                });
+            } catch (e) { }
+        });
+        const on = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) { } };
+        on('play', () => audio.play());
+        on('pause', () => audio.pause());
+        on('nexttrack', () => { if (typeof playNextSong === 'function') playNextSong(); });
+        on('previoustrack', () => { if (typeof playPreviousSong === 'function') playPreviousSong(); });
+    }
+
     function init() {
         const view = document.getElementById('searchView');
         const input = document.querySelector('.input-box');
@@ -277,6 +296,7 @@
 
         ['play', 'playing', 'pause', 'loadstart'].forEach(ev => audio.addEventListener(ev, markCurrent));
         watchAudioErrors();
+        setupMediaSession();
         // saat lagu mulai main, siapkan lagu berikutnya di antrean
         audio.addEventListener('playing', () => {
             try {
