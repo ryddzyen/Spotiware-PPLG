@@ -193,12 +193,15 @@ async function artistInfo(id) {
 
 // ---------- unduh audio dengan yt-dlp ke folder cache ----------
 let active = 0;
-const waiters = [];
-async function limit(fn) {
-    if (active >= MAX_YTDLP) await new Promise(r => waiters.push(r));
+const procs = new Map();     // kode video -> { p (proses yt-dlp), low (prefetch?), killed }
+const demand = new Map();    // kode video -> jumlah permintaan klik yang masih menunggu
+const waitersHi = [], waitersLo = [];
+async function limit(fn, low = false) {            // low = prefetch (selalu menyisakan 1 slot untuk lagu yang diklik)
+    const cap = low ? MAX_YTDLP - 1 : MAX_YTDLP;
+    while (active >= cap) await new Promise(r => (low ? waitersLo : waitersHi).push(r));
     active++;
     try { return await fn(); }
-    finally { active--; const w = waiters.shift(); if (w) w(); }
+    finally { active--; const w = waitersHi.shift() || waitersLo.shift(); if (w) w(); }
 }
 
 function findCached(id) {
@@ -255,37 +258,44 @@ function pruneCache() {
 }
 
 const inflight = new Map();      // lagu yang sama diminta berkali-kali hanya diunduh sekali
-function getAudio(id) {
+function getAudio(id, low = false) {
     const c = findCached(id);
     if (c) return Promise.resolve(c);
-    if (!inflight.has(id)) inflight.set(id, download(id).finally(() => inflight.delete(id)));
+    if (!inflight.has(id)) inflight.set(id, download(id, low).finally(() => inflight.delete(id)));
     return inflight.get(id);
 }
 
-const sizes = new Map();         // kode video -> ukuran total file (dari yt-dlp, sebelum unduhan)
 
-function runYtdlp(id) {
+const sizes = new Map();         // kode video -> ukuran total file (dari yt-dlp, sebelum unduhan)
+const cancelled = () => Object.assign(new Error('dibatalkan'), { cancelled: true });
+
+function runYtdlp(id, low) {
     return new Promise((resolve, reject) => {
+        if (!low && !demand.has(id)) return reject(cancelled());     // sudah tidak ditunggu siapa pun
         const p = spawn(YTDLP, [
             '--js-runtimes', 'node',
             '-f', 'bestaudio[ext=m4a]/bestaudio',
             '--no-playlist', '--no-warnings', '--no-progress',
-            '--fixup', 'never',                              // jangan ubah file setelah diunduh (ukuran harus tetap)
+            '--fixup', 'never',
             '--no-simulate', '--print', 'before_dl:SIZE:%(filesize)s',
             '-o', path.join(CACHE_DIR, id + '.%(ext)s'),
             'https://www.youtube.com/watch?v=' + id
         ], { windowsHide: true });
+        const ent = { p, low, killed: false };
+        procs.set(id, ent);
         let out = '', err = '';
-        const timer = setTimeout(() => p.kill(), 120000);
+        const timer = setTimeout(() => p.kill(), 300000);
         p.stdout.on('data', d => {
             out += d;
             const m = /SIZE:(\d+)/.exec(out);
             if (m) sizes.set(id, parseInt(m[1]));
         });
         p.stderr.on('data', d => { err += d; });
-        p.on('error', e => { clearTimeout(timer); reject(e); });
+        p.on('error', e => { clearTimeout(timer); procs.delete(id); reject(e); });
         p.on('close', code => {
             clearTimeout(timer);
+            procs.delete(id);
+            if (ent.killed) return reject(cancelled());
             if (code === 0) return resolve();
             const e = new Error('keluar dengan kode ' + code);
             e.stderr = err;
@@ -294,19 +304,29 @@ function runYtdlp(id) {
     });
 }
 
-async function download(id) {
+// klik lagu: hentikan prefetch supaya lagu yang diklik mendapat slot dan CPU
+function prioritize(id) {
+    prefetchQueue.length = 0;
+    for (const [pid, ent] of procs) {
+        if (pid === id) ent.low = false;
+        else if (ent.low) { ent.killed = true; ent.p.kill(); }
+    }
+}
+
+async function download(id, low = false) {
     const t0 = Date.now();
     let lastErr = null;
     for (let attempt = 1; attempt <= 2; attempt++) {        // coba ulang sekali kalau gagal
         try {
             sizes.delete(id);
-            await limit(() => runYtdlp(id));
+            await limit(() => runYtdlp(id, low), low);
             const c = findCached(id);
             if (!c) throw new Error('file audio tidak terbentuk');
             console.log('[audio]', id, 'siap (' + c.mime + ', ' + c.length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
             pruneCache();
             return c;
         } catch (e) {
+            if (e.cancelled) { console.log('[audio]', id, 'dibatalkan'); throw e; }
             if (e.code === 'ENOENT') throw new Error('yt-dlp tidak ditemukan (' + YTDLP + ')');
             lastErr = new Error('yt-dlp gagal: ' + String(e.stderr || e.message).trim().split('\n').pop());
             console.log('[audio]', id, 'percobaan', attempt, 'gagal:', lastErr.message);
@@ -319,12 +339,23 @@ async function download(id) {
 async function serveAudio(req, res, id) {
     let a = findCached(id);
     if (!a) {
+        demand.set(id, (demand.get(id) || 0) + 1);
+        res.on('close', () => {
+            const n = (demand.get(id) || 1) - 1;
+            if (n > 0) { demand.set(id, n); return; }
+            demand.delete(id);
+            setTimeout(() => {                    // pengguna sudah pindah lagu: batalkan unduhan yang tidak ditunggu siapa pun
+                const ent = procs.get(id);
+                if (!demand.has(id) && ent && !ent.low) { ent.killed = true; ent.p.kill(); }
+            }, 3000);
+        });
+        prioritize(id);
         const job = getAudio(id);                 // mulai unduhan (atau gabung kalau sudah berjalan)
         job.catch(() => { });
         const m0 = /^bytes=(\d*)-/.exec(req.headers.range || '');
         const from = m0 && m0[1] !== '' ? parseInt(m0[1]) : 0;
-        if (STREAM_WHILE_DOWNLOADING && from === 0 && req.method !== 'HEAD') return serveGrowing(req, res, id, job);
-        a = await job;                            // permintaan loncat ke tengah lagu: tunggu sampai selesai
+        if (from === 0 && req.method !== 'HEAD' && STREAM_WHILE_DOWNLOADING) return serveGrowing(req, res, id, job);
+        a = await job;
     }
     return serveFile(req, res, a);
 }
@@ -436,7 +467,7 @@ function pumpPrefetch() {
             while (prefetchQueue.length) {
                 const id = prefetchQueue.shift();
                 if (findCached(id)) continue;
-                try { await getAudio(id); } catch (e) { }
+                try { await getAudio(id, true); } catch (e) { }
             }
             prefetchWorkers--;
         })();

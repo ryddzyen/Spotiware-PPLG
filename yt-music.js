@@ -80,7 +80,11 @@
     const prefetched = new Map();
     const prefetch = vids => {
         const now = Date.now();
-        vids = (Array.isArray(vids) ? vids : [vids]).filter(v => v && !(prefetched.get(v) > now - 120000));
+        vids = (Array.isArray(vids) ? vids : [vids]).filter(v => {
+            if (!v || prefetched.get(v) > now - 120000) return false;
+            const s = songs.find(x => x.yt === v);
+            return !(s && s.dur > 600);              // lagu panjang (mix, lebih dari 10 menit) tidak disiapkan duluan
+        });
         if (mode !== 'yt' || !vids.length) return;
         vids.forEach(v => prefetched.set(v, now));
         fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vids.join(','))).catch(() => { });
@@ -358,6 +362,7 @@
 
     function ensureBlob(s) {
         if (!s || !s.yt) return Promise.resolve(false);
+        if (s.dur > 600) return Promise.resolve(false);      // lagu panjang jangan diunduh ke memori HP
         if (blobs.has(s.yt)) {
             const b = blobs.get(s.yt);
             b.t = Date.now();
