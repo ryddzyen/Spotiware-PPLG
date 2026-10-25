@@ -291,6 +291,7 @@
             return;
         }
         list = register(rs.value);
+        prefetch(list.slice(0, 4).map(s => s.yt));      // siapkan 4 hasil teratas di server
         arts = ra.status === 'fulfilled' && Array.isArray(ra.value) ? ra.value.slice(0, 12) : [];
         pls = rp.status === 'fulfilled' && Array.isArray(rp.value) ? rp.value.slice(0, 12) : [];
         render(list.length || arts.length || pls.length ? '' : 'Tidak ada hasil dari YouTube Music.');
@@ -330,6 +331,56 @@
         on('previoustrack', () => { if (typeof playPreviousSong === 'function') playPreviousSong(); });
     }
 
+    // ---------- simpan lagu di memori browser supaya tidak tersendat saat jaringan jelek ----------
+    const blobs = new Map();          // kode video -> { url, t }
+    const pendingBlob = new Map();
+    const BLOB_MAX = 6;               // maksimal 6 lagu di memori
+    const remoteUrl = vid => SERVER + '/audio?id=' + encodeURIComponent(vid);
+
+    function trimBlobs() {
+        if (blobs.size <= BLOB_MAX) return;
+        let cur = null;
+        try { cur = getCurrentSong().yt; } catch (e) { }
+        const old = [...blobs.entries()].filter(([k]) => k !== cur).sort((a, b) => a[1].t - b[1].t);
+        while (blobs.size > BLOB_MAX && old.length) {
+            const [k, v] = old.shift();
+            URL.revokeObjectURL(v.url);
+            blobs.delete(k);
+            const s = songs.find(x => x.yt === k);
+            if (s) s.songPath = remoteUrl(k);        // kembalikan ke alamat server
+        }
+    }
+
+    function ensureBlob(s) {
+        if (!s || !s.yt) return Promise.resolve(false);
+        if (blobs.has(s.yt)) {
+            const b = blobs.get(s.yt);
+            b.t = Date.now();
+            s.songPath = b.url;
+            return Promise.resolve(true);
+        }
+        if (pendingBlob.has(s.yt)) return pendingBlob.get(s.yt);
+        const p = (async () => {
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    const r = await fetch(remoteUrl(s.yt));
+                    if (!r.ok) throw new Error('status ' + r.status);
+                    const b = await r.blob();
+                    if (!b.size) throw new Error('kosong');
+                    const url = URL.createObjectURL(b);
+                    blobs.set(s.yt, { url, t: Date.now() });
+                    s.songPath = url;
+                    trimBlobs();
+                    return true;
+                } catch (e) { await new Promise(r => setTimeout(r, 1500)); }
+            }
+            return false;                             // gagal: pemutar tetap memakai alamat server
+        })().finally(() => pendingBlob.delete(s.yt));
+        pendingBlob.set(s.yt, p);
+        return p;
+    }
+    let playToken = 0;
+
     function init() {
         const view = document.getElementById('searchView');
         const input = document.querySelector('.input-box');
@@ -354,7 +405,11 @@
             const s = list[parseInt(row.dataset.i)];
             if (!s) return;
             if (playerBar.classList.contains('show') && getCurrentSong().id === s.id) play.click();
-            else playSongFromList(s.id, list);       // seluruh hasil jadi antrean: Next/Previous tetap jalan
+            else {
+                const my = ++playToken;                // kalau klik lagu lain, yang lama dibatalkan
+                toast('Menyiapkan lagu...');
+                ensureBlob(s).finally(() => { if (my === playToken) playSongFromList(s.id, list); });
+            }
         });
 
         input.addEventListener('keydown', e => { if (e.key === 'Enter') run(input.value); });
@@ -378,11 +433,15 @@
         };
         setupMediaSession();
         // saat lagu mulai main, siapkan lagu berikutnya di antrean
-        audio.addEventListener('playing', () => {
+        audio.addEventListener('playing', () => {       // siapkan 2 lagu berikutnya di antrean
             try {
                 const cur = getCurrentSong();
                 const i = list.findIndex(s => s.id === cur.id);
-                if (i >= 0) prefetch(list.slice(i + 1, i + 3).map(s => s.yt));
+                if (i >= 0) {
+                    const nx = list.slice(i + 1, i + 3);
+                    prefetch(nx.map(s => s.yt));                 // server mengunduh lebih dulu
+                    nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());   // browser mengambil satu per satu
+                }
             } catch (e) { }
         });
     }
