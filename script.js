@@ -582,6 +582,7 @@ function preloadNextTrack() {
     }
 
     if (!nextSong || nextSong.songPath === preloadedPath) return; // sudah di-preload / tidak ada lagu berikutnya
+    if (nextSong.external) return;   // lagu YouTube disiapkan lewat prefetch di yt-music.js, bukan preload ini
 
     preloadedPath = nextSong.songPath;
     preloadAudio.src = nextSong.songPath;
@@ -1185,8 +1186,16 @@ function loadTrackDurations() {
     document.querySelectorAll('.track-duration[data-song-path]').forEach((cell) => {
         const path = cell.dataset.songPath;
 
-        if (durationCache[path] !== undefined) {
-            cell.textContent = formatTime(durationCache[path]);
+        // lagu YouTube: durasi sudah dikirim server, jangan buka audionya (itu memicu unduhan di server)
+        const ytm = /\/audio\?id=([^&]+)/.exec(path);
+        if (ytm) {
+            const ys = songs.find(x => x.yt === decodeURIComponent(ytm[1]));
+            if (ys && ys.dur) {
+                durationCache[path] = ys.dur;
+                cell.textContent = formatTime(ys.dur);
+            } else {
+                cell.textContent = '--:--';
+            }
             return;
         }
 

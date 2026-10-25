@@ -391,6 +391,19 @@
     }
     let playToken = 0;
 
+    // lagu yang akan diputar berikutnya menurut pemutar Spotiware (antrean pengguna dulu, lalu `order`, sudah termasuk shuffle)
+    function upcoming(n) {
+        const toS = x => (x && typeof x === 'object') ? x : songs.find(s => s.id === x);
+        const out = [];
+        try {
+            if (typeof queue !== 'undefined' && Array.isArray(queue)) queue.slice(0, n).forEach(x => out.push(toS(x)));
+            if (typeof order !== 'undefined' && Array.isArray(order) && order.length && typeof currentIndex === 'number') {
+                for (let k = 1; out.length < n && k <= n; k++) out.push(toS(order[(currentIndex + k) % order.length]));
+            }
+        } catch (e) { }
+        return out.filter(s => s && s.yt);
+    }
+
     function init() {
         const view = document.getElementById('searchView');
         const input = document.querySelector('.input-box');
@@ -442,15 +455,12 @@
         };
         setupMediaSession();
         // saat lagu mulai main, siapkan lagu berikutnya di antrean
-        audio.addEventListener('playing', () => {       // siapkan 2 lagu berikutnya di antrean aktif
+        audio.addEventListener('playing', () => {       // siapkan 2 lagu yang benar-benar akan diputar berikutnya
             try {
-                const cur = getCurrentSong();
-                const i = curList.findIndex(s => s.id === cur.id);
-                if (i >= 0) {
-                    const nx = curList.slice(i + 1, i + 3);
-                    prefetch(nx.map(s => s.yt));                 // server mengunduh lebih dulu
-                    // nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());
-                }
+                const nx = upcoming(2);
+                if (!nx.length) return;
+                prefetch(nx.map(s => s.yt));                 // server mengunduh lebih dulu
+                nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());   // browser menyimpan satu per satu
             } catch (e) { }
         });
     }

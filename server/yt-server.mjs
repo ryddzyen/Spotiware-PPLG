@@ -16,7 +16,7 @@ const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
 const STREAM_WHILE_DOWNLOADING = false;
-const MAX_YTDLP = 3;
+const MAX_YTDLP = 2;
 const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
 
@@ -280,6 +280,17 @@ function getAudio(id, low = false) {
 const sizes = new Map();         // kode video -> ukuran total file (dari yt-dlp, sebelum unduhan)
 const cancelled = () => Object.assign(new Error('dibatalkan'), { cancelled: true });
 
+// matikan yt-dlp beserta anak prosesnya (node.exe) di Windows
+function killTree(p) {
+    try {
+        if (process.platform === 'win32' && p.pid) {
+            spawn('taskkill', ['/pid', String(p.pid), '/T', '/F'], { windowsHide: true });
+        } else {
+            p.kill();
+        }
+    } catch (e) { }
+}
+
 function runYtdlp(id, low) {
     return new Promise((resolve, reject) => {
         if (!low && !demand.has(id)) return reject(cancelled());     // sudah tidak ditunggu siapa pun
@@ -295,7 +306,7 @@ function runYtdlp(id, low) {
         const ent = { p, low, killed: false };
         procs.set(id, ent);
         let out = '', err = '';
-        const timer = setTimeout(() => p.kill(), 300000);
+        const timer = setTimeout(() => killTree(p), 300000);
         p.stdout.on('data', d => {
             out += d;
             const m = /SIZE:(\d+)/.exec(out);
@@ -320,7 +331,7 @@ function prioritize(id) {
     prefetchQueue.length = 0;
     for (const [pid, ent] of procs) {
         if (pid === id) ent.low = false;
-        else if (ent.low) { ent.killed = true; ent.p.kill(); }
+        else if (ent.low) { ent.killed = true; killTree(ent.p); }
     }
 }
 
@@ -330,10 +341,11 @@ async function download(id, low = false) {
     for (let attempt = 1; attempt <= 2; attempt++) {        // coba ulang sekali kalau gagal
         try {
             sizes.delete(id);
-            await limit(() => runYtdlp(id, low), low);
+            let tRun = Date.now();
+            await limit(() => { tRun = Date.now(); return runYtdlp(id, low); }, low);
             const c = findCached(id);
             if (!c) throw new Error('file audio tidak terbentuk');
-            console.log('[audio]', id, 'siap (' + c.mime + ', ' + c.length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
+                        console.log('[audio]', id, 'siap (' + c.mime + ', ' + c.length + ' byte) antre ' + (tRun - t0) + ' ms + unduh ' + (Date.now() - tRun) + ' ms');
             pruneCache();
             return c;
         } catch (e) {
@@ -357,8 +369,8 @@ async function serveAudio(req, res, id) {
             demand.delete(id);
             setTimeout(() => {                    // pengguna sudah pindah lagu: batalkan unduhan yang tidak ditunggu siapa pun
                 const ent = procs.get(id);
-                if (!demand.has(id) && ent && !ent.low) { ent.killed = true; ent.p.kill(); }
-            }, 3000);
+                if (!demand.has(id) && ent && !ent.low) { ent.killed = true; killTree(ent.p); }
+            }, 1200);
         });
         prioritize(id);
         const job = getAudio(id);                 // mulai unduhan (atau gabung kalau sudah berjalan)
@@ -472,7 +484,7 @@ const json = (res, code, obj) => { res.writeHead(code, { ...res.cors, 'Content-T
 const prefetchQueue = [];
 let prefetchWorkers = 0;
 function pumpPrefetch() {
-    while (prefetchWorkers < 2 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
+    while (prefetchWorkers < 1 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
         prefetchWorkers++;
         (async () => {
             while (prefetchQueue.length) {
