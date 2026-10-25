@@ -11,6 +11,7 @@
     try { mode = localStorage.getItem(MODE_KEY) === 'yt' ? 'yt' : 'local'; } catch (e) { }
     let block = null, seg = null, list = [], lastQ = '', token = 0, lastWarn = 0;
     let arts = [], pls = [];
+    let curList = [];      // antrean yang sedang aktif (hasil pencarian atau isi playlist/artist)
 
     // permintaan ke server dengan cache singkat (tidak mengulang pencarian yang sama)
     const memo = new Map();
@@ -43,6 +44,8 @@
         if (!d || !Array.isArray(d.songs) || !d.songs.length) { toast('Tidak ada lagu di sini'); return; }
 
         const items = register(d.songs);
+        curList = items;
+        prefetch(items.slice(0, 4).map(s => s.yt));      // siapkan 4 lagu pertama playlist
         // isi durasi dari data YouTube supaya kolom durasi tidak memicu pengambilan audio per lagu
         if (typeof durationCache !== 'undefined') {
             items.forEach(s => { if (durationCache[s.songPath] === undefined) durationCache[s.songPath] = s.dur || 0; });
@@ -74,11 +77,12 @@
     const idOf = vid => ID_BASE + hash(vid);
     const fmt = sec => (!sec || sec < 0) ? '' : Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
     const toast = (t, label, fn) => { if (typeof showToast === 'function') showToast(t, label, fn); };
-    const prefetched = new Set();
+    const prefetched = new Map();
     const prefetch = vids => {
-        vids = (Array.isArray(vids) ? vids : [vids]).filter(v => v && !prefetched.has(v));
+        const now = Date.now();
+        vids = (Array.isArray(vids) ? vids : [vids]).filter(v => v && !(prefetched.get(v) > now - 120000));
         if (mode !== 'yt' || !vids.length) return;
-        vids.forEach(v => prefetched.add(v));
+        vids.forEach(v => prefetched.set(v, now));
         fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vids.join(','))).catch(() => { });
     };
 
@@ -291,6 +295,7 @@
             return;
         }
         list = register(rs.value);
+        curList = list;
         prefetch(list.slice(0, 4).map(s => s.yt));      // siapkan 4 hasil teratas di server
         arts = ra.status === 'fulfilled' && Array.isArray(ra.value) ? ra.value.slice(0, 12) : [];
         pls = rp.status === 'fulfilled' && Array.isArray(rp.value) ? rp.value.slice(0, 12) : [];
@@ -406,9 +411,8 @@
             if (!s) return;
             if (playerBar.classList.contains('show') && getCurrentSong().id === s.id) play.click();
             else {
-                const my = ++playToken;                // kalau klik lagu lain, yang lama dibatalkan
-                toast('Menyiapkan lagu...');
-                ensureBlob(s).finally(() => { if (my === playToken) playSongFromList(s.id, list); });
+                if (blobs.has(s.yt)) s.songPath = blobs.get(s.yt).url;     // sudah ada di memori: pakai itu
+                playSongFromList(s.id, list);       // kalau belum, putar langsung lewat server (mulai bunyi sambil diunduh)
             }
         });
 
@@ -433,14 +437,14 @@
         };
         setupMediaSession();
         // saat lagu mulai main, siapkan lagu berikutnya di antrean
-        audio.addEventListener('playing', () => {       // siapkan 2 lagu berikutnya di antrean
+        audio.addEventListener('playing', () => {       // siapkan 2 lagu berikutnya di antrean aktif
             try {
                 const cur = getCurrentSong();
-                const i = list.findIndex(s => s.id === cur.id);
+                const i = curList.findIndex(s => s.id === cur.id);
                 if (i >= 0) {
-                    const nx = list.slice(i + 1, i + 3);
+                    const nx = curList.slice(i + 1, i + 3);
                     prefetch(nx.map(s => s.yt));                 // server mengunduh lebih dulu
-                    nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());   // browser mengambil satu per satu
+                    nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());   // browser menyimpan satu per satu
                 }
             } catch (e) { }
         });

@@ -15,7 +15,7 @@ const YTDLP = fileURLToPath(new URL(process.platform === 'win32' ? './yt-dlp_win
 const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
-const MAX_YTDLP = 2;                    // maksimal proses yt-dlp bersamaan
+const MAX_YTDLP = 3;
 const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
 
@@ -382,16 +382,19 @@ async function serveGrowing(req, res, id, job) {
 const json = (res, code, obj) => { res.writeHead(code, { ...res.cors, 'Content-Type': 'application/json' }); res.end(JSON.stringify(obj)); };
 
 const prefetchQueue = [];
-let prefetchRunning = false;
-async function pumpPrefetch() {
-    if (prefetchRunning) return;
-    prefetchRunning = true;
-    while (prefetchQueue.length) {
-        const id = prefetchQueue.shift();
-        if (findCached(id)) continue;
-        try { await getAudio(id); } catch (e) { }
+let prefetchWorkers = 0;
+function pumpPrefetch() {
+    while (prefetchWorkers < 2 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
+        prefetchWorkers++;
+        (async () => {
+            while (prefetchQueue.length) {
+                const id = prefetchQueue.shift();
+                if (findCached(id)) continue;
+                try { await getAudio(id); } catch (e) { }
+            }
+            prefetchWorkers--;
+        })();
     }
-    prefetchRunning = false;
 }
 
 const server = http.createServer(async (req, res) => {
