@@ -1,3 +1,9 @@
 {
-    "liveServer.settings.port": 5503
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "**/*.scss",
+    "**/*.sass",
+    "**/*.ts",
+    "server/**"
+  ]
 }

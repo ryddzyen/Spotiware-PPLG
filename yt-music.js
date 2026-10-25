@@ -17,10 +17,11 @@
     const fmt = sec => (!sec || sec < 0) ? '' : Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
     const toast = (t, label, fn) => { if (typeof showToast === 'function') showToast(t, label, fn); };
     const prefetched = new Set();
-    const prefetch = vid => {
-        if (mode !== 'yt' || !vid || prefetched.has(vid)) return;
-        prefetched.add(vid);
-        fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vid)).catch(() => { });
+    const prefetch = vids => {
+        vids = (Array.isArray(vids) ? vids : [vids]).filter(v => v && !prefetched.has(v));
+        if (mode !== 'yt' || !vids.length) return;
+        vids.forEach(v => prefetched.add(v));
+        fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vids.join(','))).catch(() => { });
     };
 
     // ---------- lagu YouTube -> format lagu Spotiware (hidden, tidak tercampur di koleksi) ----------
@@ -89,7 +90,13 @@
     // ---------- sakelar mode ----------
     function applyMode() {
         document.body.classList.toggle('mode-yt', mode === 'yt');
-        if (seg) seg.querySelectorAll('button[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+        if (seg) {
+            seg.classList.toggle('on', mode === 'yt');
+            seg.querySelector('i').className = mode === 'yt' ? 'fa-brands fa-youtube' : 'fa-solid fa-music';
+            seg.title = mode === 'yt'
+                ? 'Mode YouTube Music (klik untuk ke Lagu Saya)'
+                : 'Mode Lagu Saya (klik untuk ke YouTube Music)';
+        }
     }
 
     async function setMode(m) {
@@ -119,18 +126,18 @@
     }
 
     function buildToggle() {
-        const host = document.querySelector('nav .right-half') || document.querySelector('nav');
-        if (!host || document.getElementById('ymSeg')) return;
-        seg = document.createElement('div');
+        const bar = document.querySelector('.search-bar');
+        if (!bar || document.getElementById('ymSeg')) return;
+        const browse = bar.querySelector('.browse');
+        seg = document.createElement('button');
+        seg.type = 'button';
         seg.id = 'ymSeg';
-        seg.className = 'ym-seg';
-        seg.innerHTML =
-            '<button type="button" data-m="local" title="Mode Lagu Saya"><i class="fa-solid fa-music"></i><span>Lagu Saya</span></button>' +
-            '<button type="button" data-m="yt" title="Mode YouTube Music"><i class="fa-brands fa-youtube"></i><span>YouTube Music</span></button>';
-        host.insertBefore(seg, host.firstChild);
+        seg.className = 'ym-btn';
+        seg.innerHTML = '<i class="fa-solid fa-music"></i>';
+        bar.insertBefore(seg, browse || null);
         seg.addEventListener('click', e => {
-            const b = e.target.closest('button[data-m]');
-            if (b) setMode(b.dataset.m);
+            e.stopPropagation();
+            setMode(mode === 'yt' ? 'local' : 'yt');
         });
     }
 
@@ -138,12 +145,10 @@
     function injectStyle() {
         const css = document.createElement('style');
         css.textContent = `
-            .ym-seg{display:flex;gap:2px;padding:3px;border-radius:2rem;background:rgba(255,255,255,.1);margin-right:.8rem;flex:0 0 auto}
-            .ym-seg button{display:flex;align-items:center;gap:.4rem;background:transparent;color:#fff;border:none;border-radius:2rem;
-                padding:.35rem .8rem;font:inherit;font-size:.78rem;cursor:pointer;white-space:nowrap}
-            .ym-seg button:hover{background:rgba(255,255,255,.14)}
-            .ym-seg button.on{background:#fff;color:#000}
-            @media (max-width:768px){.ym-seg button span{display:none}.ym-seg button{padding:.4rem .6rem}.ym-seg{margin-right:.4rem}}
+            .ym-btn{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.12);
+                color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0 .3rem;font-size:.95rem}
+            .ym-btn:hover{background:rgba(255,255,255,.22)}
+            .ym-btn.on{background:#fff;color:#e62117}
 
             /* Mode Lagu Saya: blok YouTube disembunyikan. Mode YouTube Music: hasil lokal disembunyikan */
             body:not(.mode-yt) #ytBlock{display:none!important}
@@ -219,6 +224,7 @@
             return;
         }
         list = register(data);
+        prefetch(list.slice(0, 4).map(s => s.yt));      // siapkan 4 hasil teratas
         if (list[0]) prefetch(list[0].yt);      // siapkan hasil pertama
         render(list.length ? '' : 'Tidak ada hasil dari YouTube Music.');
     }
@@ -276,7 +282,7 @@
             try {
                 const cur = getCurrentSong();
                 const i = list.findIndex(s => s.id === cur.id);
-                if (i >= 0 && list[i + 1]) prefetch(list[i + 1].yt);
+                if (i >= 0) prefetch(list.slice(i + 1, i + 3).map(s => s.yt));
             } catch (e) { }
         });
     }

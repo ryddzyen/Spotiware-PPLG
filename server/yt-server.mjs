@@ -1,7 +1,8 @@
 // yt-server.mjs — jalankan: node yt-server.mjs
-// Pencarian: youtubei.js. Audio: yt-dlp mengunduh ke folder audio-cache, server melayani dengan Range.
+// Pencarian: youtubei.js. Audio: yt-dlp mengunduh ke folder cache, server melayani dengan Range.
 import http from 'node:http';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { execFile } from 'node:child_process';
@@ -10,8 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { Innertube, UniversalCache } from 'youtubei.js';
 
 const run = promisify(execFile);
-const YTDLP = fileURLToPath(new URL(process.platform === 'win32' ? './yt-dlp.exe' : './yt-dlp_linux', import.meta.url));
-const CACHE_DIR = fileURLToPath(new URL('./audio-cache/', import.meta.url));
+const YTDLP = fileURLToPath(new URL(process.platform === 'win32' ? './yt-dlp_win/yt-dlp.exe' : './yt-dlp_linux', import.meta.url));
+const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
 const MAX_YTDLP = 2;                    // maksimal proses yt-dlp bersamaan
@@ -81,6 +82,114 @@ async function search(q) {
     return top;
 }
 
+// ---------- Langkah 2: playlist, artis, pencarian playlist/artis ----------
+const memoMap = new Map();
+async function memo(key, ttl, fn) {            // hasil disimpan sebentar supaya YouTube tidak dipanggil berulang
+    const c = memoMap.get(key);
+    if (c && c.exp > Date.now()) return c.v;
+    const v = await fn();
+    if (memoMap.size > 200) memoMap.clear();
+    memoMap.set(key, { v, exp: Date.now() + ttl });
+    return v;
+}
+
+const hits = new Map();
+function rateLimited(req) {                    // maksimal 60 permintaan/menit per alamat (selain /audio)
+    const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    const now = Date.now();
+    const h = (hits.get(ip) || []).filter(t => now - t < 60000);
+    h.push(now);
+    hits.set(ip, h);
+    if (hits.size > 500) hits.clear();
+    return h.length > 60;
+}
+
+const txt = v => (typeof v === 'string' ? v : (v && (v.text || v.name)) || '');
+const lastThumb = th => { th = th || []; return th.length ? th[th.length - 1].url : ''; };
+const fastThumb = url => /=w\d+-h\d+/.test(url || '') ? url.replace(/=w\d+-h\d+/, '=w544-h544') : (url || '');
+
+function mapSong(it) {
+    if (!it || !it.id) return null;
+    if (it.item_type && !['song', 'video'].includes(it.item_type)) return null;
+    return {
+        id: it.id,
+        title: txt(it.title) || txt(it.name) || 'Tanpa judul',
+        artist: (it.artists || []).map(a => a.name).filter(Boolean).join(', ') || (it.author && it.author.name) || 'Unknown',
+        thumb: fastThumb(lastThumb(it.thumbnails)),
+        duration: (it.duration && it.duration.seconds) || 0
+    };
+}
+
+async function searchOther(q, type) {          // type: 'playlist' | 'artist'
+    const t = await getYT();
+    const res = await t.music.search(q, { type });
+    const out = [], seen = new Set();
+    for (const shelf of (res.contents || [])) {
+        for (const it of (shelf.contents || [])) {
+            if (!it || !it.id || seen.has(it.id) || it.item_type !== type) continue;
+            seen.add(it.id);
+            const thumb = fastThumb(lastThumb(it.thumbnails));
+            if (type === 'artist') {
+                out.push({ id: it.id, name: txt(it.name) || txt(it.title) || 'Unknown', thumb, subs: it.subscribers || '' });
+            } else {
+                const au = it.author;
+                out.push({
+                    id: String(it.id).replace(/^VL/, ''),
+                    title: txt(it.title) || txt(it.name) || 'Playlist',
+                    author: typeof au === 'string' ? au : (au && au.name) || '',
+                    thumb,
+                    count: it.item_count || ''
+                });
+            }
+        }
+    }
+    return out.slice(0, 20);
+}
+
+async function playlistSongs(id) {
+    const t = await getYT();
+    let pl = await t.music.getPlaylist(id);
+    const head = pl.header || {};
+    let items = pl.items || [];
+    for (let i = 0; i < 3 && pl.has_continuation && items.length < 300; i++) {   // halaman berikutnya
+        try { pl = await pl.getContinuation(); items = items.concat(pl.items || []); } catch (e) { break; }
+    }
+    const songs = items.map(mapSong).filter(Boolean).slice(0, 300);
+    const au = head.author;
+    return {
+        id,
+        title: txt(head.title) || 'Playlist',
+        author: typeof au === 'string' ? au : (au && au.name) || '',
+        thumb: fastThumb(lastThumb(head.thumbnails) || (head.thumbnail && lastThumb(head.thumbnail.contents)) || (songs[0] && songs[0].thumb) || ''),
+        songs
+    };
+}
+
+async function artistInfo(id) {
+    const t = await getYT();
+    const a = await t.music.getArtist(id);
+    const head = a.header || {};
+    const name = txt(head.title) || 'Artist';
+    let items = [];
+    try {                                      // semua lagu artis, kalau tersedia
+        const all = await a.getAllSongs();
+        if (all && Array.isArray(all.contents)) items = all.contents;
+    } catch (e) { }
+    if (!items.length) {                       // cadangan: daftar lagu teratas di halaman artis
+        for (const s of (a.sections || [])) {
+            if (s.type === 'MusicShelf' && Array.isArray(s.contents) && s.contents.length) { items = s.contents; break; }
+        }
+    }
+    const songs = items.map(mapSong).filter(Boolean).slice(0, 100)
+        .map(s => s.artist === 'Unknown' ? { ...s, artist: name } : s);
+    return {
+        id,
+        name,
+        thumb: fastThumb(lastThumb(head.thumbnails) || (head.thumbnail && lastThumb(head.thumbnail.contents)) || (songs[0] && songs[0].thumb) || ''),
+        songs
+    };
+}
+
 // ---------- unduh audio dengan yt-dlp ke folder cache ----------
 let active = 0;
 const waiters = [];
@@ -101,10 +210,37 @@ function findCached(id) {
         const file = path.join(CACHE_DIR, f);
         try {
             const st = fs.statSync(file);
-            if (st.size > 0) return { file, length: st.size, mime: MIME[ext] };
+            if (st.size > 0) return { file, length: st.size, size: st.size, mime: MIME[ext], final: true };
         } catch (e) { }
     }
     return null;
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// file yang sedang diunduh yt-dlp (berakhiran .part)
+function findPart(id) {
+    let names;
+    try { names = fs.readdirSync(CACHE_DIR); } catch (e) { return null; }
+    for (const f of names) {
+        if (!f.startsWith(id + '.') || !f.endsWith('.part')) continue;
+        const ext = path.extname(f.slice(0, -5)).slice(1).toLowerCase();
+        const file = path.join(CACHE_DIR, f);
+        try {
+            const st = fs.statSync(file);
+            return { file, size: st.size, mime: MIME[ext] || 'audio/mp4', final: false };
+        } catch (e) { }
+    }
+    return null;
+}
+
+async function readChunk(file, pos, len) {
+    const fh = await fs.promises.open(file, 'r');
+    try {
+        const buf = Buffer.alloc(len);
+        const { bytesRead } = await fh.read(buf, 0, len, pos);
+        return buf.subarray(0, bytesRead);
+    } finally { await fh.close(); }
 }
 
 function pruneCache() {
@@ -151,9 +287,21 @@ async function download(id) {
     throw lastErr;
 }
 
-// ---------- layani audio dari disk (mendukung Range) ----------
+// ---------- layani audio (file selesai: Range penuh; file masih diunduh: kirim sambil jalan) ----------
 async function serveAudio(req, res, id) {
-    const a = await getAudio(id);
+    let a = findCached(id);
+    if (!a) {
+        const job = getAudio(id);                 // mulai unduhan (atau gabung kalau sudah berjalan)
+        job.catch(() => { });
+        const m0 = /^bytes=(\d*)-/.exec(req.headers.range || '');
+        const from = m0 && m0[1] !== '' ? parseInt(m0[1]) : 0;
+        if (from === 0 && req.method !== 'HEAD') return serveGrowing(req, res, id, job);
+        a = await job;                            // permintaan loncat ke tengah lagu: tunggu sampai selesai
+    }
+    return serveFile(req, res, a);
+}
+
+async function serveFile(req, res, a) {
     const total = a.length;
     let start = 0, end = total - 1;
     const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
@@ -181,24 +329,88 @@ async function serveAudio(req, res, id) {
     catch (e) { /* browser memutus koneksi (seek/ganti lagu): abaikan */ }
 }
 
+// tunggu buffer kosong atau koneksi ditutup, lalu lepas kedua pendengar (supaya tidak menumpuk)
+function waitDrain(res) {
+    return new Promise(resolve => {
+        const done = () => { res.off('drain', done); res.off('close', done); resolve(); };
+        res.once('drain', done);
+        res.once('close', done);
+    });
+}
+
+async function serveGrowing(req, res, id, job) {
+    let closed = false, done = false, failed = false;
+    res.on('close', () => { closed = true; });
+    job.then(() => { done = true; }, () => { failed = true; });
+
+    // tunggu sampai ada data awal (sekitar 64 KB) atau unduhan selesai
+    const t0 = Date.now();
+    let cur = null;
+    while (!closed && !failed) {
+        cur = findCached(id) || findPart(id);
+        if (cur && cur.size > 64 * 1024) break;
+        if (done && cur) break;
+        if (Date.now() - t0 > 120000) break;
+        await sleep(150);
+    }
+    if (closed) return;
+    if (failed || !cur) await job;                // melempar error aslinya, dibalas 502 oleh handler
+
+    res.writeHead(200, { ...res.cors, 'Content-Type': cur.mime, 'Cache-Control': 'no-store' });
+    let pos = 0, lastData = Date.now();
+    while (!closed) {
+        const c = findCached(id) || findPart(id);
+        if (c && c.size > pos) {
+            try {
+                const buf = await readChunk(c.file, pos, Math.min(c.size - pos, 256 * 1024));
+                if (buf.length) {
+                    pos += buf.length;
+                    lastData = Date.now();
+                    if (!res.write(buf)) await waitDrain(res);
+                    continue;
+                }
+            } catch (e) { /* file baru saja di-rename jadi final: coba lagi */ }
+        }
+        if (c && c.final && pos >= c.size) break;           // file akhir sudah terkirim penuh
+        if (failed) { res.destroy(); return; }
+        if (Date.now() - lastData > 60000) break;
+        await sleep(120);
+    }
+    if (!closed) res.end();
+}
+
 const json = (res, code, obj) => { res.writeHead(code, { ...res.cors, 'Content-Type': 'application/json' }); res.end(JSON.stringify(obj)); };
 
-let prefetching = false;     // maksimal 1 prefetch sekaligus supaya klik lagu tidak antre
+const prefetchQueue = [];
+let prefetchRunning = false;
+async function pumpPrefetch() {
+    if (prefetchRunning) return;
+    prefetchRunning = true;
+    while (prefetchQueue.length) {
+        const id = prefetchQueue.shift();
+        if (findCached(id)) continue;
+        try { await getAudio(id); } catch (e) { }
+    }
+    prefetchRunning = false;
+}
 
 const server = http.createServer(async (req, res) => {
     res.cors = corsFor(req);
-    const u = new URL(req.url, 'http://x');
     if (req.method === 'OPTIONS') { res.writeHead(204, res.cors); return res.end(); }
+    const u = new URL(req.url, 'http://x');
+    if (u.pathname !== '/audio' && u.pathname !== '/prefetch' && u.pathname !== '/health' && rateLimited(req)) {
+        res.writeHead(429, { ...res.cors, 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'terlalu banyak permintaan, coba sebentar lagi' }));
+    }
 
     try {
         if (u.pathname === '/' || u.pathname === '/health') return json(res, 200, { ok: true });
 
         if (u.pathname === '/prefetch') {
-            const id = u.searchParams.get('id');
-            if (id && /^[\w-]{6,20}$/.test(id) && !prefetching && !findCached(id)) {
-                prefetching = true;
-                getAudio(id).catch(() => { }).finally(() => { prefetching = false; });
-            }
+            const ids = (u.searchParams.get('id') || '').split(',').filter(x => /^[\w-]{6,20}$/.test(x)).slice(0, 5);
+            prefetchQueue.length = 0;                    // permintaan terbaru menggantikan antrean lama
+            for (const x of ids) if (!findCached(x)) prefetchQueue.push(x);
+            pumpPrefetch();
             res.writeHead(204, res.cors);
             return res.end();
         }
@@ -206,7 +418,23 @@ const server = http.createServer(async (req, res) => {
         if (u.pathname === '/search') {
             const q = (u.searchParams.get('q') || '').trim();
             if (!q) return json(res, 400, { error: 'q kosong' });
-            return json(res, 200, await search(q));
+            const type = u.searchParams.get('type') || 'song';
+            if (type === 'playlist' || type === 'artist') {
+                return json(res, 200, await memo('s:' + type + ':' + q.toLowerCase(), 5 * 60 * 1000, () => searchOther(q, type)));
+            }
+            return json(res, 200, await search(q));       // pencarian lagu: perilaku lama tidak berubah
+        }
+
+        if (u.pathname === '/playlist') {
+            const id = (u.searchParams.get('id') || '').replace(/^VL/, '');
+            if (!/^[\w-]{2,64}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
+            return json(res, 200, await memo('pl:' + id, 10 * 60 * 1000, () => playlistSongs(id)));
+        }
+
+        if (u.pathname === '/artist') {
+            const id = u.searchParams.get('id') || '';
+            if (!/^[\w-]{10,40}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
+            return json(res, 200, await memo('ar:' + id, 10 * 60 * 1000, () => artistInfo(id)));
         }
 
         if (u.pathname === '/audio') {

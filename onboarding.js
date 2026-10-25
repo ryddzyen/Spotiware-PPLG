@@ -131,7 +131,9 @@
     }
 
     // hanya muncul kalau akun ini belum pernah memilih / melewati
+    // hanya untuk pengguna yang sudah login/daftar, dan hanya kalau akun ini belum pernah memilih
     function checkAndShow() {
+        if (uid() === 'guest') return;
         if (!getPrefs()) open();
     }
 
@@ -141,7 +143,10 @@
         if (typeof getSongsByGenre !== 'function' || !window.GENRE_ARTISTS) return setTimeout(init, 300);
         injectStyle();
         setTimeout(checkAndShow, 1500);   // beri waktu login Firebase menentukan akun
-        window.addEventListener('spotiware:account-changed', () => setTimeout(() => { if (!overlay) checkAndShow(); }, 400));
+        window.addEventListener('spotiware:account-changed', () => setTimeout(() => {
+            if (uid() === 'guest') { close(); return; }   // logout: tutup layar pilih
+            if (!overlay) checkAndShow();
+        }, 400));
     }
 
     init();
