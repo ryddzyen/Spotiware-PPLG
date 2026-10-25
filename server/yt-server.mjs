@@ -41,6 +41,17 @@ async function getYT() {
     return yt;
 }
 
+// kalau pemanggilan ke YouTube gagal (jaringan tersendat), buat sesi baru lalu coba sekali lagi
+async function retryYT(fn) {
+    try { return await fn(); }
+    catch (e) {
+        console.log('[yt] gagal (' + e.message + '), membuat sesi baru lalu mencoba lagi');
+        yt = null;
+        await new Promise(r => setTimeout(r, 400));
+        return await fn();
+    }
+}
+
 // ---------- cover resolusi tinggi ----------
 const thumbCache = new Map();
 async function bestThumb(id, url) {
@@ -500,21 +511,21 @@ const server = http.createServer(async (req, res) => {
             if (!q) return json(res, 400, { error: 'q kosong' });
             const type = u.searchParams.get('type') || 'song';
             if (type === 'playlist' || type === 'artist') {
-                return json(res, 200, await memo('s:' + type + ':' + q.toLowerCase(), 5 * 60 * 1000, () => searchOther(q, type)));
+                return json(res, 200, await memo('s:' + type + ':' + q.toLowerCase(), 5 * 60 * 1000, () => retryYT(() => searchOther(q, type))));
             }
-            return json(res, 200, await search(q));       // pencarian lagu: perilaku lama tidak berubah
+            return json(res, 200, await retryYT(() => search(q)));
         }
 
         if (u.pathname === '/playlist') {
             const id = (u.searchParams.get('id') || '').replace(/^VL/, '');
             if (!/^[\w-]{2,64}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
-            return json(res, 200, await memo('pl:' + id, 10 * 60 * 1000, () => playlistSongs(id)));
+            return json(res, 200, await memo('pl:' + id, 10 * 60 * 1000, () => retryYT(() => playlistSongs(id))));
         }
 
         if (u.pathname === '/artist') {
             const id = u.searchParams.get('id') || '';
             if (!/^[\w-]{10,40}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
-            return json(res, 200, await memo('ar:' + id, 10 * 60 * 1000, () => artistInfo(id)));
+            return json(res, 200, await memo('ar:' + id, 10 * 60 * 1000, () => retryYT(() => artistInfo(id))));
         }
 
         if (u.pathname === '/audio') {
