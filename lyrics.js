@@ -47,6 +47,8 @@
     .lyr-line:hover{opacity:.7;}
     .lyr-line.active{opacity:1;transform:scale(1.04);}
     .lyr-line.gap{font-size:1.1rem;opacity:.25;}
+    .lyr-w{display:inline-block;white-space:nowrap;}
+    .lyr-ch{--f:0;background-image:linear-gradient(90deg,var(--yellow,#FFD700) calc(var(--f)*140% - 40%),rgba(255,255,255,.4) calc(var(--f)*140%));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
     .lyr-plain{white-space:pre-wrap;font-size:1.05rem;line-height:1.8;opacity:.92;padding-bottom:3rem;}
     .lyr-note{font-size:.78rem;color:#c9c9ce;margin-bottom:1rem;line-height:1.5;}
     .lyr-status{text-align:center;color:#c9c9ce;padding:3rem 1rem;line-height:1.6;}
@@ -303,6 +305,7 @@
         bodyEl.innerHTML = '';
         bodyEl.classList.remove('picking');
         lines = []; lineEls = []; activeIdx = -1;
+        fillEls = []; fillIdx = -1;
     }
 
     function showStatus(msg, retry) {
@@ -371,13 +374,71 @@
         bodyEl.scrollTo({ top: Math.max(0, top), behavior: jump ? 'auto' : 'smooth' });
     }
 
+    // ---------- Isi warna mengalir per huruf (hanya baris aktif) ----------
+    const CHAR_SEC = 0.1;     // perkiraan detik per huruf (kecilkan = lebih cepat, besarkan = lebih lambat)
+    let fillEls = [], fillIdx = -1, fillDone = 0, fillDur = 1;
+
+    function clearFill() {
+        if (fillIdx >= 0 && lineEls[fillIdx] && lines[fillIdx]) lineEls[fillIdx].textContent = lines[fillIdx].text || '♪';
+        fillIdx = -1;
+        fillEls = [];
+    }
+
+    function prepFill(i) {
+        clearFill();
+        const l = lines[i], el = lineEls[i];
+        if (!l || !el || !l.text) return;
+        // aksara yang hurufnya bersambung (Arab, Thai, Devanagari, dll.) dipecah per kata, bukan per huruf, supaya bentuknya tidak rusak
+        const complex = /[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF]/.test(l.text);
+        el.textContent = '';
+        const frag = document.createDocumentFragment();
+        l.text.split(/(\s+)/).forEach((w) => {
+            if (!w) return;
+            if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(' ')); return; }
+            const wrap = document.createElement('span');
+            wrap.className = 'lyr-w';
+            (complex ? [w] : Array.from(w)).forEach((u) => {
+                const s = document.createElement('span');
+                s.className = 'lyr-ch';
+                s.textContent = u;
+                wrap.appendChild(s);
+                fillEls.push(s);
+            });
+            frag.appendChild(wrap);
+        });
+        el.appendChild(frag);
+        fillIdx = i;
+        fillDone = 0;
+        const next = lines[i + 1];
+        const gap = next ? next.t - l.t : 6;
+        fillDur = Math.max(0.6, Math.min(gap, Math.max(1, fillEls.length * CHAR_SEC)));
+    }
+
+    function updateFill(t) {
+        if (fillIdx < 0 || !fillEls.length) return;
+        const l = lines[fillIdx];
+        if (!l) return;
+        const n = fillEls.length;
+        const x = Math.max(0, Math.min(1, (t - l.t) / fillDur)) * n;
+        const k = Math.floor(x);
+        if (k > fillDone) {                                   // maju: huruf yang terlewati penuh
+            for (let j = fillDone; j < k && j < n; j++) fillEls[j].style.setProperty('--f', 1);
+        } else if (k < fillDone) {                            // mundur (geser lagu): kosongkan lagi
+            for (let j = k + 1; j <= Math.min(fillDone, n - 1); j++) fillEls[j].style.setProperty('--f', 0);
+        }
+        fillDone = k;
+        if (k < n) fillEls[k].style.setProperty('--f', (x - k).toFixed(3));   // huruf yang sedang terisi
+    }
+
     function setActive(i, jump) {
         if (i === activeIdx && !jump) return;
         if (lineEls[activeIdx]) lineEls[activeIdx].classList.remove('active');
         activeIdx = i;
         const el = lineEls[i];
-        if (!el) return;
+        if (!el) { clearFill(); return; }
+        prepFill(i);
         el.classList.add('active');
+        updateFill(audio.currentTime);
         if (Date.now() > userScrollUntil) centerActive(jump);
     }
 
@@ -397,8 +458,10 @@
         rafId = null;
         if (!open) return;
         if (lines.length) {
-            const i = currentIndex(audio.currentTime);
+            const t = audio.currentTime;
+            const i = currentIndex(t);
             if (i !== activeIdx) setActive(i);
+            updateFill(t);
         }
         rafId = requestAnimationFrame(tick);
     }

@@ -810,6 +810,6 @@
         if (audio.duration && audio.duration - audio.currentTime < 25) ensureYtNext();
     });
 
-    window.YTMusic = { register, idOf };
+    window.YTMusic = { register, idOf, SERVER };
     init();
 })();

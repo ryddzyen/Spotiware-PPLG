@@ -17,7 +17,9 @@ const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
 const STREAM_WHILE_DOWNLOADING = false;
-const MAX_YTDLP = 3;
+const MAX_YTDLP = 2;                    // yt-dlp bersamaan: lebih banyak malah membuat semuanya lebih lambat di laptop
+const DIRECT_STREAM = false;            // YouTube menolak (403) streaming langsung untuk klien TVHTML5
+const YT_ARGS = process.env.YT_CLIENT ? ['--extractor-args', 'youtube:player_client=' + process.env.YT_CLIENT] : [];
 const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
 
@@ -386,6 +388,7 @@ function runYtdlp(id, low) {
         if (!low && !demand.has(id)) return reject(cancelled());     // sudah tidak ditunggu siapa pun
         const p = spawn(YTDLP, [
             '--js-runtimes', 'node',
+            ...YT_ARGS,
             '-f', 'bestaudio[ext=m4a]/bestaudio',
             '--no-playlist', '--no-warnings', '--no-progress',
             '--fixup', 'never',
@@ -654,9 +657,10 @@ async function streamUpstream(req, res, id) {
 
 // ---------- layani audio (file selesai: Range penuh; file masih diunduh: kirim sambil jalan) ----------
 async function serveAudio(req, res, id) {
-    const cached = findCached(id);                 // file hasil unduhan lama (kalau ada) tetap dilayani dari disk
+    const cached = findCached(id);
     if (cached) return serveFile(req, res, cached);
-    return streamUpstream(req, res, id);           // selain itu: streaming murni
+    if (!DIRECT_STREAM) return serveViaDownload(req, res, id);     // satu kali yt-dlp saja
+    return streamUpstream(req, res, id);
 }
 
 async function serveFile(req, res, a) {
@@ -760,24 +764,108 @@ const json = (res, code, obj) => { res.writeHead(code, { ...res.cors, 'Content-T
 const prefetchQueue = [];
 let prefetchWorkers = 0;
 function pumpPrefetch() {
-    while (prefetchWorkers < 2 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
+    while (prefetchWorkers < 1 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
         prefetchWorkers++;
         (async () => {
             while (prefetchQueue.length) {
                 const id = prefetchQueue.shift();
                 if (findCached(id)) continue;
-                try { await (Date.now() < directOffUntil ? getAudio(id, true) : audioInfo(id, true)); } catch (e) { }
+                try { await getAudio(id, true); } catch (e) { }
             }
             prefetchWorkers--;
         })();
     }
 }
 
+// ---------- Import Spotify: baca daftar lagu playlist publik + cocokkan satu per satu ke YouTube Music ----------
+function findKey(o, key, depth = 0) {              // cari properti bernama `key` di mana pun dalam JSON
+    if (!o || typeof o !== 'object' || depth > 12) return null;
+    if (Array.isArray(o[key])) return o[key];
+    for (const k of Object.keys(o)) {
+        const r = findKey(o[k], key, depth + 1);
+        if (r) return r;
+    }
+    return null;
+}
+
+async function spotifyPlaylist(url) {
+    const m = /playlist\/([A-Za-z0-9]{10,40})/.exec(url || '');
+    if (!m) throw new Error('link playlist Spotify tidak valid');
+    const r = await fetch('https://open.spotify.com/embed/playlist/' + m[1], {
+        headers: { 'User-Agent': DEFAULT_UA, 'Accept-Language': 'en-US,en;q=0.9' }
+    });
+    if (!r.ok) throw new Error('Spotify membalas ' + r.status + ' (playlist privat atau tidak ada?)');
+    const html = await r.text();
+    const sm = /<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/.exec(html);
+    if (!sm) throw new Error('format halaman Spotify tidak dikenali');
+    let data;
+    try { data = JSON.parse(sm[1]); } catch (e) { throw new Error('data halaman Spotify rusak'); }
+    const list = findKey(data, 'trackList');
+    if (!list || !list.length) throw new Error('daftar lagu tidak ditemukan di halaman Spotify');
+    let name = 'Playlist Spotify';
+    try {
+        const ent = data.props.pageProps.state.data.entity;
+        name = txt(ent.name) || txt(ent.title) || name;
+    } catch (e) { }
+    const tracks = list.map(t => ({
+        title: String(t.title || '').trim(),
+        artist: String(t.subtitle || '').replace(/\u00a0/g, ' ').trim()
+    })).filter(t => t.title).slice(0, 300);
+    return { name, tracks };
+}
+
+const normM = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\(\[][^\)\]]*[\)\]]/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+async function matchOne(title, artist) {
+    const t = await getYT();
+    const res = await t.music.search((title + ' ' + artist).trim(), { type: 'song' });
+    const cands = [];
+    for (const shelf of (res.contents || [])) {
+        for (const it of (shelf.contents || [])) {
+            const s = mapSong(it);
+            if (s) cands.push(s);
+            if (cands.length >= 8) break;
+        }
+        if (cands.length >= 8) break;
+    }
+    const nt = normM(title), na = normM(String(artist).split(',')[0]);
+    let best = null, bestScore = 0;
+    for (const c of cands) {
+        const ct = normM(c.title);
+        const ts = ct === nt ? 3 : (ct && nt && (ct.includes(nt) || nt.includes(ct))) ? 2 : 0;
+        const as = na && normM(c.artist).includes(na) ? 2 : 0;
+        const sc = ts * 10 + as;
+        if (ts >= 2 && sc > bestScore) { best = { c, ts, as }; bestScore = sc; }
+    }
+    if (!best) return { found: false };
+    return { found: true, approx: best.as < 2, song: best.c };      // approx: judul cocok tapi artis tidak jelas
+}
+
+let matchChain = Promise.resolve();
+function throttled(fn) {                               // satu pencarian sekali jalan, jeda 350 ms antar pencarian
+    const p = matchChain.then(fn);
+    matchChain = p.catch(() => { }).then(() => sleep(350));
+    return p;
+}
+
+const capHits = new Map();
+function capped(req, max, windowMs) {                  // batas per alamat untuk endpoint import (URL Funnel itu publik)
+    const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    const now = Date.now();
+    const h = (capHits.get(ip) || []).filter(x => now - x < windowMs);
+    h.push(now);
+    capHits.set(ip, h);
+    if (capHits.size > 300) capHits.clear();
+    return h.length > max;
+}
+
 const server = http.createServer(async (req, res) => {
     res.cors = corsFor(req);
     if (req.method === 'OPTIONS') { res.writeHead(204, res.cors); return res.end(); }
     const u = new URL(req.url, 'http://x');
-    if (u.pathname !== '/audio' && u.pathname !== '/prefetch' && u.pathname !== '/health' && rateLimited(req)) {
+    if (u.pathname !== '/audio' && u.pathname !== '/prefetch' && u.pathname !== '/health' &&
+        u.pathname !== '/match' && u.pathname !== '/spotify-list' && rateLimited(req)) {
         res.writeHead(429, { ...res.cors, 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ error: 'terlalu banyak permintaan, coba sebentar lagi' }));
     }
@@ -786,7 +874,7 @@ const server = http.createServer(async (req, res) => {
         if (u.pathname === '/' || u.pathname === '/health') return json(res, 200, { ok: true });
 
         if (u.pathname === '/prefetch') {
-            const ids = (u.searchParams.get('id') || '').split(',').filter(x => /^[\w-]{6,20}$/.test(x)).slice(0, 5);
+            const ids = (u.searchParams.get('id') || '').split(',').filter(x => /^[\w-]{6,20}$/.test(x)).slice(0, 2);
             if (u.searchParams.get('hot') === '1') {      // kursor di atas lagu: taruh paling depan, antrean lain tidak dibuang
                 for (const x of ids.reverse()) {
                     if (findCached(x) || procs.has(x) || inflight.has(x)) continue;
@@ -852,6 +940,21 @@ const server = http.createServer(async (req, res) => {
             const id = u.searchParams.get('id') || '';
             if (!/^[\w-]{6,20}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
             return json(res, 200, await memo('rd:' + id, 10 * 60 * 1000, () => retryYT(() => radioSongs(id))));
+        }
+
+        if (u.pathname === '/spotify-list') {
+            if (capped(req, 20, 10 * 60 * 1000)) return json(res, 429, { error: 'terlalu banyak permintaan, coba lagi nanti' });
+            const url = (u.searchParams.get('url') || '').trim().slice(0, 300);
+            if (!/^https?:\/\/(open\.)?spotify\.com\//.test(url)) return json(res, 400, { error: 'bukan link Spotify' });
+            return json(res, 200, await memo('sp:' + url, 10 * 60 * 1000, () => spotifyPlaylist(url)));
+        }
+
+        if (u.pathname === '/match') {
+            if (capped(req, 400, 10 * 60 * 1000)) return json(res, 429, { error: 'terlalu banyak permintaan, coba lagi nanti' });
+            const title = (u.searchParams.get('title') || '').trim().slice(0, 150);
+            const artist = (u.searchParams.get('artist') || '').trim().slice(0, 150);
+            if (!title) return json(res, 400, { error: 'title kosong' });
+            return json(res, 200, await throttled(() => retryYT(() => matchOne(title, artist))));
         }
 
         json(res, 404, { error: 'tidak ditemukan' });
