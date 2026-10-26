@@ -83,7 +83,7 @@
         vids = (Array.isArray(vids) ? vids : [vids]).filter(v => {
             if (!v || prefetched.get(v) > now - win) return false;
             const s = songs.find(x => x.yt === v);
-            return !(s && s.dur > 600);              // lagu panjang (mix, lebih dari 10 menit) tidak disiapkan duluan
+            return !(s && (s.dur > 600 || s.viaLocal));
         });
         if (mode !== 'yt' || !vids.length) return;
         vids.forEach(v => prefetched.set(v, now));
@@ -91,18 +91,50 @@
     };
 
     // ---------- lagu YouTube -> format lagu Spotiware (hidden, tidak tercampur di koleksi) ----------
+    // ---------- pakai file lokal kalau lagu YouTube ini ada di koleksi (tanpa pindah mode, tanpa API) ----------
+    let localIdx = null;
+    const titleKey = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\(\[]\s*(feat|ft|with|prod)\b[^\)\]]*[\)\]]/g, ' ')     // (feat. X), (with X), [prod. X]
+        .replace(/\s(feat|ft)\.?\s.*$/, ' ')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const artistKeys = s => String(s || '').split(',')
+        .map(a => a.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}]+/gu, ''))
+        .filter(Boolean);
+
+    function buildLocalIdx() {
+        localIdx = new Map();
+        songs.forEach(s => {
+            if (s.external) return;                          // hanya lagu koleksi lokal
+            const k = titleKey(s.songName);
+            if (!k) return;
+            if (!localIdx.has(k)) localIdx.set(k, []);
+            localIdx.get(k).push({ path: s.songPath, a: artistKeys(s.songDes) });
+        });
+    }
+
+    function localPathFor(m) {
+        if (!localIdx) buildLocalIdx();
+        const c = localIdx.get(titleKey(m.title));
+        if (!c) return null;
+        const ya = artistKeys(m.artist);
+        const hit = c.find(x => x.a.some(a => ya.includes(a)));
+        return hit ? hit.path : null;
+    }
+
     function toSong(m) {
+        const lp = localPathFor(m);
         return {
             id: idOf(m.id),
             songName: m.title,
             songDes: m.artist,
             songImage: m.thumb || 'img/pplglogo.png',
-            songPath: SERVER + '/audio?id=' + encodeURIComponent(m.id),   // alamat tetap, tidak kedaluwarsa
+            songPath: lp || SERVER + '/audio?id=' + encodeURIComponent(m.id),   // file lokal kalau ada, kalau tidak server
             hidden: true,
             keyword: ['__yt__'],
             artists: m.artist.split(',').map(a => a.trim()).filter(Boolean),
             genre: 'YouTube',
             external: true,
+            viaLocal: !!lp,
             yt: m.id,
             dur: m.duration || 0
         };
@@ -524,6 +556,7 @@
 
     function ensureBlob(s) {
         if (!s || !s.yt) return Promise.resolve(false);
+        if (s.viaLocal) return Promise.resolve(false);
         if (!BLOB_ON) return Promise.resolve(false);
         if (s.dur > 600) return Promise.resolve(false);      // lagu panjang jangan diunduh ke memori HP
         if (blobs.has(s.yt)) {
@@ -704,6 +737,78 @@
             nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());
         } catch (e) { /* gagal: antrean cepat tetap dipakai */ }
     }
+
+    // file lokal untuk lagu YouTube ini tidak ada / rusak -> otomatis pakai server YouTube Music
+    audio.addEventListener('error', () => {
+        try {
+            const cur = getCurrentSong();
+            if (!cur || !cur.viaLocal || !playerBar.classList.contains('show')) return;
+            cur.viaLocal = false;
+            cur.songPath = remoteUrl(cur.yt);
+            audio.src = cur.songPath;
+            audio.load();
+            audio.play().catch(() => { });
+        } catch (e) { }
+    });
+
+    // ---------- Mode YouTube Music: lagu berikutnya selalu dari YouTube Music ----------
+    const AUTO_STAY_YT = true;     // true: lagu lokal di tengah playlist campuran juga dilewati. false: hanya akhir daftar yang disambung
+    let autoBusy = false, autoFail = 0;
+
+    function nextInLine() {
+        try {
+            if (typeof queue !== 'undefined' && queue.length) return queue[0];
+            return order[currentIndex + 1];                  // undefined = akhir daftar
+        } catch (e) { return undefined; }
+    }
+
+    async function ensureYtNext() {
+        if (mode !== 'yt' || autoBusy || Date.now() - autoFail < 20000) return;
+        if (!playerBar.classList.contains('show')) return;
+        if (typeof songOnRepeat !== 'undefined' && songOnRepeat) return;
+        const cur = getCurrentSong();
+        if (!cur || !cur.yt) return;
+        const nx = nextInLine();
+        if (nx && nx.yt) return;                             // lagu berikutnya sudah dari YouTube
+        if (nx && !AUTO_STAY_YT) return;
+
+        autoBusy = true;
+        try {
+            let metas = [];
+            try { const d = await getJSON('/radio?id=' + encodeURIComponent(cur.yt), 600000); if (Array.isArray(d)) metas = d; } catch (e) { }
+            if (metas.length < 3) {                          // cadangan: lagu lain dari artis yang sama
+                try {
+                    const q = (cur.artists && cur.artists[0]) || cur.songDes;
+                    const d = await getJSON('/search?q=' + encodeURIComponent(q), 600000);
+                    if (Array.isArray(d)) metas = metas.concat(d);
+                } catch (e) { }
+            }
+            if (!playerBar.classList.contains('show') || getCurrentSong().id !== cur.id) return;   // sudah pindah lagu
+
+            const seen = new Set(order.map(s => s.id));
+            seen.add(cur.id);
+            try { playHistory.slice(0, 20).forEach(s => seen.add(s.id)); } catch (e) { }
+            const rel = [];
+            register(metas).forEach(s => { if (!seen.has(s.id)) { seen.add(s.id); rel.push(s); } });
+            if (!rel.length) { autoFail = Date.now(); return; }
+
+            const add = rel.slice(0, 25);
+            order.splice(currentIndex + 1, 0, ...add);
+            const ci = currentContextList.findIndex(s => s.id === cur.id);
+            currentContextList.splice(ci >= 0 ? ci + 1 : currentContextList.length, 0, ...add);
+            try { preloadedPath = null; renderQueuePanel(); renderMobileSheet(); } catch (e) { }
+
+            const up = upcoming(2);
+            prefetch(up.map(s => s.yt));
+            up.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());
+        } catch (e) { autoFail = Date.now(); }
+        finally { autoBusy = false; }
+    }
+
+    audio.addEventListener('playing', ensureYtNext);
+    audio.addEventListener('timeupdate', () => {             // jaring pengaman 25 detik sebelum lagu habis
+        if (audio.duration && audio.duration - audio.currentTime < 25) ensureYtNext();
+    });
 
     window.YTMusic = { register, idOf };
     init();
