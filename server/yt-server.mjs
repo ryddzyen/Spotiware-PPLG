@@ -496,7 +496,9 @@ async function resolveDirect(id, low) {
     if (expire && expire * 1000 - Date.now() > 15 * 60 * 1000) {
         exp = Math.min(expire * 1000 - 10 * 60 * 1000, Date.now() + 5 * 60 * 60 * 1000);
     }
-    const entry = { url: j.url, mime, length, ua, exp };
+    const hdr = { ...(j.http_headers || {}) };
+    delete hdr['Accept-Encoding'];                    // audio tidak dikompres, biarkan fetch yang mengurus
+    const entry = { url: j.url, mime, length, ua, hdr, exp };
     if (directCache.size > 300) directCache.clear();
     directCache.set(id, entry);
     console.log('[audio]', id, 'URL langsung siap (' + mime + ', ' + length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
@@ -513,22 +515,43 @@ function audioInfo(id, low = false) {
 }
 
 // ambil satu potongan dari server YouTube; kalau gagal (URL kedaluwarsa), ambil URL baru lalu coba sekali lagi
+// ambil satu potongan dari server YouTube.
+// gangguan jaringan sesaat: ulangi URL yang sama (murah). 403/URL mati: baru ambil URL baru lewat yt-dlp (mahal, 5-10 detik)
 async function fetchPart(id, a, from, to, signal) {
-    for (let attempt = 0; attempt < 2; attempt++) {
+    let renewed = false, netRetry = 0;
+    for (let attempt = 0; attempt < 4; attempt++) {
         try {
-            const up = await fetch(a.url, { headers: { Range: `bytes=${from}-${to}`, 'User-Agent': a.ua }, signal });
+            const up = await fetch(a.url, {
+                headers: { ...(a.hdr || {}), Range: `bytes=${from}-${to}`, 'User-Agent': a.ua },
+                signal
+            });
             const okFull = up.status === 200 && from === 0 && to >= a.length - 1;
-            if (up.status !== 206 && !okFull) throw new Error('upstream ' + up.status);
+            if (up.status !== 206 && !okFull) {
+                try { up.body && up.body.cancel(); } catch (e2) { }
+                const err = new Error('upstream ' + up.status);
+                err.status = up.status;
+                throw err;
+            }
             if (!up.body) throw new Error('upstream tanpa isi');
             return { up, a };
         } catch (e) {
             if (signal.aborted) throw e;
-            console.log('[audio]', id, 'potongan gagal:', e.message, attempt ? '' : '- ambil URL baru');
+            const why = e.status ? e.message
+                : e.message + ' (' + ((e.cause && (e.cause.code || e.cause.message)) || '?') + ')';
+            if (!e.status && netRetry < 2) {
+                netRetry++;
+                console.log('[audio]', id, 'gangguan jaringan:', why, '- coba lagi URL yang sama');
+                await new Promise(r => setTimeout(r, 400 * netRetry));
+                continue;
+            }
+            if (renewed) throw e;
+            renewed = true;
+            console.log('[audio]', id, 'potongan gagal:', why, '- ambil URL baru');
             directCache.delete(id);
-            if (attempt === 1) throw e;
             a = await audioInfo(id);
         }
     }
+    throw new Error('gagal mengambil potongan audio');
 }
 
 async function streamUpstream(req, res, id) {
