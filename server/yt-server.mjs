@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
@@ -498,7 +499,10 @@ async function resolveDirect(id, low) {
     }
     const hdr = { ...(j.http_headers || {}) };
     delete hdr['Accept-Encoding'];                    // audio tidak dikompres, biarkan fetch yang mengurus
-    const entry = { url: j.url, mime, length, ua, hdr, exp };
+    let cl = '?', pot = false;
+    try { const q = new URL(j.url).searchParams; cl = q.get('c') || '?'; pot = q.has('pot'); } catch (e) { }
+    console.log('[audio]', id, 'klien:', cl, '| pot:', pot, '| format:', j.format_id);
+    const entry = { url: j.url, mime, length, ua, hdr, exp, t: Date.now() };
     if (directCache.size > 300) directCache.clear();
     directCache.set(id, entry);
     console.log('[audio]', id, 'URL langsung siap (' + mime + ', ' + length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
@@ -538,6 +542,7 @@ async function fetchPart(id, a, from, to, signal) {
             if (signal.aborted) throw e;
             const why = e.status ? e.message
                 : e.message + ' (' + ((e.cause && (e.cause.code || e.cause.message)) || '?') + ')';
+            if (e.status === 403 && Date.now() - (a.t || 0) < 90000) throw e;   // URL masih baru: 403 bukan karena kedaluwarsa, ambil URL baru tidak membantu
             if (!e.status && netRetry < 2) {
                 netRetry++;
                 console.log('[audio]', id, 'gangguan jaringan:', why, '- coba lagi URL yang sama');
@@ -554,9 +559,24 @@ async function fetchPart(id, a, from, to, signal) {
     throw new Error('gagal mengambil potongan audio');
 }
 
+let directFails = 0, directOffUntil = 0;     // streaming langsung ditolak berturut-turut -> matikan sementara
+
+// cara lama: yt-dlp mengunduh ke folder cache, lalu dilayani dari disk
+async function serveViaDownload(req, res, id) {
+    demand.set(id, (demand.get(id) || 0) + 1);
+    res.on('close', () => {
+        const n = (demand.get(id) || 1) - 1;
+        if (n > 0) demand.set(id, n); else demand.delete(id);
+    });
+    prioritize(id);
+    const a = await getAudio(id);
+    return serveFile(req, res, a);
+}
+
 async function streamUpstream(req, res, id) {
     const ctl = new AbortController();
     res.on('close', () => { if (!res.writableFinished) ctl.abort(); });   // browser pindah lagu / seek = normal
+    if (Date.now() < directOffUntil) return serveViaDownload(req, res, id);
 
     let a = await audioInfo(id);
     if (ctl.signal.aborted) return;
@@ -592,7 +612,21 @@ async function streamUpstream(req, res, id) {
     if (req.method === 'HEAD') { res.writeHead(status, head); return res.end(); }
 
     // potongan pertama diambil SEBELUM header dikirim, supaya kalau gagal browser menerima 502, bukan koneksi menggantung
-    let first = await fetchPart(id, a, start, Math.min(end, start + CHUNK - 1), ctl.signal);
+    let first;
+    try {
+        first = await fetchPart(id, a, start, Math.min(end, start + CHUNK - 1), ctl.signal);
+        directFails = 0;
+    } catch (e) {
+        if (ctl.signal.aborted) return;
+        directFails++;
+        console.log('[audio]', id, 'streaming langsung ditolak (' + e.message + '), pakai unduhan lewat yt-dlp');
+        if (directFails >= 2) {
+            directOffUntil = Date.now() + 30 * 60 * 1000;
+            console.log('[audio] streaming langsung dimatikan 30 menit, semua lagu diunduh lewat yt-dlp');
+        }
+        directCache.delete(id);
+        return serveViaDownload(req, res, id);
+    }
     a = first.a;
     res.writeHead(status, head);
 
@@ -732,7 +766,7 @@ function pumpPrefetch() {
             while (prefetchQueue.length) {
                 const id = prefetchQueue.shift();
                 if (findCached(id)) continue;
-                try { await audioInfo(id, true); } catch (e) { }     // hanya menyiapkan URL, tidak mengunduh file    const BLOB_MAX = 6;               // maksimal 6 lagu di memori
+                try { await (Date.now() < directOffUntil ? getAudio(id, true) : audioInfo(id, true)); } catch (e) { }
             }
             prefetchWorkers--;
         })();
