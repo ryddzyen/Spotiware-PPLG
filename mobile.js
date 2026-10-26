@@ -79,9 +79,10 @@
     msPage.className = 'm-page';
     msPage.id = 'msPage';
     msPage.innerHTML = `
+        <div id="msSearches"></div>
         <h2 class="ms-h">Recommended for you</h2>
         <div id="msRec"></div>
-        <h2 class="ms-h">Recent</h2>
+        <h2 class="ms-h">Recently played</h2>
         <div id="msRecent"></div>`;
     rightPart.prepend(msPage);
 
@@ -94,6 +95,7 @@
             msRecommended = shuffleSongs(visibleSongs).slice(0, 12);
             msFresh = false;
         }
+        msPage.querySelector('#msSearches').innerHTML = (S() && S().recentsHTML) ? S().recentsHTML() : '';
         msPage.querySelector('#msRec').innerHTML = msRecommended.map((s) => rowHTML(s)).join('');
 
         const hist = playHistory.slice(0, 30);
@@ -102,6 +104,35 @@
             : '<div class="sd-empty">Songs you play will show up here.</div>';
     }
     if (S()) S().bindRows(msPage);
+
+    // klik di daftar "Recent searches": hapus satu / hapus semua / buka profil / ulangi pencarian
+    msPage.addEventListener('click', (e) => {
+        if (!e.target.closest('#msSearches') || !S()) return;
+        const rm = e.target.closest('[data-act="remove"]');
+        if (rm) {
+            e.stopPropagation();
+            S().removeRecent(parseInt(rm.dataset.ri));
+            renderSearchPage();
+            return;
+        }
+        if (e.target.closest('.sd-clear-recent')) { S().clearRecents(); renderSearchPage(); return; }
+        const prof = e.target.closest('.sd-prof');
+        if (prof && window.Social) { Social.openProfile(prof.dataset.uid); return; }
+        const q = e.target.closest('.sd-sug');
+        if (q) S().openQuery(q.dataset.text);
+    });
+
+    // gaya daftar riwayat (dropdown laptop memakai gaya sendiri, jadi ditambahkan di sini)
+    const ms = document.createElement('style');
+    ms.textContent = `
+        #msSearches .sd-head{font-size:1.1rem;font-weight:700;margin:.4rem 0 .5rem}
+        #msSearches .sd-sug{display:flex;align-items:center;gap:.8rem;padding:.7rem .3rem;cursor:pointer}
+        #msSearches .sd-sug-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        #msSearches .sd-sug-icon{opacity:.7;width:1.4rem;text-align:center}
+        #msSearches .sr-remove{background:none;border:none;color:#fff;opacity:.7;padding:.5rem;cursor:pointer}
+        #msSearches .sd-clear-recent{text-align:center;font-weight:700;font-size:.85rem;padding:1rem 0;opacity:.8;cursor:pointer}
+    `;
+    document.head.appendChild(ms);
 
     // ---------- Halaman Friends (inbox) ----------
     const miPage = document.createElement('div');

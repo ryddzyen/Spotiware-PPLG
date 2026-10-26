@@ -4,7 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
@@ -16,7 +16,7 @@ const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
 const STREAM_WHILE_DOWNLOADING = false;
-const MAX_YTDLP = 2;
+const MAX_YTDLP = 3;
 const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
 
@@ -113,12 +113,30 @@ function rateLimited(req) {                    // maksimal 60 permintaan/menit p
     h.push(now);
     hits.set(ip, h);
     if (hits.size > 500) hits.clear();
-    return h.length > 60;
+    return h.length > 120;
 }
 
 const txt = v => (typeof v === 'string' ? v : (v && (v.text || v.name)) || '');
 const lastThumb = th => { th = th || []; return th.length ? th[th.length - 1].url : ''; };
 const fastThumb = url => /=w\d+-h\d+/.test(url || '') ? url.replace(/=w\d+-h\d+/, '=w544-h544') : (url || '');
+
+
+// ambil URL cover dari berbagai bentuk data youtubei.js (array, objek MusicThumbnail, dst.)
+function pickThumb(it) {
+    const cands = [
+        it && it.thumbnails,
+        it && it.thumbnail,
+        it && it.thumbnail && it.thumbnail.contents,
+        it && it.thumbnail && it.thumbnail.thumbnails
+    ];
+    for (const c of cands) {
+        if (Array.isArray(c) && c.length) {
+            const u = c[c.length - 1] && c[c.length - 1].url;
+            if (u) return fastThumb(u);
+        }
+    }
+    return '';
+}
 
 function mapSong(it) {
     if (!it || !it.id) return null;
@@ -140,7 +158,7 @@ async function searchOther(q, type) {          // type: 'playlist' | 'artist'
         for (const it of (shelf.contents || [])) {
             if (!it || !it.id || seen.has(it.id) || it.item_type !== type) continue;
             seen.add(it.id);
-            const thumb = fastThumb(lastThumb(it.thumbnails));
+            const thumb = pickThumb(it);
             if (type === 'artist') {
                 out.push({ id: it.id, name: txt(it.name) || txt(it.title) || 'Unknown', thumb, subs: it.subscribers || '' });
             } else {
@@ -200,6 +218,77 @@ async function artistInfo(id) {
         thumb: fastThumb(lastThumb(head.thumbnails) || (head.thumbnail && lastThumb(head.thumbnail.contents)) || (songs[0] && songs[0].thumb) || ''),
         songs
     };
+}
+
+// ---------- Langkah 6: saran pencarian, beranda, album ----------
+async function suggestions(q) {
+    const t = await getYT();
+    const res = await t.music.getSearchSuggestions(q);
+    const out = [], seen = new Set();
+    for (const sec of (res || [])) {
+        for (const it of (sec.contents || [])) {
+            const s = (txt(it.suggestion) || txt(it.title)).trim();
+            if (s && !seen.has(s.toLowerCase())) { seen.add(s.toLowerCase()); out.push(s); }
+        }
+    }
+    return out.slice(0, 8);
+}
+
+function mapHomeItem(it) {
+    if (!it || !it.id) return null;
+    const type = it.item_type || '';
+    const thumb = pickThumb(it);
+    if (type === 'song' || type === 'video') { const s = mapSong(it); return s ? { k: 's', ...s, thumb: s.thumb || thumb } : null; }
+    const au = it.author;
+    const sub = txt(it.subtitle) || (typeof au === 'string' ? au : (au && au.name) || '');
+    if (type === 'playlist') return { k: 'p', id: String(it.id).replace(/^VL/, ''), title: txt(it.title), sub, thumb };
+    if (type === 'artist') return { k: 'a', id: it.id, title: txt(it.name) || txt(it.title), sub: 'Artist', thumb };
+    if (type === 'album') return { k: 'b', id: it.id, title: txt(it.title), sub, thumb };
+    return null;
+}
+
+async function homeFeed() {
+    const t = await getYT();
+    const feed = await t.music.getHomeFeed();
+    const out = [];
+    for (const sec of (feed.sections || [])) {
+        const title = txt(sec.header && sec.header.title);
+        const items = (sec.contents || []).map(mapHomeItem).filter(Boolean).slice(0, 20);
+        if (title && items.length) out.push({ title, items });
+    }
+    return { sections: out.slice(0, 8) };
+}
+
+async function albumSongs(id) {
+    const t = await getYT();
+    const al = await t.music.getAlbum(id);
+    const head = al.header || {};
+    const au = head.author;
+    const author = typeof au === 'string' ? au : (au && au.name) || '';
+    const thumb = fastThumb(lastThumb(head.thumbnails) || (head.thumbnail && lastThumb(head.thumbnail.contents)) || '');
+    const songs = (al.contents || []).map(mapSong).filter(Boolean).slice(0, 100)
+        .map(s => ({ ...s, thumb: s.thumb || thumb, artist: s.artist === 'Unknown' ? (author || 'Unknown') : s.artist }));
+    return { id, title: txt(head.title) || 'Album', author, thumb, songs };
+}
+// ---------- lagu berikutnya yang berkaitan (radio YouTube Music) ----------
+function mapPanel(it) {
+    const id = it && (it.video_id || it.id);
+    if (!id) return null;
+    const arts = (it.artists || []).map(a => a && a.name).filter(Boolean);
+    const au = it.author;
+    return {
+        id,
+        title: txt(it.title) || 'Tanpa judul',
+        artist: arts.join(', ') || (typeof au === 'string' ? au : (au && au.name) || '') || 'Unknown',
+        thumb: pickThumb(it),
+        duration: (it.duration && it.duration.seconds) || 0
+    };
+}
+
+async function radioSongs(id) {
+    const t = await getYT();
+    const up = await t.music.getUpNext(id);
+    return (up.contents || []).map(mapPanel).filter(x => x && x.id !== id).slice(0, 40);
 }
 
 // ---------- unduh audio dengan yt-dlp ke folder cache ----------
@@ -358,29 +447,159 @@ async function download(id, low = false) {
     throw lastErr;
 }
 
+// ---------- STREAMING MURNI: URL langsung dari yt-dlp, lalu diteruskan per-Range ke browser ----------
+const CHUNK = 8 * 1024 * 1024;
+const DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+const directCache = new Map();       // kode video -> { url, mime, length, ua, exp }
+const directInflight = new Map();    // permintaan bersamaan untuk lagu yang sama hanya menjalankan yt-dlp sekali
+
+async function probeLength(url, ua) {
+    const r = await fetch(url, { headers: { Range: 'bytes=0-1', 'User-Agent': ua } });
+    try { r.body && r.body.cancel(); } catch (e) { }
+    if (!r.ok && r.status !== 206) throw new Error('probe upstream ' + r.status);
+    const m = /\/(\d+)$/.exec(r.headers.get('content-range') || '');
+    if (m) return parseInt(m[1]);
+    const cl = parseInt(r.headers.get('content-length') || '0');
+    if (cl > 2) return cl;
+    throw new Error('ukuran audio tidak diketahui');
+}
+
+async function resolveDirect(id, low) {
+    const t0 = Date.now();
+    let stdout;
+    try {
+        ({ stdout } = await limit(() => run(YTDLP, [
+            '--js-runtimes', 'node',
+            '-f', 'bestaudio[ext=m4a]/bestaudio',
+            '--dump-single-json', '--no-playlist', '--no-warnings',
+            'https://www.youtube.com/watch?v=' + id
+        ], { maxBuffer: 50 * 1024 * 1024, timeout: 60000, windowsHide: true }), low));
+    } catch (e) {
+        if (e.code === 'ENOENT') throw new Error('yt-dlp tidak ditemukan (' + YTDLP + ')');
+        throw new Error('yt-dlp gagal: ' + String(e.stderr || e.message).trim().split('\n').pop());
+    }
+    const j = JSON.parse(stdout);
+    if (!j.url) throw new Error('yt-dlp tidak memberi URL audio');
+    const ua = (j.http_headers && j.http_headers['User-Agent']) || DEFAULT_UA;
+
+    // ukuran total yang akurat: clen di URL YouTube, lalu filesize dari yt-dlp, terakhir tanya langsung
+    let clen = 0, expire = 0;
+    try {
+        const q = new URL(j.url).searchParams;
+        clen = parseInt(q.get('clen')) || 0;
+        expire = parseInt(q.get('expire')) || 0;
+    } catch (e) { }
+    const length = clen || Number(j.filesize) || await probeLength(j.url, ua);
+    const mime = j.ext === 'm4a' ? 'audio/mp4' : j.ext === 'webm' ? 'audio/webm' : 'audio/mpeg';
+
+    let exp = Date.now() + 20 * 60 * 1000;
+    if (expire && expire * 1000 - Date.now() > 15 * 60 * 1000) {
+        exp = Math.min(expire * 1000 - 10 * 60 * 1000, Date.now() + 5 * 60 * 60 * 1000);
+    }
+    const entry = { url: j.url, mime, length, ua, exp };
+    if (directCache.size > 300) directCache.clear();
+    directCache.set(id, entry);
+    console.log('[audio]', id, 'URL langsung siap (' + mime + ', ' + length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
+    return entry;
+}
+
+function audioInfo(id, low = false) {
+    const c = directCache.get(id);
+    if (c && c.exp > Date.now()) return Promise.resolve(c);
+    if (!directInflight.has(id)) {
+        directInflight.set(id, resolveDirect(id, low).finally(() => directInflight.delete(id)));
+    }
+    return directInflight.get(id);
+}
+
+// ambil satu potongan dari server YouTube; kalau gagal (URL kedaluwarsa), ambil URL baru lalu coba sekali lagi
+async function fetchPart(id, a, from, to, signal) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            const up = await fetch(a.url, { headers: { Range: `bytes=${from}-${to}`, 'User-Agent': a.ua }, signal });
+            const okFull = up.status === 200 && from === 0 && to >= a.length - 1;
+            if (up.status !== 206 && !okFull) throw new Error('upstream ' + up.status);
+            if (!up.body) throw new Error('upstream tanpa isi');
+            return { up, a };
+        } catch (e) {
+            if (signal.aborted) throw e;
+            console.log('[audio]', id, 'potongan gagal:', e.message, attempt ? '' : '- ambil URL baru');
+            directCache.delete(id);
+            if (attempt === 1) throw e;
+            a = await audioInfo(id);
+        }
+    }
+}
+
+async function streamUpstream(req, res, id) {
+    const ctl = new AbortController();
+    res.on('close', () => { if (!res.writableFinished) ctl.abort(); });   // browser pindah lagu / seek = normal
+
+    let a = await audioInfo(id);
+    if (ctl.signal.aborted) return;
+    const total = a.length;
+
+    // baca header Range: bytes=N-M | bytes=N- | bytes=-N
+    let start = 0, end = total - 1, partial = false;
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m && (m[1] !== '' || m[2] !== '')) {
+        partial = true;
+        if (m[1] === '') start = Math.max(0, total - parseInt(m[2]));
+        else {
+            start = parseInt(m[1]);
+            if (m[2] !== '') end = Math.min(end, parseInt(m[2]));
+        }
+    }
+    if (start >= total || start > end) {
+        res.writeHead(416, { ...res.cors, 'Content-Range': 'bytes */' + total });
+        return res.end();
+    }
+
+    console.log('[range]', id, 'bytes', start + '-' + end, 'dari', total);
+    const head = {
+        ...res.cors,
+        'Content-Type': a.mime,
+        'Content-Length': end - start + 1,       // persis jumlah byte yang akan dikirim
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'private, max-age=3600'
+    };
+    if (partial) head['Content-Range'] = `bytes ${start}-${end}/${total}`;
+    const status = partial ? 206 : 200;
+
+    if (req.method === 'HEAD') { res.writeHead(status, head); return res.end(); }
+
+    // potongan pertama diambil SEBELUM header dikirim, supaya kalau gagal browser menerima 502, bukan koneksi menggantung
+    let first = await fetchPart(id, a, start, Math.min(end, start + CHUNK - 1), ctl.signal);
+    a = first.a;
+    res.writeHead(status, head);
+
+    let pos = start;
+    try {
+        while (pos <= end && !ctl.signal.aborted) {
+            const g = first || await fetchPart(id, a, pos, Math.min(end, pos + CHUNK - 1), ctl.signal);
+            first = null;
+            a = g.a;
+            const before = pos;
+            for await (const chunk of Readable.fromWeb(g.up.body)) {
+                pos += chunk.length;
+                if (!res.write(chunk)) await waitDrain(res);     // hormati buffer browser: tidak mendahului pemutaran
+                if (ctl.signal.aborted) break;
+            }
+            if (pos === before && !ctl.signal.aborted) throw new Error('upstream mengirim data kosong');
+        }
+        if (!ctl.signal.aborted) res.end();
+    } catch (e) {
+        if (ctl.signal.aborted) return;
+        console.log('[audio]', id, 'stream terputus:', e.message);
+        res.destroy();
+    }
+}
+
 // ---------- layani audio (file selesai: Range penuh; file masih diunduh: kirim sambil jalan) ----------
 async function serveAudio(req, res, id) {
-    let a = findCached(id);
-    if (!a) {
-        demand.set(id, (demand.get(id) || 0) + 1);
-        res.on('close', () => {
-            const n = (demand.get(id) || 1) - 1;
-            if (n > 0) { demand.set(id, n); return; }
-            demand.delete(id);
-            setTimeout(() => {                    // pengguna sudah pindah lagu: batalkan unduhan yang tidak ditunggu siapa pun
-                const ent = procs.get(id);
-                if (!demand.has(id) && ent && !ent.low) { ent.killed = true; killTree(ent.p); }
-            }, 1200);
-        });
-        prioritize(id);
-        const job = getAudio(id);                 // mulai unduhan (atau gabung kalau sudah berjalan)
-        job.catch(() => { });
-        const m0 = /^bytes=(\d*)-/.exec(req.headers.range || '');
-        const from = m0 && m0[1] !== '' ? parseInt(m0[1]) : 0;
-        if (from === 0 && req.method !== 'HEAD' && STREAM_WHILE_DOWNLOADING) return serveGrowing(req, res, id, job);
-        a = await job;
-    }
-    return serveFile(req, res, a);
+    const cached = findCached(id);                 // file hasil unduhan lama (kalau ada) tetap dilayani dari disk
+    if (cached) return serveFile(req, res, cached);
+    return streamUpstream(req, res, id);           // selain itu: streaming murni
 }
 
 async function serveFile(req, res, a) {
@@ -484,13 +703,13 @@ const json = (res, code, obj) => { res.writeHead(code, { ...res.cors, 'Content-T
 const prefetchQueue = [];
 let prefetchWorkers = 0;
 function pumpPrefetch() {
-    while (prefetchWorkers < 1 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
+    while (prefetchWorkers < 2 && prefetchQueue.length) {      // dua lagu disiapkan bersamaan
         prefetchWorkers++;
         (async () => {
             while (prefetchQueue.length) {
                 const id = prefetchQueue.shift();
                 if (findCached(id)) continue;
-                try { await getAudio(id, true); } catch (e) { }
+                try { await audioInfo(id, true); } catch (e) { }     // hanya menyiapkan URL, tidak mengunduh file    const BLOB_MAX = 6;               // maksimal 6 lagu di memori
             }
             prefetchWorkers--;
         })();
@@ -511,8 +730,18 @@ const server = http.createServer(async (req, res) => {
 
         if (u.pathname === '/prefetch') {
             const ids = (u.searchParams.get('id') || '').split(',').filter(x => /^[\w-]{6,20}$/.test(x)).slice(0, 5);
-            prefetchQueue.length = 0;                    // permintaan terbaru menggantikan antrean lama
-            for (const x of ids) if (!findCached(x)) prefetchQueue.push(x);
+            if (u.searchParams.get('hot') === '1') {      // kursor di atas lagu: taruh paling depan, antrean lain tidak dibuang
+                for (const x of ids.reverse()) {
+                    if (findCached(x) || procs.has(x) || inflight.has(x)) continue;
+                    const k = prefetchQueue.indexOf(x);
+                    if (k >= 0) prefetchQueue.splice(k, 1);
+                    prefetchQueue.unshift(x);
+                }
+                if (prefetchQueue.length > 8) prefetchQueue.length = 8;
+            } else {
+                prefetchQueue.length = 0;                 // permintaan terbaru menggantikan antrean lama
+                for (const x of ids) if (!findCached(x)) prefetchQueue.push(x);
+            }
             pumpPrefetch();
             res.writeHead(204, res.cors);
             return res.end();
@@ -544,6 +773,28 @@ const server = http.createServer(async (req, res) => {
             const id = u.searchParams.get('id');
             if (!id || !/^[\w-]{6,20}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
             return await serveAudio(req, res, id);
+        }
+
+        if (u.pathname === '/suggest') {
+            const q = (u.searchParams.get('q') || '').trim().slice(0, 80);
+            if (!q) return json(res, 200, []);
+            return json(res, 200, await memo('sg:' + q.toLowerCase(), 2 * 60 * 1000, () => suggestions(q)));
+        }
+
+        if (u.pathname === '/home') {
+            return json(res, 200, await memo('home', 15 * 60 * 1000, () => homeFeed()));
+        }
+
+        if (u.pathname === '/album') {
+            const id = u.searchParams.get('id') || '';
+            if (!/^[\w-]{6,40}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
+            return json(res, 200, await memo('al:' + id, 10 * 60 * 1000, () => albumSongs(id)));
+        }
+
+        if (u.pathname === '/radio') {
+            const id = u.searchParams.get('id') || '';
+            if (!/^[\w-]{6,20}$/.test(id)) return json(res, 400, { error: 'id tidak valid' });
+            return json(res, 200, await memo('rd:' + id, 10 * 60 * 1000, () => retryYT(() => radioSongs(id))));
         }
 
         json(res, 404, { error: 'tidak ditemukan' });

@@ -1071,6 +1071,24 @@
     }
 
     // dipakai tombol back di profil orang lain + halaman search HP
+    // HTML daftar "Recent searches" untuk halaman Search di HP (isi sama dengan dropdown di laptop)
+    function recentsHTML() {
+        const rows = [];
+        getRecents().forEach((r, i) => {
+            if (r.type === 'song') {
+                const s = songs.find((x) => x.id === r.id);
+                if (s) rows.push(recentSongRowHTML(s, i));
+            } else if (r.type === 'profile' && r.id) {
+                rows.push(recentProfileRowHTML(r, i));
+            } else if (r.type === 'query' && r.text) {
+                rows.push(recentQueryRowHTML(r.text, i));
+            }
+        });
+        if (!rows.length) return '';
+        return '<div class="sd-head">Recent searches</div>' + rows.join('') +
+            '<div class="sd-clear-recent">Clear recent searches</div>';
+    }
+
     window.SpotiSearch = {
         reopen() {
             if (!lastQuery) return false;
@@ -1079,7 +1097,16 @@
         },
         rowHTML,
         bindRows,
-        refreshRows
+        refreshRows,
+        recentsHTML,
+        removeRecent,
+        clearRecents() { saveRecents([]); },
+        openQuery(text) {
+            input.value = text;
+            clearBtn.classList.add('show');
+            bar.classList.add('has-text');
+            openResults(text);
+        }
     };
 
     function closeResults() {

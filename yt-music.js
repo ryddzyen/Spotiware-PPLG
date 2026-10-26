@@ -39,7 +39,7 @@
         const isA = kind === 'a';
         toast('Memuat ' + (isA ? 'artis' : 'playlist') + '...');
         let d;
-        try { d = await getJSON((isA ? '/artist?id=' : '/playlist?id=') + encodeURIComponent(id), 600000); }
+        try { d = await getJSON((isA ? '/artist?id=' : kind === 'b' ? '/album?id=' : '/playlist?id=') + encodeURIComponent(id), 600000); }
         catch (e) { toast(e.message === 'status 429' ? 'Terlalu banyak permintaan, coba sebentar lagi' : 'Gagal memuat dari YouTube Music'); return; }
         if (!d || !Array.isArray(d.songs) || !d.songs.length) { toast('Tidak ada lagu di sini'); return; }
 
@@ -78,16 +78,16 @@
     const fmt = sec => (!sec || sec < 0) ? '' : Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
     const toast = (t, label, fn) => { if (typeof showToast === 'function') showToast(t, label, fn); };
     const prefetched = new Map();
-    const prefetch = vids => {
-        const now = Date.now();
+    const prefetch = (vids, hot) => {
+        const now = Date.now(), win = hot ? 8000 : 120000;
         vids = (Array.isArray(vids) ? vids : [vids]).filter(v => {
-            if (!v || prefetched.get(v) > now - 120000) return false;
+            if (!v || prefetched.get(v) > now - win) return false;
             const s = songs.find(x => x.yt === v);
             return !(s && s.dur > 600);              // lagu panjang (mix, lebih dari 10 menit) tidak disiapkan duluan
         });
         if (mode !== 'yt' || !vids.length) return;
         vids.forEach(v => prefetched.set(v, now));
-        fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vids.join(','))).catch(() => { });
+        fetch(SERVER + '/prefetch?id=' + encodeURIComponent(vids.join(',')) + (hot ? '&hot=1' : '')).catch(() => { });
     };
 
     // ---------- lagu YouTube -> format lagu Spotiware (hidden, tidak tercampur di koleksi) ----------
@@ -185,6 +185,7 @@
         token++;
         if (block) block.innerHTML = '';
         toast(mode === 'yt' ? 'Mode YouTube Music aktif' : 'Mode Lagu Saya aktif');
+        if (mode === 'yt') loadHome();
 
         const view = document.getElementById('searchView');
         const input = document.querySelector('.input-box');
@@ -234,6 +235,10 @@
             .yt-t{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
             .yt-row.cur .yt-t{color:var(--yellow,#1ed760)}
             .yt-s{font-size:.8rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            body.mode-yt.yt-typing .search-dropdown > :not(.ys){display:none!important}
+            body.mode-yt.yt-typing .search-dropdown:not(:has(.ys)){display:none!important}
+            body.yt-page #playlistDetailCover .cover-upload-overlay{display:none!important}
+            body.yt-page #playlistDetailCover{cursor:default}
         `;
         document.head.appendChild(css);
     }
@@ -306,6 +311,162 @@
         render(list.length || arts.length || pls.length ? '' : 'Tidak ada hasil dari YouTube Music.');
     }
 
+    // ---------- Langkah 6: Home, Genre, saran pencarian (Mode YouTube Music) ----------
+    const GENRES = ['Pop', 'Hip-Hop', 'R&B', 'Rock', 'Indie', 'EDM', 'K-Pop', 'Lo-fi', 'Jazz', 'Dangdut',
+        'Pop Indonesia', 'Indie Indonesia', 'Religi', 'Chill', 'Workout', 'Party'];
+    let homeEl = null, homeTab = 'home', homeData = null, homeBusy = false, genreName = '', genreData = null;
+
+    function homeCard(it, si) {
+        return `<div class="yt-card${it.k === 'a' ? ' round' : ''}" data-hk="${it.k}" data-id="${esc(it.id)}" data-si="${si}">
+            <img src="${esc(it.thumb || 'img/pplglogo.png')}" alt="" loading="lazy">
+            <div class="yt-cn">${esc(it.title)}</div><div class="yt-cs">${esc(it.k === 's' ? it.artist : it.sub)}</div></div>`;
+    }
+
+    function genreHTML() {
+        if (!genreName) {
+            return '<div class="yh-genres">' + GENRES.map(g => {
+                const hue = hash(g) % 360;
+                return `<div class="yt-genre" data-g="${esc(g)}" style="background:hsl(${hue} 55% 36%)">${esc(g)}</div>`;
+            }).join('') + '</div>';
+        }
+        let h = `<h3 class="yt-h2">${esc(genreName)}</h3>`;
+        if (!genreData) return h + '<div class="yt-note">Memuat...</div>';
+        const g = genreData;
+        if (g.pls.length) h += '<h4 class="yt-h2">Playlists</h4><div class="yt-scroll">' +
+            g.pls.map(p => homeCard({ k: 'p', id: p.id, title: p.title, sub: p.author || 'Playlist', thumb: p.thumb }, 0)).join('') + '</div>';
+        if (g.songs.length) h += '<h4 class="yt-h2">Songs</h4>' + g.songs.map((s, i) => `
+            <div class="yt-row" data-gi="${i}">
+                <div class="yt-th"><img src="${esc(s.songImage)}" alt="" loading="lazy"><div class="yt-pl"><i class="fa-solid fa-play"></i></div></div>
+                <div class="yt-info"><div class="yt-t">${esc(s.songName)}</div>
+                    <div class="yt-s">Song • ${esc(s.songDes)}${s.dur ? ' • ' + fmt(s.dur) : ''}</div></div>
+            </div>`).join('');
+        if (!g.pls.length && !g.songs.length) h += '<div class="yt-note">Tidak ada hasil untuk genre ini.</div>';
+        return h;
+    }
+
+    function renderHome() {
+        if (!homeEl) return;
+        const chips = '<div class="yh-chips">' +
+            `<button type="button" class="yh-chip${homeTab === 'home' ? ' on' : ''}" data-t="home">Home</button>` +
+            `<button type="button" class="yh-chip${homeTab === 'genre' ? ' on' : ''}" data-t="genre">${homeTab === 'genre' && genreName ? '‹ Genre' : 'Genre'}</button></div>`;
+        let body = '';
+        if (homeTab === 'genre') body = genreHTML();
+        else if (homeBusy) body = '<div class="yt-note">Memuat beranda YouTube Music...</div>';
+        else if (!homeData) body = '<div class="yt-note">Beranda YouTube Music tidak bisa dimuat. Pastikan laptop menyala dan server berjalan.<br>' +
+            '<button type="button" class="ym-back yh-retry">Coba lagi</button> <button type="button" class="ym-back">Pakai Lagu Saya</button></div>';
+        else body = homeData.sections.map((s, si) => `<div class="yh-sec"><h3 class="yt-h2">${esc(s.title)}</h3>` +
+            `<div class="yt-scroll">${s.items.map(it => homeCard(it, si)).join('')}</div></div>`).join('');
+        homeEl.innerHTML = chips + body;
+    }
+
+    async function loadHome(force) {
+        if (mode !== 'yt' || homeBusy) return;
+        if (homeData && !force) return;
+        homeBusy = true;
+        renderHome();
+        try {
+            const d = await getJSON('/home', 900000);
+            homeData = d && Array.isArray(d.sections) && d.sections.length ? d : null;
+        } catch (e) { homeData = null; }
+        homeBusy = false;
+        renderHome();
+    }
+
+    async function openGenre(g) {
+        genreName = g;
+        genreData = null;
+        renderHome();
+        const enc = encodeURIComponent(g + ' music');
+        const [rp, rs] = await Promise.allSettled([getJSON('/search?q=' + enc + '&type=playlist'), getJSON('/search?q=' + enc)]);
+        if (genreName !== g) return;                    // sudah pindah genre
+        genreData = {
+            pls: rp.status === 'fulfilled' && Array.isArray(rp.value) ? rp.value.slice(0, 12) : [],
+            songs: rs.status === 'fulfilled' && Array.isArray(rs.value) ? register(rs.value) : []
+        };
+        renderHome();
+    }
+
+    function onHomeClick(e) {
+        if (e.target.closest('.yh-retry')) return loadHome(true);
+        if (e.target.closest('.ym-back')) return setMode('local');
+        const tab = e.target.closest('.yh-chip');
+        if (tab) { homeTab = tab.dataset.t; genreName = ''; genreData = null; renderHome(); if (homeTab === 'home') loadHome(); return; }
+        const gt = e.target.closest('.yt-genre');
+        if (gt) return openGenre(gt.dataset.g);
+        const gr = e.target.closest('.yt-row[data-gi]');
+        if (gr && genreData) {
+            const s = genreData.songs[parseInt(gr.dataset.gi)];            if (s) { if (playerBar.classList.contains('show') && getCurrentSong().id === s.id) play.click(); else playRelated(s, genreData.songs); }
+
+            return;
+        }
+        const c = e.target.closest('.yt-card[data-hk]');
+        if (!c) return;
+        if (c.dataset.hk === 's') {
+            const sec = homeData && homeData.sections[parseInt(c.dataset.si)];
+            if (!sec) return;
+            const queue = register(sec.items.filter(x => x.k === 's'));    // satu rak = satu antrean
+            return playSongFromList(idOf(c.dataset.id), queue);
+        }
+        openYtPage(c.dataset.hk, c.dataset.id);
+    }
+
+    function buildHome() {
+        const right = document.querySelector('.main-right-part');
+        if (!right || document.getElementById('ytHome')) return;
+        homeEl = document.createElement('div');
+        homeEl.id = 'ytHome';
+        homeEl.className = 'music-section';       // ikut aturan hide/show halaman lain (playlist, pencarian)
+        right.prepend(homeEl);
+        homeEl.addEventListener('click', onHomeClick);
+        renderHome();
+    }
+
+    // saran pencarian dari YouTube Music menggantikan saran lokal di dropdown (Mode YouTube Music)
+    let sugQ = '', sugItems = [], sugTimer = null, sugTok = 0, sugVer = 0;
+
+    function paintSug() {
+        const inp = document.querySelector('.input-box'), dd = document.querySelector('.search-dropdown');
+        const typing = mode === 'yt' && !!(inp && inp.value.trim());
+        document.body.classList.toggle('yt-typing', typing);
+        if (!typing || !sugItems.length || !dd || !dd.classList.contains('show')) return;
+        if (dd.dataset.sv === String(sugVer) && dd.firstElementChild && dd.firstElementChild.classList.contains('ys')) return;
+        dd.dataset.sv = String(sugVer);
+        dd.innerHTML = sugItems.map(t => `
+            <div class="sd-sug ys" data-text="${esc(t)}">
+                <span class="sd-sug-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <span class="sd-sug-text">${esc(t)}</span>
+                <button type="button" class="sd-fill" data-act="fill" data-text="${esc(t)}" title="Use this search">
+                    <i class="fa-solid fa-arrow-up" style="transform:rotate(-45deg)"></i>
+                </button>
+            </div>`).join('');
+    }
+
+    function mountSuggest() {
+        // listener di window (fase capture) supaya jalan lebih dulu dari search.js yang menghentikan event input
+        window.addEventListener('input', e => {
+            const inp = e.target;
+            if (!inp || !inp.classList || !inp.classList.contains('input-box')) return;
+            const q = inp.value.trim();
+            document.body.classList.toggle('yt-typing', mode === 'yt' && !!q);
+            if (mode !== 'yt') return;
+            clearTimeout(sugTimer);
+            const my = ++sugTok;
+            if (!q) { sugItems = []; sugQ = ''; sugVer++; return; }
+            sugTimer = setTimeout(async () => {
+                try {
+                    const r = await getJSON('/suggest?q=' + encodeURIComponent(q), 120000);
+                    if (my !== sugTok) return;
+                    sugQ = q;
+                    sugItems = Array.isArray(r) ? r.slice(0, 8) : [];
+                    sugVer++;
+                    paintSug();
+                } catch (err) { }
+            }, 200);
+        }, true);
+        const dd = document.querySelector('.search-dropdown');
+        if (dd) new MutationObserver(paintSug).observe(dd, { childList: true });   // search.js menggambar ulang -> pasang lagi
+    }
+
     // lagu YouTube gagal diputar -> cek server, tawarkan pindah ke Mode Lagu Saya (maksimal 1x per menit)
     function watchAudioErrors() {
         audio.addEventListener('error', () => {
@@ -337,13 +498,14 @@
         on('play', () => audio.play());
         on('pause', () => audio.pause());
         on('nexttrack', () => { if (typeof playNextSong === 'function') playNextSong(); });
-        on('previoustrack', () => { if (typeof playPreviousSong === 'function') playPreviousSong(); });
+        on('previoustrack', () => { if (typeof playPrevSong === 'function') playPrevSong(); });
     }
 
     // ---------- simpan lagu di memori browser supaya tidak tersendat saat jaringan jelek ----------
     const blobs = new Map();          // kode video -> { url, t }
     const pendingBlob = new Map();
     const BLOB_MAX = 6;               // maksimal 6 lagu di memori
+    const BLOB_ON = false;            // true = unduh 2 lagu berikutnya penuh ke memori (tidak tersendat di jaringan jelek, tapi boros kuota)
     const remoteUrl = vid => SERVER + '/audio?id=' + encodeURIComponent(vid);
 
     function trimBlobs() {
@@ -362,6 +524,7 @@
 
     function ensureBlob(s) {
         if (!s || !s.yt) return Promise.resolve(false);
+        if (!BLOB_ON) return Promise.resolve(false);
         if (s.dur > 600) return Promise.resolve(false);      // lagu panjang jangan diunduh ke memori HP
         if (blobs.has(s.yt)) {
             const b = blobs.get(s.yt);
@@ -430,7 +593,7 @@
             if (playerBar.classList.contains('show') && getCurrentSong().id === s.id) play.click();
             else {
                 if (blobs.has(s.yt)) s.songPath = blobs.get(s.yt).url;     // sudah ada di memori: pakai itu
-                playSongFromList(s.id, list);       // kalau belum, putar langsung lewat server (mulai bunyi sambil diunduh)
+                playRelated(s, list);               // lagu berikutnya = yang berkaitan, bukan sekadar ke bawah
             }
         });
 
@@ -442,6 +605,9 @@
 
         ['play', 'playing', 'pause', 'loadstart'].forEach(ev => audio.addEventListener(ev, markCurrent));
         watchAudioErrors();
+        buildHome();
+        mountSuggest();
+        if (mode === 'yt') loadHome();
 
         // penanda halaman YouTube dilepas saat pindah ke halaman lain
         const _open = window.openPlaylistDetailView, _close = window.closePlaylistDetailView;
@@ -463,6 +629,80 @@
                 nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());   // browser menyimpan satu per satu
             } catch (e) { }
         });
+    }
+
+    // halaman playlist/artis YouTube: klik cover tidak membuka pemilih foto
+    document.addEventListener('click', e => {
+        if (document.body.classList.contains('yt-page') && e.target.closest('#playlistDetailCover')) e.stopPropagation();
+    }, true);
+
+    // kursor berhenti 0,15 detik di lagu YouTube (atau jari menyentuhnya) -> server mulai menyiapkannya sebelum diklik
+    let hotT = null;
+    const hotId = el => {
+        if (mode !== 'yt' || !el || !el.closest) return null;
+        const r = el.closest('.yt-row[data-i], .yt-row[data-gi], .yt-card[data-hk="s"], #playlistTrackTableBody tr[data-song-id]');
+        if (!r) return null;
+        if (r.dataset.hk) return r.dataset.id;
+        let s = null;
+        if (r.dataset.i !== undefined) s = list[parseInt(r.dataset.i)];
+        else if (r.dataset.gi !== undefined) s = genreData && genreData.songs[parseInt(r.dataset.gi)];
+        else s = songs.find(x => x.id === parseInt(r.dataset.songId));
+        return s && s.yt ? s.yt : null;
+    };
+    document.addEventListener('pointerover', e => {
+        clearTimeout(hotT);
+        const v = hotId(e.target);
+        if (v) hotT = setTimeout(() => prefetch([v], true), 150);
+    });
+    document.addEventListener('pointerout', () => clearTimeout(hotT));
+    document.addEventListener('pointerdown', e => { const v = hotId(e.target); if (v) prefetch([v], true); });
+
+    // jaring pengaman: 30 detik sebelum lagu habis, pastikan lagu berikutnya sudah disiapkan (diulang kalau tadi gagal)
+    let guardId = null;
+    audio.addEventListener('timeupdate', () => {
+        try {
+            if (mode !== 'yt' || !audio.duration || audio.duration - audio.currentTime > 30) return;
+            const cur = getCurrentSong();
+            if (!cur || guardId === cur.id) return;
+            guardId = cur.id;
+            const nx = upcoming(1);
+            if (!nx.length || blobs.has(nx[0].yt)) return;
+            prefetched.delete(nx[0].yt);
+            prefetch([nx[0].yt], true);
+            ensureBlob(nx[0]);
+        } catch (e) { }
+    });
+
+    // putar dari hasil pencarian / genre: lagu berikutnya = artis yang sama dulu, lalu radio YouTube Music
+    let relToken = 0;
+    async function playRelated(song, base) {
+        const mine = new Set(song.artists || []);
+        const sameArtist = base.filter(x => x.id !== song.id && (x.artists || []).some(a => mine.has(a)));
+        const others = base.filter(x => x.id !== song.id && !sameArtist.includes(x));
+        playSongFromList(song.id, [song, ...sameArtist, ...others]);      // langsung bunyi dengan antrean cepat
+
+        const my = ++relToken;
+        try {
+            const d = await getJSON('/radio?id=' + encodeURIComponent(song.yt), 600000);
+            if (my !== relToken || !Array.isArray(d) || !d.length) return;
+            if (!playerBar.classList.contains('show') || getCurrentSong().id !== song.id) return;   // sudah pindah lagu
+            if (typeof songOnShuffle !== 'undefined' && songOnShuffle) return;                      // shuffle: biarkan acak
+
+            const rel = register(d);
+            const seen = new Set([song.id]);
+            const next = [];
+            [...sameArtist.slice(0, 5), ...rel].forEach(x => { if (!seen.has(x.id)) { seen.add(x.id); next.push(x); } });
+
+            order = [song, ...next];
+            currentIndex = 0;
+            currentContextList = [...order];
+            try { preloadedPath = null; } catch (e) { }
+            try { renderQueuePanel(); renderMobileSheet(); } catch (e) { }
+
+            const nx = upcoming(2);                                   // siapkan 2 lagu berikutnya yang baru
+            prefetch(nx.map(s => s.yt));
+            nx.reduce((p, s) => p.then(() => ensureBlob(s)), Promise.resolve());
+        } catch (e) { /* gagal: antrean cepat tetap dipakai */ }
     }
 
     window.YTMusic = { register, idOf };

@@ -6658,3 +6658,15 @@ body.addv-open .addv{ display: flex; }
             body.yt-page #ctxRemoveFromPlaylist{display:none!important}
             body.yt-page .af-page{display:none!important}
             body.mode-yt .search-dropdown .sr-row,body.mode-yt .search-dropdown .sv-item,body.mode-yt .search-dropdown .sd-divider{display:none!important}
+            #ytHome{display:none;padding:0 1.4rem 2rem}
+            html body.mode-yt.mode-yt.mode-yt.mode-yt.mode-yt #ytHome:not(.hide){display:block!important}
+            body.mode-yt .ht-bar,body.mode-yt #htAllView,body.mode-yt #htMusicView,body.mode-yt #htGenreView,body.mode-yt .mh-section{display:none!important}
+            .yh-chips{display:flex;gap:.6rem;padding:1rem 0}
+            .yh-chip{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:2rem;padding:.5rem 1.1rem;font:inherit;font-size:.9rem;cursor:pointer}
+            .yh-chip:hover{background:rgba(255,255,255,.22)}
+            .yh-chip.on{background:#fff;color:#000}
+            .yh-genres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem;padding-top:.4rem}
+            .yt-genre{height:96px;border-radius:10px;padding:.9rem;box-sizing:border-box;font-weight:800;font-size:1.05rem;cursor:pointer;overflow:hidden}
+            .yt-genre:hover{filter:brightness(1.15)}
+            #ytHome .ym-back{margin:.6rem .5rem 0 0;display:inline-block;background:#fff;color:#000;border:none;border-radius:2rem;padding:.5rem 1.1rem;font:inherit;font-weight:700;cursor:pointer}
+            #ytHome .yt-note{font-size:.85rem;opacity:.85;padding:.6rem 0;line-height:1.6}
