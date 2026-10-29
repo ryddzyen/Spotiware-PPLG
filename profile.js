@@ -110,29 +110,26 @@
         profileView.innerHTML = `
             <div class="pf-banner empty" id="pfBanner"></div>
 
-            <div class="pf-head">
-                <div class="pf-ident">
+            <div class="tk-head">
+                <div class="pf-avatar tk-avatar" id="profileAvatarBig" title="Edit profile"></div>
+                <div class="tk-info">
                     <h1 class="pf-name" id="profileName"></h1>
                     <p class="pf-meta" id="profileMeta"></p>
+                    <div class="tk-stats">
+                        <button type="button" class="tk-stat" data-list="following"><b id="tkFollowing">0</b><span>Following</span></button>
+                        <button type="button" class="tk-stat" data-list="followers"><b id="tkFollowers">0</b><span>Followers</span></button>
+                        <div class="tk-stat static"><b id="tkPlaylists">0</b><span>Playlists</span></div>
+                    </div>
+                    <button class="pf-edit-btn tk-edit" id="pfEditBtn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
+                    <p class="pf-bio" id="pfBio"></p>
                 </div>
-                <div class="pf-avatar" id="profileAvatarBig" title="Edit profile"></div>
-            </div>
-
-            <div class="pf-actions">
-                <button class="pf-edit-btn" id="pfEditBtn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
             </div>
 
             <div class="pf-tabs">
-                <button class="pf-tab active" data-tab="main">Main</button>
-                <button class="pf-tab" data-tab="playlists">Playlists</button>
+                <button class="pf-tab active" type="button">Playlists</button>
             </div>
 
-            <div class="pf-panel" id="pfMain">
-                <h3 class="pf-label">Bio</h3>
-                <p class="pf-bio" id="pfBio"></p>
-            </div>
-
-            <div class="pf-panel" id="pfPlaylists" style="display:none;">
+            <div class="pf-panel" id="pfPlaylists">
                 <div class="pf-pl-grid" id="pfPlGrid"></div>
             </div>`;
 
@@ -150,6 +147,7 @@
         function closeProfileViews() {
             profileView.classList.remove('show');
             historyView.classList.remove('show');
+            document.querySelector('.fl-view')?.classList.remove('show');
         }
 
         function showOnly(view) {
@@ -286,12 +284,12 @@
         function renderPlaylistsTab() {
             const grid = profileView.querySelector('#pfPlGrid');
             grid.innerHTML = '';
-            const lists = getPlaylists().filter(p => p.id !== LIKED_PLAYLIST_ID);
+            const lists = getPlaylists().filter(p => p.isPublic && p.id !== LIKED_PLAYLIST_ID);
 
             if (lists.length === 0) {
                 const empty = document.createElement('div');
                 empty.className = 'pf-empty';
-                empty.textContent = 'Belum ada playlist. Buat dari tombol + di Your Library.';
+                empty.textContent = 'Belum ada playlist publik. Buka sebuah playlist, klik titik tiga, lalu pilih Make public.';
                 grid.appendChild(empty);
                 return;
             }
@@ -337,10 +335,106 @@
 
         function openProfileView() {
             refreshProfileUI();
-            switchTab('main');
+            refreshStats();
+            renderPlaylistsTab();
             showOnly(profileView);
             loadBanner(currentUser);
         }
+
+        // ---------- Statistik gaya TikTok: Following | Followers | Playlists ----------
+        const escH = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const followedArtists = () => {
+            try { return (JSON.parse(localStorage.getItem('spotiware_follow_artists:' + currentUser.uid)) || []).map(x => x.n); }
+            catch (e) { return []; }
+        };
+        const friendUids = () => {
+            const S = window.Social && Social.core;
+            if (!S || !currentUser) return [];
+            return S.friendships().filter(f => f.status === 'accepted')
+                .map(f => f.users.find(x => x !== currentUser.uid)).filter(Boolean);
+        };
+        const publicCount = () => getPlaylists().filter(p => p.isPublic && p.id !== LIKED_PLAYLIST_ID).length;
+
+        function refreshStats() {
+            if (!currentUser) return;
+            const fr = friendUids().length;
+            profileView.querySelector('#tkFollowing').textContent = fr + followedArtists().length;
+            profileView.querySelector('#tkFollowers').textContent = fr;
+            profileView.querySelector('#tkPlaylists').textContent = publicCount();
+        }
+        window.addEventListener('spotiware:friends', refreshStats);
+
+        // ---------- Halaman Following / Followers ----------
+        const listView = document.createElement('div');
+        listView.className = 'fl-view';
+        listView.innerHTML = `
+            <div class="fl-top">
+                <button type="button" class="playlist-back-btn fl-back" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+                <h1 class="fl-title" id="flTitle"></h1>
+            </div>
+            <div class="fl-chips" id="flChips"></div>
+            <div class="fl-grid" id="flGrid"></div>`;
+        rightPart.prepend(listView);
+
+        let flKind = 'following', flFilter = 'all', flTok = 0, flSource = null;
+        const artImg = n => (window.ARTIST_PHOTOS || {})[n] ||
+            ((songs.find(s => !s.external && (s.artists || []).includes(n)) || {}).songImage) || 'img/pplglogo.png';
+
+        async function renderList() {
+            const my = ++flTok;
+            const grid = listView.querySelector('#flGrid');
+            listView.querySelector('#flTitle').textContent = flKind === 'following' ? 'Following' : 'Followers';
+            listView.querySelector('#flChips').innerHTML = flKind === 'following'
+                ? [['all', 'All'], ['artists', 'Artists'], ['profiles', 'Profiles']]
+                    .map(([f, l]) => `<button type="button" class="fl-chip${flFilter === f ? ' active' : ''}" data-f="${f}">${l}</button>`).join('')
+                : '';
+            grid.innerHTML = '<div class="pf-empty">Loading…</div>';
+
+            const showArtists = flKind === 'following' && flFilter !== 'profiles';
+            const showPeople = flKind === 'followers' || flFilter !== 'artists';
+            let html = '';
+
+            if (showArtists) {
+                html += followedArtists().map(n => `
+                    <div class="fl-card" data-k="a" data-name="${escH(n)}">
+                        <div class="fl-img"><img src="${escH(artImg(n))}" alt="" loading="lazy"></div>
+                        <div class="fl-name">${escH(n)}</div><div class="fl-sub">Artist</div></div>`).join('');
+            }
+            if (showPeople && window.Social && Social.core) {
+                let users = [];
+                try { users = await Promise.all(friendUids().map(uid => Social.core.getUser(uid))); } catch (e) { }
+                if (my !== flTok) return;
+                html += users.map(u => `
+                    <div class="fl-card" data-k="p" data-uid="${escH(u.id)}">
+                        <div class="fl-img">${u.photo ? `<img src="${escH(u.photo)}" alt="" loading="lazy">` : '<i class="fa-solid fa-user"></i>'}</div>
+                        <div class="fl-name">${escH(u.displayName || u.username || 'User')}</div><div class="fl-sub">Profile</div></div>`).join('');
+            }
+            if (my !== flTok) return;
+            grid.innerHTML = html || '<div class="pf-empty">Belum ada.</div>';
+        }
+
+        function openList(kind, src) {
+            flKind = kind;
+            flFilter = 'all';
+            flSource = src || { artists: followedArtists(), uids: friendUids(), back: openProfileView };
+            showOnly(listView);
+            renderList();
+        }
+
+        profileView.addEventListener('click', e => {
+            const s = e.target.closest('.tk-stat[data-list]');
+            if (s) openList(s.dataset.list);
+        });
+
+        listView.addEventListener('click', e => {
+            if (e.target.closest('.fl-back')) return (flSource && flSource.back ? flSource.back() : openProfileView());
+            const chip = e.target.closest('.fl-chip');
+            if (chip) { flFilter = chip.dataset.f; return renderList(); }
+            const c = e.target.closest('.fl-card');
+            if (!c) return;
+            if (c.dataset.k === 'a') { if (typeof window.openArtistPage === 'function') window.openArtistPage(c.dataset.name); }
+            else if (window.Social) Social.openProfile(c.dataset.uid);
+        });
 
         profileView.querySelector('#pfEditBtn').addEventListener('click', () => openEditModal());
         profileView.querySelector('#profileAvatarBig').addEventListener('click', () => openEditModal());
@@ -665,6 +759,7 @@
                 };
             },
             applyTheme,
+            openList,
             openSelf: openProfileView
         };
 

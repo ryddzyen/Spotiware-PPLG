@@ -376,6 +376,8 @@
 
     // ---------- Isi warna mengalir per huruf (hanya baris aktif) ----------
     const CHAR_SEC = 0.1;     // perkiraan detik per huruf (kecilkan = lebih cepat, besarkan = lebih lambat)
+    const FILL_MODE = 'speech';   // 'speech' = menyesuaikan jumlah huruf (lebih natural). 'gap' = persis selama jarak ke baris berikutnya, maks. 8 detik (sesuai rumus 14 - 10 = 4)
+    const WORD_MODE = false;      // true = warna mengalir per kata, bukan per huruf (lebih ringan di HP lama)
     let fillEls = [], fillIdx = -1, fillDone = 0, fillDur = 1;
 
     function clearFill() {
@@ -397,7 +399,7 @@
             if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(' ')); return; }
             const wrap = document.createElement('span');
             wrap.className = 'lyr-w';
-            (complex ? [w] : Array.from(w)).forEach((u) => {
+            (complex || WORD_MODE ? [w] : Array.from(w)).forEach((u) => {
                 const s = document.createElement('span');
                 s.className = 'lyr-ch';
                 s.textContent = u;
@@ -411,7 +413,10 @@
         fillDone = 0;
         const next = lines[i + 1];
         const gap = next ? next.t - l.t : 6;
-        fillDur = Math.max(0.6, Math.min(gap, Math.max(1, fillEls.length * CHAR_SEC)));
+        const cap = FILL_MODE === 'gap' ? Math.min(gap, 8) : gap * 0.85;
+        fillDur = FILL_MODE === 'gap'
+            ? Math.max(0.5, cap)
+            : Math.max(0.5, Math.min(cap, Math.max(0.8, fillEls.length * CHAR_SEC)));
     }
 
     function updateFill(t) {
@@ -445,9 +450,11 @@
     // cadangan: kalau loop animasi berhenti, lirik tetap mengikuti lagu
     audio.addEventListener('timeupdate', () => {
         if (!open || !lines.length) return;
-        const i = currentIndex(audio.currentTime);
+        const t = audio.currentTime;
+        const i = currentIndex(t);
         if (i !== activeIdx) setActive(i);
-        if (!rafId) rafId = requestAnimationFrame(tick);
+        updateFill(t);
+        if (!rafId && !audio.paused) rafId = requestAnimationFrame(tick);
     });
 
     // jangan rebut kendali saat pengguna menggulir sendiri
@@ -463,7 +470,7 @@
             if (i !== activeIdx) setActive(i);
             updateFill(t);
         }
-        rafId = requestAnimationFrame(tick);
+        if (!audio.paused) rafId = requestAnimationFrame(tick);   // dijeda = berhenti menggambar
     }
 
     // ---------- Memuat lirik lagu yang sedang diputar ----------

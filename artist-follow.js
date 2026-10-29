@@ -13,6 +13,7 @@
         const was = l.some(x => x.n === n);
         l = was ? l.filter(x => x.n !== n) : [{ n, t: Date.now() }, ...l];
         saveList(l);
+        window.dispatchEvent(new Event('spotiware:follows'));
         if (typeof showToast === 'function') showToast(was ? 'Removed from Your Library' : 'Added to Your Library');
         syncButtons();
         patchLibrary();

@@ -18,7 +18,8 @@ fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
 const STREAM_WHILE_DOWNLOADING = false;
 const MAX_YTDLP = 2;                    // yt-dlp bersamaan: lebih banyak malah membuat semuanya lebih lambat di laptop
-const DIRECT_STREAM = false;            // YouTube menolak (403) streaming langsung untuk klien TVHTML5
+const DIRECT_STREAM = process.env.DIRECT_STREAM === '1';     // mati bawaan: terbukti tidak jalan di jaringan ini
+const CLIENTS = (process.env.YT_CLIENTS || 'android_vr,ios,web_safari').split(',').map(s => s.trim()).filter(Boolean);
 const YT_ARGS = process.env.YT_CLIENT ? ['--extractor-args', 'youtube:player_client=' + process.env.YT_CLIENT] : [];
 const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
@@ -389,6 +390,7 @@ function runYtdlp(id, low) {
         const p = spawn(YTDLP, [
             '--js-runtimes', 'node',
             ...YT_ARGS,
+            '--http-chunk-size', '10M',
             '-f', 'bestaudio[ext=m4a]/bestaudio',
             '--no-playlist', '--no-warnings', '--no-progress',
             '--fixup', 'never',
@@ -468,12 +470,14 @@ async function probeLength(url, ua) {
     throw new Error('ukuran audio tidak diketahui');
 }
 
-async function resolveDirect(id, low) {
+async function resolveWith(id, low, client) {
     const t0 = Date.now();
     let stdout;
     try {
         ({ stdout } = await limit(() => run(YTDLP, [
             '--js-runtimes', 'node',
+            '--force-ipv4', '--socket-timeout', '25',
+            '--extractor-args', 'youtube:player_client=' + client,
             '-f', 'bestaudio[ext=m4a]/bestaudio',
             '--dump-single-json', '--no-playlist', '--no-warnings',
             'https://www.youtube.com/watch?v=' + id
@@ -506,10 +510,43 @@ async function resolveDirect(id, low) {
     try { const q = new URL(j.url).searchParams; cl = q.get('c') || '?'; pot = q.has('pot'); } catch (e) { }
     console.log('[audio]', id, 'klien:', cl, '| pot:', pot, '| format:', j.format_id);
     const entry = { url: j.url, mime, length, ua, hdr, exp, t: Date.now() };
+    if (!(await verifyUrl(entry))) {                 // URL ditolak YouTube: jangan disimpan di cache
+        const err = new Error('ditolak YouTube saat diuji (klien ' + client + ')');
+        err.rejected = true;
+        throw err;
+    }
     if (directCache.size > 300) directCache.clear();
     directCache.set(id, entry);
     console.log('[audio]', id, 'URL langsung siap (' + mime + ', ' + length + ' byte) dalam ' + (Date.now() - t0) + ' ms');
     return entry;
+}
+
+// uji kecil: minta 64 KB pertama. YouTube menjawab 206/200 kalau URL-nya diterima
+async function verifyUrl(a) {
+    try {
+        const r = await fetch(a.url, { headers: { ...(a.hdr || {}), Range: 'bytes=0-65535', 'User-Agent': a.ua } });
+        try { r.body && r.body.cancel(); } catch (e) { }
+        return r.status === 206 || r.status === 200;
+    } catch (e) { return false; }
+}
+
+let goodClient = null;      // klien yang terakhir lolos uji dicoba paling dulu
+async function resolveDirect(id, low) {
+    const order = goodClient ? [goodClient, ...CLIENTS.filter(c => c !== goodClient)] : CLIENTS;
+    let lastErr = null;
+    for (const c of order.slice(0, 3)) {
+        try {
+            const e = await resolveWith(id, low, c);
+            if (goodClient !== c) console.log('[audio] klien terpilih:', c);
+            goodClient = c;
+            return e;
+        } catch (err) {
+            lastErr = err;
+            console.log('[audio]', id, 'klien', c, 'gagal:', err.message);
+            if (/tidak ditemukan/.test(err.message)) break;      // yt-dlp tidak ada: ganti klien percuma
+        }
+    }
+    throw lastErr || new Error('semua klien gagal');
 }
 
 function audioInfo(id, low = false) {
@@ -572,7 +609,12 @@ async function serveViaDownload(req, res, id) {
         if (n > 0) demand.set(id, n); else demand.delete(id);
     });
     prioritize(id);
-    const a = await getAudio(id);
+    const job = getAudio(id);
+    if (process.env.START_EARLY !== '0' && req.method !== 'HEAD') {     // bunyi mulai begitu 64 KB pertama terunduh
+        job.catch(() => { });
+        return serveGrowing(req, res, id, job);
+    }
+    const a = await job;
     return serveFile(req, res, a);
 }
 
@@ -656,10 +698,21 @@ async function streamUpstream(req, res, id) {
 }
 
 // ---------- layani audio (file selesai: Range penuh; file masih diunduh: kirim sambil jalan) ----------
+let directResolveFails = 0;
 async function serveAudio(req, res, id) {
-    const cached = findCached(id);
+    const cached = findCached(id);                       // file hasil unduhan lama
     if (cached) return serveFile(req, res, cached);
-    if (!DIRECT_STREAM) return serveViaDownload(req, res, id);     // satu kali yt-dlp saja
+    if (!DIRECT_STREAM || Date.now() < directOffUntil) return serveViaDownload(req, res, id);
+    try {
+        await audioInfo(id);                             // cache URL: instan kalau sudah disiapkan
+        directResolveFails = 0;
+    } catch (e) {
+        if (++directResolveFails >= 3) {                 // 3 lagu berturut-turut tidak ada klien yang lolos
+            directOffUntil = Date.now() + 10 * 60 * 1000;
+            console.log('[audio] semua klien ditolak, streaming langsung dimatikan 10 menit');
+        }
+        return serveViaDownload(req, res, id);           // cadangan: unduh lewat yt-dlp seperti sebelumnya
+    }
     return streamUpstream(req, res, id);
 }
 
@@ -770,7 +823,7 @@ function pumpPrefetch() {
             while (prefetchQueue.length) {
                 const id = prefetchQueue.shift();
                 if (findCached(id)) continue;
-                try { await getAudio(id, true); } catch (e) { }
+                try { await (DIRECT_STREAM && Date.now() >= directOffUntil ? audioInfo(id, true) : getAudio(id, true)); } catch (e) { }
             }
             prefetchWorkers--;
         })();
@@ -810,7 +863,7 @@ async function spotifyPlaylist(url) {
     const tracks = list.map(t => ({
         title: String(t.title || '').trim(),
         artist: String(t.subtitle || '').replace(/\u00a0/g, ' ').trim()
-    })).filter(t => t.title).slice(0, 300);
+    })).filter(t => t.title);
     return { name, tracks };
 }
 
@@ -950,7 +1003,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (u.pathname === '/match') {
-            if (capped(req, 400, 10 * 60 * 1000)) return json(res, 429, { error: 'terlalu banyak permintaan, coba lagi nanti' });
+            if (capped(req, 20000, 60 * 60 * 1000)) return json(res, 429, { error: 'terlalu banyak permintaan, coba lagi nanti' });
             const title = (u.searchParams.get('title') || '').trim().slice(0, 150);
             const artist = (u.searchParams.get('artist') || '').trim().slice(0, 150);
             if (!title) return json(res, 400, { error: 'title kosong' });

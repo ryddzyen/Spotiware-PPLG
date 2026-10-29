@@ -1049,6 +1049,7 @@
         if (!q) return;
         if (!keepCategory) { addRecent({ type: 'query', text: q }); setChip('all'); }
         lastQuery = q;
+        window.__lastQ = q;
         closeDropdown();
         input.blur();
 
@@ -1106,6 +1107,13 @@
             clearBtn.classList.add('show');
             bar.classList.add('has-text');
             openResults(text);
+        },
+        restore(text, cat) {
+            input.value = text;
+            clearBtn.classList.add('show');
+            bar.classList.add('has-text');
+            setChip(cat || 'all');
+            openResults(text, true);          // true = tidak dicatat sebagai pencarian baru
         }
     };
 

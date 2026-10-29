@@ -12,14 +12,17 @@
             body.ht-allhome:not(.ht-music):not(.ht-genre) .music-section:not(#htAllView){display:none!important}
 
             /* tile kecil di paling atas */
-            .hr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;padding:.4rem .2rem 1.2rem}
-            @media (max-width:900px){.hr-grid{grid-template-columns:repeat(2,1fr)}}
+            .hr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.4rem .2rem 1.2rem}
+            body.np-hidden:has(.main-left-part.collapsed) .hr-grid{grid-template-columns:repeat(4,1fr)}
             .hr-tile{display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;cursor:pointer;height:56px}
             .hr-tile:hover{background:rgba(255,255,255,.16)}
             .hr-tile img,.hr-tile .hr-ico{width:56px;height:56px;flex:0 0 56px;object-fit:cover}
             .hr-ico{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#450af5,#c4efd9);color:#fff}
             .hr-ico.pl{background:#2f2f2f;color:#b3b3b3}
-            .hr-tile span{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:.6rem}
+            .hr-tile span{min-width:0;max-width:30ch;font-weight:600;font-size:.88rem;line-height:1.25;padding-right:.6rem;
+                white-space:normal;word-break:normal;overflow-wrap:normal;hyphens:none;
+                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+            #createMenuQueue,#createMenuHistory{display:none!important}
 
             /* kartu Recents */
             .hr-card{flex:0 0 auto;width:170px;cursor:pointer;border-radius:8px;padding:8px;box-sizing:border-box;transition:background .2s}

@@ -11,6 +11,7 @@
     try { mode = localStorage.getItem(MODE_KEY) === 'yt' ? 'yt' : 'local'; } catch (e) { }
     let block = null, seg = null, list = [], lastQ = '', token = 0, lastWarn = 0;
     let arts = [], pls = [];
+    let profs = null, ytTab = 'all', ytDone = false;
     let curList = [];      // antrean yang sedang aktif (hasil pencarian atau isi playlist/artist)
 
     // permintaan ke server dengan cache singkat (tidak mengulang pencarian yang sama)
@@ -37,6 +38,7 @@
     // halaman artis / playlist YouTube: memakai tampilan playlist Spotiware yang sudah ada
     async function openYtPage(kind, id) {
         const isA = kind === 'a';
+        window.__ytPage = { kind, id };
         toast('Memuat ' + (isA ? 'artis' : 'playlist') + '...');
         let d;
         try { d = await getJSON((isA ? '/artist?id=' : kind === 'b' ? '/album?id=' : '/playlist?id=') + encodeURIComponent(id), 600000); }
@@ -275,20 +277,187 @@
         document.head.appendChild(css);
     }
 
+    // ---------- Hasil pencarian Mode YouTube Music: All | Songs | Artists | Playlists | Profiles ----------
+    (function () {
+        const css = document.createElement('style');
+        css.textContent = `
+            .yc-chips{display:flex;gap:.6rem;flex-wrap:wrap;padding:.4rem 0 1rem}
+            .yc-chip{background:#2a2a2a;color:#fff;border:none;border-radius:999px;padding:.5rem 1rem;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+            .yc-chip:hover{background:#3a3a3a}
+            .yc-chip.active{background:#fff;color:#000}
+            .yt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1.2rem}
+            .yt-grid .yt-card{flex:none;width:auto}
+            .yt-grid .yt-card img{width:100%;height:auto;aspect-ratio:1/1}
+        `;
+        document.head.appendChild(css);
+    })();
+
+    const nrm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+    const songRow = (s, i) => `
+        <div class="yt-row" data-i="${i}">
+            <div class="yt-th"><img src="${esc(s.songImage)}" alt="" loading="lazy"><div class="yt-pl"><i class="fa-solid fa-play"></i></div></div>
+            <div class="yt-info"><div class="yt-t">${esc(s.songName)}</div>
+                <div class="yt-s">Song • ${esc(s.songDes)}${s.dur ? ' • ' + fmt(s.dur) : ''}</div></div>
+        </div>`;
+
+    const profRow = u => {
+        const img = u.photo ? `<img src="${esc(u.photo)}" alt="" loading="lazy">` : '<i class="fa-solid fa-user"></i>';
+        return `<div class="sv-item yt-prof" data-kind="profile" data-id="${esc(u.id)}">
+            <div class="sv-item-img round">${img}</div>
+            <div class="sv-item-info"><div class="sv-item-title">${esc(u.displayName || u.username || 'User')}</div>
+                <div class="sv-item-sub">@${esc(u.username || '')}</div></div></div>`;
+    };
+
+    // top result: artis kalau namanya cocok dengan ketikan, kalau tidak lagu teratas
+    function pickTop() {
+        const q = nrm(lastQ), a = arts[0];
+        if (a) {
+            const n = nrm(a.name);
+            if (n && q && (n === q || n.startsWith(q) || (n.length >= 3 && q.startsWith(n)))) return { k: 'a', a };
+        }
+        if (list[0]) return { k: 's', i: 0 };
+        if (a) return { k: 'a', a };
+        return null;
+    }
+
+    function topHTML(t) {
+        if (t.k === 'a') {
+            const a = t.a;
+            return `<div class="sv-top artist yt-top" data-k="a" data-id="${esc(a.id)}">
+                <img src="${esc(a.thumb || 'img/pplglogo.png')}" alt="">
+                <div class="sv-top-name">${esc(a.name)}</div><div class="sv-top-sub">Artist</div>
+                <button type="button" class="sv-top-play yt-top-play" data-k="a" data-id="${esc(a.id)}" data-name="${esc(a.name)}" title="Play"><i class="fa-solid fa-play"></i></button></div>`;
+        }
+        const s = list[t.i];
+        return `<div class="sv-top song yt-top" data-k="s" data-i="${t.i}">
+            <img src="${esc(s.songImage)}" alt="">
+            <div class="sv-top-name">${esc(s.songName)}</div><div class="sv-top-sub">Song • ${esc(s.songDes)}</div>
+            <button type="button" class="sv-top-play yt-top-play" data-k="s" data-i="${t.i}" title="Play"><i class="fa-solid fa-play"></i></button></div>`;
+    }
+
+    function syncTopPlay() {
+        const b = block && block.querySelector('.yt-top-play');
+        if (!b) return;
+        let on = false;
+        if (playerBar.classList.contains('show') && !audio.paused) {
+            const cur = getCurrentSong();
+            if (b.dataset.k === 's') { const s = list[parseInt(b.dataset.i)]; on = !!s && s.id === cur.id; }
+            else on = (cur.artists || []).some(x => nrm(x) === nrm(b.dataset.name));
+        }
+        const i = b.querySelector('i');
+        if (i) i.className = 'fa-solid ' + (on ? 'fa-pause' : 'fa-play');
+    }
+    ['play', 'playing', 'pause', 'loadstart'].forEach(ev => audio.addEventListener(ev, syncTopPlay));
+
+    function setYtTab(t) {
+        ytTab = t;
+        if (t === 'profiles' && profs === null) loadProfiles();
+        render('');
+    }
+
+    async function loadProfiles() {
+        const my = token, q = lastQ;
+        if (!window.Social || !Social.searchProfiles) { profs = { err: 'Fitur profil belum siap.' }; return render(''); }
+        profs = 'loading';
+        render('');
+        try {
+            const r = await Social.searchProfiles(q);
+            if (my !== token) return;
+            profs = Array.isArray(r) ? r : [];
+        } catch (e) {
+            if (my !== token) return;
+            profs = { err: e && e.message === 'login' ? 'Log in untuk mencari profil.' : 'Gagal mencari profil. Cek koneksi.' };
+        }
+        render('');
+    }
+
+    async function playArtistYt(id) {
+        toast('Memuat artis...');
+        try {
+            const d = await getJSON('/artist?id=' + encodeURIComponent(id), 600000);
+            if (!d || !Array.isArray(d.songs) || !d.songs.length) { toast('Tidak ada lagu dari artis ini'); return; }
+            const items = register(d.songs);
+            playSongFromList(items[0].id, items);
+        } catch (e) { toast('Gagal memuat dari YouTube Music'); }
+    }
+
+    function playTopSong(i) {
+        const s = list[i];
+        if (!s) return;
+        if (playerBar.classList.contains('show') && getCurrentSong().id === s.id) play.click();
+        else playRelated(s, list);
+    }
+
+    // true = klik sudah ditangani
+    function onResultClick(e) {
+        const chip = e.target.closest('.yc-chip');
+        if (chip) { setYtTab(chip.dataset.t); return true; }
+        const lk = e.target.closest('.yt-link');
+        if (lk) { setYtTab(lk.dataset.t); return true; }
+        const tp = e.target.closest('.yt-top-play');
+        if (tp) {
+            e.stopPropagation();
+            if (tp.dataset.k === 'a') {
+                const cur = playerBar.classList.contains('show') ? getCurrentSong() : null;
+                if (cur && (cur.artists || []).some(x => nrm(x) === nrm(tp.dataset.name))) play.click();   // jeda / lanjut
+                else playArtistYt(tp.dataset.id);
+            } else playTopSong(parseInt(tp.dataset.i));
+            return true;
+        }
+        const top = e.target.closest('.yt-top');
+        if (top) {
+            if (top.dataset.k === 'a') openYtPage('a', top.dataset.id);
+            else playTopSong(parseInt(top.dataset.i));
+            return true;
+        }
+        const pr = e.target.closest('.yt-prof');
+        if (pr && window.Social) { Social.openProfile(pr.dataset.id); return true; }
+        return false;
+    }
+
     function render(note) {
         if (!block) return;
-        block.innerHTML = '<h3 class="yt-h">YouTube Music</h3>' +
-            (note ? `<div class="yt-note">${note}</div>` : '') +
-            (arts.length ? '<h4 class="yt-h2">Artists</h4><div class="yt-scroll">' + arts.map(a => card('a', a)).join('') + '</div>' : '') +
-            (pls.length ? '<h4 class="yt-h2">Playlists</h4><div class="yt-scroll">' + pls.map(p => card('p', p)).join('') + '</div>' : '') +
-            (list.length ? '<h4 class="yt-h2">Songs</h4>' : '') +
-            list.map((s, i) => `
-                <div class="yt-row" data-i="${i}">
-                    <div class="yt-th"><img src="${esc(s.songImage)}" alt="" loading="lazy"><div class="yt-pl"><i class="fa-solid fa-play"></i></div></div>
-                    <div class="yt-info"><div class="yt-t">${esc(s.songName)}</div>
-                        <div class="yt-s">Song • ${esc(s.songDes)}${s.dur ? ' • ' + fmt(s.dur) : ''}</div></div>
-                </div>`).join('');
+        const has = list.length || arts.length || pls.length;
+        const chips = (has || ytDone)
+            ? '<div class="yc-chips">' + [['all', 'All'], ['songs', 'Songs'], ['artists', 'Artists'], ['playlists', 'Playlists'], ['profiles', 'Profiles']]
+                .map(([t, l]) => `<button type="button" class="yc-chip${ytTab === t ? ' active' : ''}" data-t="${t}">${l}</button>`).join('') + '</div>'
+            : '';
+        let body = '';
+
+        if (!has && !ytDone) {
+            body = '';                                              // masih mencari / error: hanya tampil catatan
+        } else if (ytTab === 'songs') {
+            body = list.length ? list.map(songRow).join('') : '<div class="yt-note">Tidak ada lagu.</div>';
+        } else if (ytTab === 'artists') {
+            body = arts.length ? '<div class="yt-grid">' + arts.map(a => card('a', a)).join('') + '</div>' : '<div class="yt-note">Tidak ada artis.</div>';
+        } else if (ytTab === 'playlists') {
+            body = pls.length ? '<div class="yt-grid">' + pls.map(p => card('p', p)).join('') + '</div>' : '<div class="yt-note">Tidak ada playlist.</div>';
+        } else if (ytTab === 'profiles') {
+            if (profs === 'loading' || profs === null) body = '<div class="yt-note">Mencari profil...</div>';
+            else if (profs && profs.err) body = `<div class="yt-note">${esc(profs.err)}</div>`;
+            else body = profs.length ? profs.map(profRow).join('') : '<div class="yt-note">Tidak ada profil.</div>';
+        } else {
+            // ---- All: Top result + Songs, lalu Artists, Playlists, More songs (tanpa duplikat) ----
+            const top = pickTop();
+            const topSong = top && top.k === 's' ? top.i : -1;
+            const topArt = top && top.k === 'a' ? top.a.id : null;
+            const idx = list.map((s, i) => i).filter(i => i !== topSong);
+            const side = idx.slice(0, 4), rest = idx.slice(4, 14);
+            const artsRow = arts.filter(a => a.id !== topArt).slice(0, 10);
+            const plsRow = pls.slice(0, 10);
+            body = '<div class="sv-topgrid">' +
+                (top ? `<div class="sv-topcol"><h3 class="sv-h">Top result</h3>${topHTML(top)}</div>` : '') +
+                (side.length ? `<div class="sv-songscol"><div class="sv-h-row"><h3 class="sv-h">Songs</h3><span class="sv-link yt-link" data-t="songs">Show all</span></div>${side.map(i => songRow(list[i], i)).join('')}</div>` : '') +
+                '</div>' +
+                (artsRow.length ? `<div class="sv-h-row"><h3 class="sv-h">Artists</h3><span class="sv-link yt-link" data-t="artists">Show all</span></div><div class="yt-scroll">${artsRow.map(a => card('a', a)).join('')}</div>` : '') +
+                (plsRow.length ? `<div class="sv-h-row"><h3 class="sv-h">Playlists</h3><span class="sv-link yt-link" data-t="playlists">Show all</span></div><div class="yt-scroll">${plsRow.map(p => card('p', p)).join('')}</div>` : '') +
+                (rest.length ? `<h3 class="sv-h">More songs</h3>${rest.map(i => songRow(list[i], i)).join('')}` : '');
+        }
+
+        block.innerHTML = chips + (note ? `<div class="yt-note">${note}</div>` : '') + body;
         markCurrent();
+        syncTopPlay();
     }
 
     function markCurrent() {
@@ -311,7 +480,7 @@
         if (q === lastQ && (list.length || arts.length || pls.length)) return;
         lastQ = q;
         const my = ++token;
-        list = []; arts = []; pls = [];
+        list = []; arts = []; pls = []; profs = null; ytTab = 'all'; ytDone = false;
         render('Mencari di YouTube Music...');
 
         const enc = encodeURIComponent(q);
@@ -338,8 +507,9 @@
         list = register(rs.value);
         curList = list;
         prefetch(list.slice(0, 4).map(s => s.yt));      // siapkan 4 hasil teratas di server
-        arts = ra.status === 'fulfilled' && Array.isArray(ra.value) ? ra.value.slice(0, 12) : [];
-        pls = rp.status === 'fulfilled' && Array.isArray(rp.value) ? rp.value.slice(0, 12) : [];
+        arts = ra.status === 'fulfilled' && Array.isArray(ra.value) ? ra.value.slice(0, 20) : [];
+        pls = rp.status === 'fulfilled' && Array.isArray(rp.value) ? rp.value.slice(0, 20) : [];
+        ytDone = true;
         render(list.length || arts.length || pls.length ? '' : 'Tidak ada hasil dari YouTube Music.');
     }
 
@@ -617,6 +787,7 @@
 
         block.addEventListener('click', e => {
             if (e.target.closest('.ym-back')) return setMode('local');
+            if (onResultClick(e)) return;
             const kc = e.target.closest('.yt-card');
             if (kc) return openYtPage(kc.dataset.k, kc.dataset.id);
             const row = e.target.closest('.yt-row');
@@ -809,6 +980,18 @@
     audio.addEventListener('timeupdate', () => {             // jaring pengaman 25 detik sebelum lagu habis
         if (audio.duration && audio.duration - audio.currentTime < 25) ensureYtNext();
     });
+
+    // klik nama artis di lagu YouTube: cari artisnya di YouTube Music, lalu buka halamannya
+    async function openArtistByName(name) {
+        toast('Mencari artis...');
+        try {
+            const r = await getJSON('/search?q=' + encodeURIComponent(name) + '&type=artist', 300000);
+            const nm = nrm(name);
+            const a = Array.isArray(r) && (r.find(x => nrm(x.name) === nm) || r[0]);
+            if (a) return openYtPage('a', a.id);
+        } catch (e) { }
+        toast('Artis tidak ditemukan di YouTube Music');
+    }
 
     window.YTMusic = { register, idOf, SERVER };
     init();

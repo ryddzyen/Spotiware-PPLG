@@ -4,7 +4,7 @@
     const WP_KEY = (u) => 'spotiware_wallpaper_' + u;
     const DEFAULTS = {
         ambient: false,
-        cardTransparency: 32,
+        ambTrans: 32, wpTrans: 32,
         wpEnabled: false, wpOpacity: 60, wpSize: 'cover',
         cursorDesign: 'default', cursorSize: 36
     };
@@ -195,7 +195,12 @@
         settings = { ...DEFAULTS };
         wallpaper = null;
         if (uid) {
-            try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY(uid))) || {}); } catch (_) {}
+            let stored = {};
+            try { stored = JSON.parse(localStorage.getItem(KEY(uid))) || {}; } catch (_) {}
+            Object.assign(settings, stored);
+            // pengguna lama: nilai lama "cardTransparency" disalin ke kedua mode
+            if (!('ambTrans' in stored) && 'cardTransparency' in stored) settings.ambTrans = stored.cardTransparency;
+            if (!('wpTrans' in stored) && 'cardTransparency' in stored) settings.wpTrans = stored.cardTransparency;
             wallpaper = localStorage.getItem(WP_KEY(uid)) || null;
         }
         // hanya satu mode: kalau data lama dua-duanya aktif, wallpaper dimatikan
@@ -208,24 +213,29 @@
         }
     }
 
+    // transparansi card mengikuti mode yang sedang aktif; Wallpaper dan Ambient Light punya nilai sendiri-sendiri
     function applyVars() {
-        body.style.setProperty('--card-alpha', (1 - settings.cardTransparency / 100).toFixed(2));
+        const wpOn = settings.wpEnabled && !!wallpaper;
+        const t = wpOn ? settings.wpTrans : settings.ambTrans;
+        body.style.setProperty('--card-alpha', (1 - t / 100).toFixed(2));
     }
 
-    // ---- Transparansi card: satu nilai, dua slider (Ambient & Wallpaper) ----
+    // ---- Transparansi card: tiap mode punya nilai sendiri ----
     function paintCardTrans() {
-        [[elCardTransA, elCardTransAV], [elCardTransW, elCardTransWV]].forEach(([el, lbl]) => {
-            el.value = settings.cardTransparency;
-            lbl.textContent = settings.cardTransparency + '%';
+        [[elCardTransA, elCardTransAV, 'ambTrans'], [elCardTransW, elCardTransWV, 'wpTrans']].forEach(([el, lbl, k]) => {
+            el.value = settings[k];
+            lbl.textContent = settings[k] + '%';
             paintRange(el);
         });
     }
-    [elCardTransA, elCardTransW].forEach(el => el.addEventListener('input', () => {
-        settings.cardTransparency = parseInt(el.value);
-        paintCardTrans();
-        applyVars();
-        saveSettings();
-    }));
+    elCardTransA.addEventListener('input', () => {
+        settings.ambTrans = parseInt(elCardTransA.value);
+        paintCardTrans(); applyVars(); saveSettings();
+    });
+    elCardTransW.addEventListener('input', () => {
+        settings.wpTrans = parseInt(elCardTransW.value);
+        paintCardTrans(); applyVars(); saveSettings();
+    });
 
     // ================= Kursor (sprite + SVG, swap otomatis saat hover) =================
     const cursorEl = document.createElement('div');
@@ -548,6 +558,7 @@
         elWpEnabled.checked = settings.wpEnabled && !!wallpaper;
         applyWallpaper();
         updateAmbient();
+        applyVars();          // pindah mode = pakai nilai transparansi mode itu
     }
 
     // ---- Ambient: toggle ----

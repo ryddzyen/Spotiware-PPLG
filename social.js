@@ -355,6 +355,8 @@
         unsubFriends = db.collection('friendships').where('users', 'array-contains', me.uid)
             .onSnapshot((snap) => {
                 friendships = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                friendsLoaded = true;
+                scheduleCounts();
                 renderFriendsSection();
                 refreshActions();
                 updateBadge();
@@ -529,36 +531,30 @@
         <button class="playlist-back-btn up-back" id="upBack" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
         <div class="pf-bn-actions" id="upBn"></div>
 
-        <div class="pf-head">
-            <div class="pf-ident">
+        <div class="tk-head">
+            <div class="pf-avatar tk-avatar" id="upAvatar" style="cursor:default;"></div>
+            <div class="tk-info">
                 <h1 class="pf-name" id="upName"></h1>
                 <p class="pf-meta" id="upMeta"></p>
+                <div class="tk-stats">
+                    <button type="button" class="tk-stat" data-list="following"><b id="upFollowing">0</b><span>Following</span></button>
+                    <button type="button" class="tk-stat" data-list="followers"><b id="upFollowers">0</b><span>Followers</span></button>
+                    <div class="tk-stat static"><b id="upPlCount">0</b><span>Playlists</span></div>
+                </div>
+                <p class="pf-bio" id="upBio"></p>
             </div>
-            <div class="pf-avatar" id="upAvatar" style="cursor:default;"></div>
         </div>
 
-        <div class="pf-actions" id="upActions"></div>
+        <div class="pf-actions" id="upActions" style="display:none;"></div>
 
         <div class="pf-tabs">
-            <button class="pf-tab active" data-tab="main">Main</button>
-            <button class="pf-tab" data-tab="playlists">Playlists</button>
+            <button class="pf-tab active" type="button">Playlists</button>
         </div>
-
-        <div class="pf-panel" id="upMain">
-            <h3 class="pf-label">Bio</h3>
-            <p class="pf-bio" id="upBio"></p>
-        </div>
-        <div class="pf-panel" id="upPlaylists" style="display:none;">
+        <div class="pf-panel" id="upPlaylists">
             <div class="pf-pl-grid" id="upPlGrid"></div>
         </div>`;
     rightPart.prepend(view);
 
-    function upSwitchTab(tab) {
-        view.querySelectorAll('.pf-tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-        view.querySelector('#upMain').style.display = tab === 'main' ? 'block' : 'none';
-        view.querySelector('#upPlaylists').style.display = tab === 'playlists' ? 'block' : 'none';
-    }
-    view.querySelectorAll('.pf-tab').forEach((b) => b.addEventListener('click', () => upSwitchTab(b.dataset.tab)));
 
     view.querySelector('#upBack').addEventListener('click', () => {
         if (!(window.SpotiSearch && SpotiSearch.reopen())) goHome();
@@ -636,7 +632,10 @@
         bioEl.classList.toggle('empty', !u.bio);
 
         if (window.SpotiProfile) SpotiProfile.applyTheme(view, u.theme || DEFAULT_THEME);
-        upSwitchTab('main');
+        const fu = u.friendUids || [], fa = u.followedArtists || [];
+        view.querySelector('#upFollowing').textContent = fu.length + fa.length;
+        view.querySelector('#upFollowers').textContent = fu.length;
+        view.querySelector('#upPlCount').textContent = '0';
         refreshActions();
     }
 
@@ -647,6 +646,7 @@
             const s = await db.collection('publicPlaylists').where('ownerUid', '==', uid).get();
             if (viewUid !== uid) return;
             const items = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+            view.querySelector('#upPlCount').textContent = items.length;
             if (!items.length) { grid.innerHTML = '<div class="pf-empty">No public playlists yet.</div>'; return; }
             grid.innerHTML = '';
             items.forEach((p) => {
@@ -733,6 +733,41 @@
     };
 
     // =====================================================
+    // 4b. Sinkron daftar teman + artis yang di-follow ke dokumen profil
+    // =====================================================
+    let countsSig = '', countsTimer = null, friendsLoaded = false;
+
+    function myFollowedArtists() {
+        try { return (JSON.parse(localStorage.getItem('spotiware_follow_artists:' + me.uid)) || []).map((x) => x.n).slice(0, 300); }
+        catch (e) { return []; }
+    }
+    function scheduleCounts() { clearTimeout(countsTimer); countsTimer = setTimeout(syncCounts, 1200); }
+    async function syncCounts() {
+        if (!me || !friendsLoaded) return;          // jangan menimpa dengan daftar kosong sebelum data teman dimuat
+        const friendUids = friendships.filter((f) => f.status === 'accepted').map(other).slice(0, 300);
+        const followedArtists = myFollowedArtists();
+        const sig = JSON.stringify([friendUids, followedArtists]);
+        if (sig === countsSig) return;
+        try {
+            await db.collection('users').doc(me.uid).set({ friendUids, followedArtists }, { merge: true });
+            countsSig = sig;
+        } catch (err) { console.warn('Gagal sinkron daftar teman/artis:', err); }
+    }
+    window.addEventListener('spotiware:follows', scheduleCounts);
+
+    // klik Following / Followers di profil orang lain
+    view.addEventListener('click', (e) => {
+        const s = e.target.closest('.tk-stat[data-list]');
+        if (!s || !viewUid || !window.SpotiProfile || !SpotiProfile.openList) return;
+        const uid = viewUid, u = userCache[uid] || {};
+        SpotiProfile.openList(s.dataset.list, {
+            artists: u.followedArtists || [],
+            uids: u.friendUids || [],
+            back: () => openProfile(uid)
+        });
+    });
+
+    // =====================================================
     // 7. Status login
     // =====================================================
     auth.onAuthStateChanged((user) => {
@@ -740,6 +775,8 @@
         if (unsubFriends) { unsubFriends(); unsubFriends = null; }
         friendships = [];
         lastSig = null;
+        friendsLoaded = false;
+        countsSig = '';
         viewUid = null;
         friendsWrap.style.display = user ? 'block' : 'none';
         friendsMenu.classList.remove('show');

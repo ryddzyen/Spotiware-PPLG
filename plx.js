@@ -352,19 +352,17 @@
         if (isOwn(key, it)) {
             const lp = localOf(key, it);
             html = mrow('queue', 'fa-solid fa-layer-group', 'Add to queue');
-            if (lp) {
-                html += mrow('edit', 'fa-solid fa-pen', 'Edit details') +
-                    mrow('delete', 'fa-regular fa-circle-xmark', 'Delete', true) +
-                    mrow('vis', lp.isPublic ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open', lp.isPublic ? 'Make private' : 'Make public');
+            if (lp && lp.id !== LIKED_PLAYLIST_ID) {
+                if (!lp.isPublic) html += mrow('vis', 'fa-regular fa-user', 'Add to profile');
+                html += mrow('delete', 'fa-regular fa-circle-xmark', 'Delete', true);
+                if (lp.isPublic) html += mrow('vis', 'fa-solid fa-lock', 'Make private');
             }
-            html += mrow('share', 'fa-solid fa-link', 'Share link');
+            html += mrow('share', 'fa-solid fa-link', 'Share');
         } else {
             const c = savedCopyOf(key, it);
             html = mrow('lib', (c ? 'fa-solid' : 'fa-regular') + ' fa-heart', c ? 'Remove from your library' : 'Add to your library') +
-                mrow('pl', 'fa-solid fa-plus', 'Add to playlist') +
                 mrow('queue', 'fa-solid fa-layer-group', 'Add to queue') +
-                mrow('prof', 'fa-regular fa-user', c && c.isPublic ? 'Remove from profile' : 'Add to profile') +
-                mrow('share', 'fa-solid fa-link', 'Share link');
+                mrow('share', 'fa-solid fa-link', 'Share');
         }
         menu.innerHTML = html;
         menu.classList.add('show');

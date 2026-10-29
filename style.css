@@ -5318,7 +5318,7 @@ body.custom-cursor.cursor-native *{ cursor: auto !important; }
     position: absolute;
     left: 50%;
     bottom: -1px;
-    width: 4.5rem;
+    width: 56rem;
     height: 3px;
     transform: translateX(-50%);
     background: var(--yellow);
@@ -6646,27 +6646,84 @@ body.addv-open .addv{ display: flex; }
     .track-title-text .t-name, .track-title-text .t-artist{ max-width: 100%; }
 }
 
-            .yt-h2{font-size:1.1rem;margin:1.2rem 0 .5rem}
-            .yt-scroll{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.6rem;scrollbar-width:none}
-            .yt-scroll::-webkit-scrollbar{display:none}
-            .yt-card{flex:0 0 150px;width:150px;cursor:pointer}
-            .yt-card img{width:150px;height:150px;object-fit:cover;border-radius:8px;background:#2f2f2f;display:block}
-            .yt-card.round{text-align:center}
-            .yt-card.round img{border-radius:50%}
-            .yt-cn{margin-top:.5rem;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-            .yt-cs{font-size:.78rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-            body.yt-page #ctxRemoveFromPlaylist{display:none!important}
-            body.yt-page .af-page{display:none!important}
-            body.mode-yt .search-dropdown .sr-row,body.mode-yt .search-dropdown .sv-item,body.mode-yt .search-dropdown .sd-divider{display:none!important}
-            #ytHome{display:none;padding:0 1.4rem 2rem}
-            html body.mode-yt.mode-yt.mode-yt.mode-yt.mode-yt #ytHome:not(.hide){display:block!important}
-            body.mode-yt .ht-bar,body.mode-yt #htAllView,body.mode-yt #htMusicView,body.mode-yt #htGenreView,body.mode-yt .mh-section{display:none!important}
-            .yh-chips{display:flex;gap:.6rem;padding:1rem 0}
-            .yh-chip{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:2rem;padding:.5rem 1.1rem;font:inherit;font-size:.9rem;cursor:pointer}
-            .yh-chip:hover{background:rgba(255,255,255,.22)}
-            .yh-chip.on{background:#fff;color:#000}
-            .yh-genres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem;padding-top:.4rem}
-            .yt-genre{height:96px;border-radius:10px;padding:.9rem;box-sizing:border-box;font-weight:800;font-size:1.05rem;cursor:pointer;overflow:hidden}
-            .yt-genre:hover{filter:brightness(1.15)}
-            #ytHome .ym-back{margin:.6rem .5rem 0 0;display:inline-block;background:#fff;color:#000;border:none;border-radius:2rem;padding:.5rem 1.1rem;font:inherit;font-weight:700;cursor:pointer}
-            #ytHome .yt-note{font-size:.85rem;opacity:.85;padding:.6rem 0;line-height:1.6}
+.yt-h2{font-size:1.1rem;margin:1.2rem 0 .5rem}
+.yt-scroll{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.6rem;scrollbar-width:none}
+.yt-scroll::-webkit-scrollbar{display:none}
+.yt-card{flex:0 0 150px;width:150px;cursor:pointer}
+.yt-card img{width:150px;height:150px;object-fit:cover;border-radius:8px;background:#2f2f2f;display:block}
+.yt-card.round{text-align:center}
+.yt-card.round img{border-radius:50%}
+.yt-cn{margin-top:.5rem;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yt-cs{font-size:.78rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.yt-page #ctxRemoveFromPlaylist{display:none!important}
+body.yt-page .af-page{display:none!important}
+body.mode-yt .search-dropdown .sr-row,body.mode-yt .search-dropdown .sv-item,body.mode-yt .search-dropdown .sd-divider{display:none!important}
+#ytHome{display:none;padding:0 1.4rem 2rem}
+html body.mode-yt.mode-yt.mode-yt.mode-yt.mode-yt #ytHome:not(.hide){display:block!important}
+body.mode-yt .ht-bar,body.mode-yt #htAllView,body.mode-yt #htMusicView,body.mode-yt #htGenreView,body.mode-yt .mh-section{display:none!important}
+.yh-chips{display:flex;gap:.6rem;padding:1rem 0}
+.yh-chip{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:2rem;padding:.5rem 1.1rem;font:inherit;font-size:.9rem;cursor:pointer}
+.yh-chip:hover{background:rgba(255,255,255,.22)}
+.yh-chip.on{background:#fff;color:#000}
+.yh-genres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem;padding-top:.4rem}
+.yt-genre{height:96px;border-radius:10px;padding:.9rem;box-sizing:border-box;font-weight:800;font-size:1.05rem;cursor:pointer;overflow:hidden}
+.yt-genre:hover{filter:brightness(1.15)}
+#ytHome .ym-back{margin:.6rem .5rem 0 0;display:inline-block;background:#fff;color:#000;border:none;border-radius:2rem;padding:.5rem 1.1rem;font:inherit;font-weight:700;cursor:pointer}
+#ytHome .yt-note{font-size:.85rem;opacity:.85;padding:.6rem 0;line-height:1.6}
+
+/* ===== Langkah 3 ===== */
+/* Your Library: judul tidak turun baris saat tombol collapse muncul di sebelahnya */
+.library{ flex-wrap: nowrap; }
+#libraryTitleText, .library p{ white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+.library-icons{ flex-shrink: 0; }
+
+/* Judul playlist di Your Library: satu baris sampai sekitar 30 karakter, lewat itu pindah baris di batas kata (maksimal 2 baris) */
+.main-left-part .playlist-item .history-title{
+    white-space: normal; max-width: 30ch; word-break: normal; overflow-wrap: normal; hyphens: none; line-height: 1.25;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Bar All | Music | Genre: ikut "Transparansi card" saat Ambient Light atau Wallpaper aktif.
+   Tanpa keduanya, bar tetap gelap seperti biasa. */
+body.ambient-on .ht-bar.scrolled,
+body.has-wallpaper .ht-bar.scrolled{
+    background: rgba(18,18,18,var(--card-alpha,0.68));
+}
+
+/* ===== Langkah 4: profil gaya TikTok + halaman Following/Followers ===== */
+.profile-view .tk-head{ display:flex; align-items:flex-start; gap:1.6rem; padding:0 1.5rem; max-width:56rem; margin-left:auto; margin-right:auto; }
+.profile-view .tk-avatar{ margin-top:-4.5rem; flex-shrink:0; }
+.tk-info{ flex:1; min-width:0; padding-top:1rem; }
+.tk-info .pf-name{ font-size:clamp(1.8rem,4vw,2.6rem); }
+.tk-stats{ display:flex; gap:1.6rem; margin:.9rem 0; flex-wrap:wrap; }
+.tk-stat{ background:none; border:none; padding:0; font:inherit; display:flex; align-items:baseline; gap:.35rem; cursor:pointer; color:var(--pf-bot,#fff); }
+.tk-stat b{ font-size:1.15rem; font-weight:800; }
+.tk-stat span{ font-size:.95rem; color:var(--pf-bot-sub,#9ca3af); }
+.tk-stat.static{ cursor:default; }
+.tk-stat:not(.static):hover span{ text-decoration:underline; }
+.tk-edit{ width:auto; display:inline-flex; padding:.7rem 1.6rem; margin-bottom:.9rem; }
+.tk-info .pf-bio{ margin:0; }
+
+.fl-view{ display:none; padding:1.2rem 2rem 3rem; }
+.fl-view.show{ display:block; }
+.fl-top{ display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
+.fl-top .playlist-back-btn{ margin:0; }
+.fl-title{ font-size:2rem; font-weight:900; color:#fff; }
+.fl-chips{ display:flex; gap:.6rem; margin-bottom:1.2rem; }
+.fl-chip{ background:#2a2a2a; color:#fff; border:none; border-radius:999px; padding:.5rem 1rem; font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; }
+.fl-chip.active{ background:#fff; color:#000; }
+.fl-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(10rem,1fr)); gap:1.4rem; }
+.fl-card{ cursor:pointer; min-width:0; padding:.6rem; border-radius:10px; }
+.fl-card:hover{ background:rgba(255,255,255,.07); }
+.fl-img{ width:100%; aspect-ratio:1/1; border-radius:50%; overflow:hidden; background:#2a2a2a; color:#7a7a7a; font-size:3rem; display:flex; align-items:center; justify-content:center; }
+.fl-img img{ width:100%; height:100%; object-fit:cover; }
+.fl-name{ margin-top:.7rem; color:#fff; font-weight:700; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fl-sub{ color:var(--gray-mid); font-size:.82rem; margin-top:.15rem; }
+
+@media (max-width:768px), (hover:none) and (pointer:coarse){
+    .profile-view .tk-head{ flex-direction:column; align-items:center; text-align:center; padding:0 1rem; }
+    .profile-view .tk-avatar{ margin-top:-3.8rem; }
+    .tk-stats{ justify-content:center; }
+    .fl-view{ padding:1rem 1rem 3rem; }
+    .fl-grid{ grid-template-columns:repeat(auto-fill,minmax(7rem,1fr)); gap:.8rem; }
+}

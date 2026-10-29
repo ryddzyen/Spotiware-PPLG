@@ -41,6 +41,7 @@
             o: playlist.ownerUid || playlist.savedFromOwnerUid || (u ? u.uid : ''),
             on: playlist.ownerName || playlist.savedFromOwner || (u ? (u.displayName || '') : '')
         };
+        return location.origin + location.pathname + SHARE_PREFIX + toB64Url(JSON.stringify(payload));
     }
 
     function parseShareHash() {
