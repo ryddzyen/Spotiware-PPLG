@@ -6656,7 +6656,6 @@ body.addv-open .addv{ display: flex; }
 .yt-cn{margin-top:.5rem;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .yt-cs{font-size:.78rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.yt-page #ctxRemoveFromPlaylist{display:none!important}
-body.yt-page .af-page{display:none!important}
 body.mode-yt .search-dropdown .sr-row,body.mode-yt .search-dropdown .sv-item,body.mode-yt .search-dropdown .sd-divider{display:none!important}
 #ytHome{display:none;padding:0 1.4rem 2rem}
 html body.mode-yt.mode-yt.mode-yt.mode-yt.mode-yt #ytHome:not(.hide){display:block!important}
@@ -6727,3 +6726,7 @@ body.has-wallpaper .ht-bar.scrolled{
     .fl-view{ padding:1rem 1rem 3rem; }
     .fl-grid{ grid-template-columns:repeat(auto-fill,minmax(7rem,1fr)); gap:.8rem; }
 }
+
+.yt-card .af-btn{margin-top:.5rem}
+.yt-card.round .af-btn{display:block;margin-left:auto;margin-right:auto}
+.yt-top .af-btn{position:absolute;top:1rem;right:1rem}

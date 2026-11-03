@@ -380,6 +380,11 @@
         const artImg = n => (window.ARTIST_PHOTOS || {})[n] ||
             ((songs.find(s => !s.external && (s.artists || []).includes(n)) || {}).songImage) || 'img/pplglogo.png';
 
+        const metaOf = n => {
+            try { return (JSON.parse(localStorage.getItem('spotiware_follow_artists:' + currentUser.uid)) || []).find(x => x.n === n) || {}; }
+            catch (e) { return {}; }
+        };
+
         async function renderList() {
             const my = ++flTok;
             const grid = listView.querySelector('#flGrid');
@@ -395,10 +400,10 @@
             let html = '';
 
             if (showArtists) {
-                html += followedArtists().map(n => `
-                    <div class="fl-card" data-k="a" data-name="${escH(n)}">
-                        <div class="fl-img"><img src="${escH(artImg(n))}" alt="" loading="lazy"></div>
-                        <div class="fl-name">${escH(n)}</div><div class="fl-sub">Artist</div></div>`).join('');
+                html += flSource.artists.map(n => { const m = metaOf(n); return `
+                    <div class="fl-card" data-k="a" data-name="${escH(n)}"${m.id ? ` data-id="${escH(m.id)}"` : ''}>
+                        <div class="fl-img"><img src="${escH(m.img || artImg(n))}" alt="" loading="lazy"></div>
+                        <div class="fl-name">${escH(n)}</div><div class="fl-sub">Artist</div></div>`; }).join('');
             }
             if (showPeople && window.Social && Social.core) {
                 let users = [];
@@ -432,7 +437,11 @@
             if (chip) { flFilter = chip.dataset.f; return renderList(); }
             const c = e.target.closest('.fl-card');
             if (!c) return;
-            if (c.dataset.k === 'a') { if (typeof window.openArtistPage === 'function') window.openArtistPage(c.dataset.name); }
+            if (c.dataset.k === 'a') {
+                if (c.dataset.id && window.YTMusic && YTMusic.openPage) YTMusic.openPage('a', c.dataset.id);
+                else if (typeof window.openArtistAny === 'function') window.openArtistAny(c.dataset.name);
+                else if (typeof window.openArtistPage === 'function') window.openArtistPage(c.dataset.name);
+            }
             else if (window.Social) Social.openProfile(c.dataset.uid);
         });
 

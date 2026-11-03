@@ -995,6 +995,19 @@ const server = http.createServer(async (req, res) => {
             return json(res, 200, await memo('rd:' + id, 10 * 60 * 1000, () => retryYT(() => radioSongs(id))));
         }
 
+        if (u.pathname === '/lyrics') {
+            const s = (u.searchParams.get('s') || '').slice(0, 150), a = (u.searchParams.get('a') || '').slice(0, 150);
+            const d = (u.searchParams.get('d') || '').slice(0, 6);
+            if (!s || !a) return json(res, 400, { error: 's dan a wajib' });
+            const qs = new URLSearchParams({ s, a });
+            if (d) qs.set('d', d);
+            return json(res, 200, await memo('ly:' + qs, 60 * 60 * 1000, async () => {
+                const r = await fetch('https://lyrics-api.boidu.dev/getLyrics?' + qs, { signal: AbortSignal.timeout(10000) });
+                if (!r.ok) throw new Error('lyrics ' + r.status);
+                return await r.json();
+            }));
+        }
+
         if (u.pathname === '/spotify-list') {
             if (capped(req, 20, 10 * 60 * 1000)) return json(res, 429, { error: 'terlalu banyak permintaan, coba lagi nanti' });
             const url = (u.searchParams.get('url') || '').trim().slice(0, 300);

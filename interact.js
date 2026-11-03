@@ -29,6 +29,7 @@
         if (known && knownN === songs.length) return known;
         known = new Set();
         songs.forEach(s => {
+            if (s.hidden && !s.external) return;      // artis lagu rahasia lokal tidak dijadikan link
             const list = (s.artists && s.artists.length) ? s.artists : String(s.songDes || '').split(',').map(x => x.trim()).filter(Boolean);
             list.forEach(a => { if (a && a !== 'Unknown') known.add(a); });
         });
@@ -63,10 +64,10 @@
     }
 
     function openArtist(name) {
-        const yt = document.body.classList.contains('mode-yt');
-        if (yt && window.YTMusic && YTMusic.artistByName) return YTMusic.artistByName(name);
+        const hasYT = window.YTMusic && YTMusic.artistByName;
+        if (document.body.classList.contains('mode-yt') && hasYT) return YTMusic.artistByName(name);
         if (visibleSongs.some(s => (s.artists || []).includes(name)) && typeof window.openArtistPage === 'function') return window.openArtistPage(name);
-        if (window.YTMusic && YTMusic.artistByName && songs.some(s => s.external && (s.artists || []).includes(name))) return YTMusic.artistByName(name);
+        if (hasYT) return YTMusic.artistByName(name);           // bukan artis koleksi: cari di YouTube Music
         toast('Artis ini tidak ada di koleksimu');
     }
 
@@ -111,6 +112,7 @@
         if (typeof songs === 'undefined' || typeof visibleSongs === 'undefined' || !window.PLX) return setTimeout(init, 300);
         injectStyle();
         new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+        window.openArtistAny = openArtist;
         scan();
     }
     init();

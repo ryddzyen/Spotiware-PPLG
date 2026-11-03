@@ -173,7 +173,6 @@
         if (typeof goHome !== 'function' || typeof openPlaylistDetailView !== 'function' || !window.Social ||
             !window.SpotiSearch || !q('.ht-chip') || !q('.left-half') || !q('.home-icon') || !window.firebase) return setTimeout(init, 300);
         injectStyle();
-        buildButtons();
         firebase.auth().onAuthStateChanged(u => {
             uid = u ? u.uid : 'guest';
             if (!started) { started = true; setTimeout(start, 900); }   // tunggu sinkron akun & playlist selesai

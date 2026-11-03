@@ -8,10 +8,12 @@
     const saveList = l => { try { localStorage.setItem(KEY(), JSON.stringify(l)); } catch (e) { } };
     const isF = n => getList().some(x => x.n === n);
 
-    function toggle(n) {
+    function toggle(n, extra) {
         let l = getList();
         const was = l.some(x => x.n === n);
-        l = was ? l.filter(x => x.n !== n) : [{ n, t: Date.now() }, ...l];
+        const item = { n, t: Date.now() };
+        if (extra && extra.id) { item.id = extra.id; if (extra.img) item.img = extra.img; }
+        l = was ? l.filter(x => x.n !== n) : [item, ...l];
         saveList(l);
         window.dispatchEvent(new Event('spotiware:follows'));
         if (typeof showToast === 'function') showToast(was ? 'Removed from Your Library' : 'Added to Your Library');
@@ -44,9 +46,9 @@
     }
 
     // ---------- tombol di hasil pencarian ----------
-    function btnHTML(name) {
+    function btnHTML(name, id, img) {
         const f = isF(name);
-        return `<button type="button" class="af-btn${f ? ' on' : ''}" data-artist="${esc(name)}">${f ? 'Following' : 'Follow'}</button>`;
+        return `<button type="button" class="af-btn${f ? ' on' : ''}" data-artist="${esc(name)}"${id ? ` data-id="${esc(id)}"` : ''}${img ? ` data-img="${esc(img)}"` : ''}>${f ? 'Following' : 'Follow'}</button>`;
     }
 
     function decorate() {
@@ -54,6 +56,14 @@
             .forEach(el => {
                 if (el.querySelector('.af-btn') || !el.dataset.name) return;
                 el.insertAdjacentHTML('beforeend', btnHTML(el.dataset.name));
+            });
+        // artis YouTube Music: kartu di hasil pencarian & Home, dan kartu Top result
+        document.querySelectorAll('#ytBlock .yt-card.round, #ytHome .yt-card.round, #ytBlock .yt-top[data-k="a"]')
+            .forEach(el => {
+                if (el.querySelector('.af-btn')) return;
+                const nameEl = el.querySelector('.yt-cn, .sv-top-name'), img = el.querySelector('img');
+                if (!el.dataset.id || !nameEl) return;
+                el.insertAdjacentHTML('beforeend', btnHTML(nameEl.textContent.trim(), el.dataset.id, img ? img.getAttribute('src') : ''));
             });
     }
 
@@ -65,28 +75,28 @@
         });
     }
 
-    // klik tombol: jangan ikut membuka halaman artis
     document.addEventListener('click', e => {
         const b = e.target.closest('.af-btn');
         if (b) {
             e.stopPropagation();
             e.preventDefault();
-            toggle(b.dataset.artist);
+            toggle(b.dataset.artist, { id: b.dataset.id, img: b.dataset.img });
             return;
         }
-        // klik baris artis di Your Library -> halaman artis
         const row = e.target.closest('.af-lib');
         if (row) {
             e.stopPropagation();
-            if (typeof window.openArtistPage === 'function') window.openArtistPage(row.dataset.artist);
+            if (row.dataset.id && window.YTMusic && YTMusic.openPage) YTMusic.openPage('a', row.dataset.id);
+            else if (typeof window.openArtistAny === 'function') window.openArtistAny(row.dataset.artist);
+            else if (typeof window.openArtistPage === 'function') window.openArtistPage(row.dataset.artist);
         }
     }, true);
 
     // ---------- Your Library ----------
     function rowHTML(x) {
         return `
-            <div class="history-item playlist-item af-lib" data-artist="${esc(x.n)}">
-                <img class="playlist-thumb" src="${esc(imgOf(x.n))}" alt="">
+            <div class="history-item playlist-item af-lib" data-artist="${esc(x.n)}"${x.id ? ` data-id="${esc(x.id)}"` : ''}>
+                <img class="playlist-thumb" src="${esc(x.img || imgOf(x.n))}" alt="">
                 <div class="history-info">
                     <div class="history-title">${esc(x.n)}</div>
                     <div class="history-artist">Artist</div>
@@ -115,7 +125,7 @@
     }
 
     // ---------- tombol di halaman artis ----------
-    function pageButton(name) {
+    function pageButton(name, id, img) {
         const tb = document.querySelector('.playlist-detail-toolbar');
         if (!tb) return;
         let b = tb.querySelector('.af-page');
@@ -127,6 +137,8 @@
             if (sh) sh.insertAdjacentElement('afterend', b); else tb.appendChild(b);
         }
         b.dataset.artist = name;
+        b.dataset.id = id || '';
+        b.dataset.img = img || '';
         const f = isF(name);
         b.classList.toggle('on', f);
         b.textContent = f ? 'Following' : 'Follow';
@@ -171,5 +183,6 @@
         decorate();
     }
 
+    window.AF = { pageButton };
     init();
 })();

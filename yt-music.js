@@ -72,6 +72,7 @@
             document.body.classList.add('artist-page');       // foto bulat, label "Artist"
             const t = document.querySelector('.playlist-detail-type');
             if (t) t.textContent = 'Artist';
+            if (window.AF) AF.pageButton(d.name || 'Artist', id, d.thumb || '');
         }
     }
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -993,6 +994,6 @@
         toast('Artis tidak ditemukan di YouTube Music');
     }
 
-    window.YTMusic = { register, idOf, SERVER };
+    window.YTMusic = { register, idOf, SERVER, openPage: openYtPage, artistByName: openArtistByName };
     init();
 })();
