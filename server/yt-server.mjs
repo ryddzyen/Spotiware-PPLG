@@ -21,7 +21,7 @@ const MAX_YTDLP = parseInt(process.env.MAX_YTDLP) || 2;                    // yt
 const DIRECT_STREAM = process.env.DIRECT_STREAM === '1';     // mati bawaan: terbukti tidak jalan di jaringan ini
 const CLIENTS = (process.env.YT_CLIENTS || 'android_vr,ios,web_safari').split(',').map(s => s.trim()).filter(Boolean);
 const YT_ARGS = process.env.YT_CLIENT ? ['--extractor-args', 'youtube:player_client=' + process.env.YT_CLIENT] : [];
-const CACHE_FILES = 150;                // simpan maksimal 150 lagu di disk
+const CACHE_FILES = parseInt(process.env.CACHE_FILES) || 150;
 const MIME = { m4a: 'audio/mp4', mp4: 'audio/mp4', webm: 'audio/webm', opus: 'audio/ogg', ogg: 'audio/ogg', mp3: 'audio/mpeg' };
 
 // domain yang boleh memanggil server ini (env ALLOWED_ORIGINS, pisahkan dengan koma)
@@ -927,6 +927,7 @@ const server = http.createServer(async (req, res) => {
         if (u.pathname === '/' || u.pathname === '/health') return json(res, 200, { ok: true });
 
         if (u.pathname === '/prefetch') {
+            if (process.env.NO_PREFETCH === '1') { res.writeHead(204, res.cors); return res.end(); }
             const ids = (u.searchParams.get('id') || '').split(',').filter(x => /^[\w-]{6,20}$/.test(x)).slice(0, 2);
             if (u.searchParams.get('hot') === '1') {      // kursor di atas lagu: taruh paling depan, antrean lain tidak dibuang
                 for (const x of ids.reverse()) {
