@@ -17,7 +17,7 @@ const CACHE_DIR = path.join(os.homedir(), 'spotiware-audio-cache') + path.sep;
 fs.mkdirSync(CACHE_DIR, { recursive: true });
 const PORT = process.env.PORT || 3001;
 const STREAM_WHILE_DOWNLOADING = false;
-const MAX_YTDLP = 2;                    // yt-dlp bersamaan: lebih banyak malah membuat semuanya lebih lambat di laptop
+const MAX_YTDLP = parseInt(process.env.MAX_YTDLP) || 2;                    // yt-dlp bersamaan: lebih banyak malah membuat semuanya lebih lambat di laptop
 const DIRECT_STREAM = process.env.DIRECT_STREAM === '1';     // mati bawaan: terbukti tidak jalan di jaringan ini
 const CLIENTS = (process.env.YT_CLIENTS || 'android_vr,ios,web_safari').split(',').map(s => s.trim()).filter(Boolean);
 const YT_ARGS = process.env.YT_CLIENT ? ['--extractor-args', 'youtube:player_client=' + process.env.YT_CLIENT] : [];
@@ -1033,4 +1033,4 @@ const server = http.createServer(async (req, res) => {
 });
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 125000;
-server.listen(PORT, '127.0.0.1', () => console.log('Server YouTube Music siap di port ' + PORT));
+server.listen(PORT, process.env.HOST || '127.0.0.1', () => console.log('Server YouTube Music siap di port ' + PORT));

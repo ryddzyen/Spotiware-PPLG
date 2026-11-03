@@ -1,0 +1,335 @@
+Server YouTube Music siap di port 3001
+Server YouTube Music siap di port 3001
+file:///C:/Users/Lenovo%20Ideapad/Desktop/Spotiware-PPLG/server/yt-server.mjs:294
+function mapPanel(it) {
+^
+
+SyntaxError: Identifier 'mapPanel' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)
+
+Node.js v24.21.0
+file:///C:/Users/Lenovo%20Ideapad/Desktop/Spotiware-PPLG/server/yt-server.mjs:294
+function mapPanel(it) {
+^
+
+SyntaxError: Identifier 'mapPanel' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)
+
+Node.js v24.21.0
+file:///C:/Users/Lenovo%20Ideapad/Desktop/Spotiware-PPLG/server/yt-server.mjs:294
+function mapPanel(it) {
+^
+
+SyntaxError: Identifier 'mapPanel' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)
+
+Node.js v24.21.0
+file:///C:/Users/Lenovo%20Ideapad/Desktop/Spotiware-PPLG/server/yt-server.mjs:294
+function mapPanel(it) {
+^
+
+SyntaxError: Identifier 'mapPanel' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)
+
+Node.js v24.21.0
+file:///C:/Users/Lenovo%20Ideapad/Desktop/Spotiware-PPLG/server/yt-server.mjs:294
+function mapPanel(it) {
+^
+
+SyntaxError: Identifier 'mapPanel' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)
+
+Node.js v24.21.0
+Server YouTube Music siap di port 3001
+[audio] 233pOxCYu9w klien: TVHTML5 | pot: false | format: 140
+[audio] 233pOxCYu9w URL langsung siap (audio/mp4, 4511736 byte) dalam 10808 ms
+[range] 233pOxCYu9w bytes 0-4511735 dari 4511736
+[audio] hGJOtt-cro0 klien: TVHTML5 | pot: false | format: 140
+[audio] hGJOtt-cro0 URL langsung siap (audio/mp4, 4797052 byte) dalam 9622 ms
+[audio] lgY2lwBjMjk klien: TVHTML5 | pot: false | format: 140
+[audio] lgY2lwBjMjk URL langsung siap (audio/mp4, 4177171 byte) dalam 6677 ms
+[audio] LqA_2OqOsAo klien: TVHTML5 | pot: false | format: 140
+[audio] LqA_2OqOsAo URL langsung siap (audio/mp4, 4958642 byte) dalam 6823 ms
+[range] LqA_2OqOsAo bytes 0-4958641 dari 4958642
+[audio] nYm48CET0iA klien: TVHTML5 | pot: false | format: 140
+[audio] nYm48CET0iA URL langsung siap (audio/mp4, 2474079 byte) dalam 4813 ms
+[audio] tqxRidAWER8 klien: TVHTML5 | pot: false | format: 140
+[audio] tqxRidAWER8 URL langsung siap (audio/mp4, 4700817 byte) dalam 5579 ms
+[audio] RPNcMH9wEag klien: TVHTML5 | pot: false | format: 140
+[audio] RPNcMH9wEag URL langsung siap (audio/mp4, 3911214 byte) dalam 4753 ms
+[audio] nyNm-dVBMoo klien: TVHTML5 | pot: false | format: 140
+[audio] nyNm-dVBMoo URL langsung siap (audio/mp4, 2995281 byte) dalam 5069 ms
+[audio] xukbqwRuN5w klien: TVHTML5 | pot: false | format: 140
+[audio] xukbqwRuN5w URL langsung siap (audio/mp4, 3752751 byte) dalam 5154 ms
+[range] tqxRidAWER8 bytes 0-4700816 dari 4700817
+[audio] r5MR7_INQwg klien: TVHTML5 | pot: false | format: 140
+[audio] r5MR7_INQwg URL langsung siap (audio/mp4, 4602208 byte) dalam 5910 ms
+[audio] -5qqrMu_AZc klien: TVHTML5 | pot: false | format: 140
+[audio] -5qqrMu_AZc URL langsung siap (audio/mp4, 3897262 byte) dalam 6833 ms
+[audio] 7BkkfkIqdqA klien: TVHTML5 | pot: false | format: 140
+[audio] 7BkkfkIqdqA URL langsung siap (audio/mp4, 3207586 byte) dalam 4987 ms
+[audio] sTMgX1PDGAE klien: TVHTML5 | pot: false | format: 140
+[audio] sTMgX1PDGAE URL langsung siap (audio/mp4, 3686421 byte) dalam 5109 ms
+[audio] Id4phoHFjC0 klien: TVHTML5 | pot: false | format: 140
+[audio] Id4phoHFjC0 URL langsung siap (audio/mp4, 5579574 byte) dalam 4885 ms
+[audio] 5WQqYf4kuvc klien: TVHTML5 | pot: false | format: 140
+[audio] 5WQqYf4kuvc URL langsung siap (audio/mp4, 4862638 byte) dalam 5429 ms
+[range] nyNm-dVBMoo bytes 0-2995280 dari 2995281
+[audio] BRpS93I8_Jk klien: TVHTML5 | pot: false | format: 140
+[audio] BRpS93I8_Jk URL langsung siap (audio/mp4, 4070141 byte) dalam 8534 ms
+[range] 233pOxCYu9w bytes 0-4511735 dari 4511736
+[audio] 7Co95H2KxTM klien: TVHTML5 | pot: false | format: 140
+[audio] 7Co95H2KxTM URL langsung siap (audio/mp4, 3959503 byte) dalam 4817 ms
+[audio] yMa_beiQWJc klien: TVHTML5 | pot: false | format: 140
+[audio] yMa_beiQWJc URL langsung siap (audio/mp4, 4407458 byte) dalam 5215 ms
+[range] yMa_beiQWJc bytes 0-4407457 dari 4407458
+[audio] tEaan_T1fd8 klien: TVHTML5 | pot: false | format: 140
+[audio] tEaan_T1fd8 URL langsung siap (audio/mp4, 3400553 byte) dalam 5473 ms
+[audio] lpRSz4xH7w4 klien: TVHTML5 | pot: false | format: 140
+[audio] lpRSz4xH7w4 URL langsung siap (audio/mp4, 3204834 byte) dalam 5551 ms
+[audio] Ro0vTEuSUuo klien: TVHTML5 | pot: false | format: 140
+[audio] Ro0vTEuSUuo URL langsung siap (audio/mp4, 2141033 byte) dalam 5044 ms
+[audio] 1eDHqoJmstU klien: TVHTML5 | pot: false | format: 140
+[audio] 1eDHqoJmstU URL langsung siap (audio/mp4, 2149131 byte) dalam 5614 ms
+[audio] kOn-HdEg6AQ klien: TVHTML5 | pot: false | format: 140
+[audio] kOn-HdEg6AQ URL langsung siap (audio/mp4, 4185103 byte) dalam 5216 ms
+[audio] G-oBffe9Uag klien: TVHTML5 | pot: false | format: 140
+[audio] G-oBffe9Uag URL langsung siap (audio/mp4, 3746295 byte) dalam 5043 ms
+[audio] 6rwWur3mLhA klien: TVHTML5 | pot: false | format: 140
+[audio] 6rwWur3mLhA URL langsung siap (audio/mp4, 5458383 byte) dalam 5796 ms
+[audio] 7veo0dKU59c klien: TVHTML5 | pot: false | format: 140
+[audio] 7veo0dKU59c URL langsung siap (audio/mp4, 2263061 byte) dalam 5231 ms
+Server YouTube Music siap di port 3001
+Server YouTube Music siap di port 3001
+Server YouTube Music siap di port 3001
+Server YouTube Music siap di port 3001
+Server YouTube Music siap di port 3001
+[audio] ljAH6jNaApU siap (audio/mp4, 3657909 byte) antre 0 ms + unduh 15504 ms
+[audio] LRPGqNeav_M siap (audio/mp4, 3968232 byte) antre 0 ms + unduh 13458 ms
+Server YouTube Music siap di port 3001
+[audio] iLOq3u5LH0U siap (audio/mp4, 4680151 byte) antre 0 ms + unduh 16017 ms
+[audio] sTuMtyFWF1E siap (audio/mp4, 3841544 byte) antre 0 ms + unduh 13949 ms
+[audio] hGJOtt-cro0 dibatalkan
+[audio] LqA_2OqOsAo siap (audio/mp4, 4958642 byte) antre 0 ms + unduh 18101 ms
+[audio] rz8YLMYFNlY dibatalkan
+[audio] hGJOtt-cro0 siap (audio/mp4, 4797052 byte) antre 0 ms + unduh 17554 ms
+[audio] gTk0AnY2d04 siap (audio/mp4, 4451103 byte) antre 6351 ms + unduh 15020 ms
+[audio] d_3voqjDxAg siap (audio/mp4, 3555219 byte) antre 0 ms + unduh 13936 ms
+[audio] lgY2lwBjMjk siap (audio/mp4, 4177171 byte) antre 37968 ms + unduh 14178 ms
+[audio] SiRJw4f_ufc siap (audio/mp4, 3415910 byte) antre 0 ms + unduh 14546 ms
+Server YouTube Music siap di port 3001
+[yt] gagal (fetch failed), membuat sesi baru lalu mencoba lagi
+[audio] EN_stE0CMOA siap (audio/mp4, 3152316 byte) antre 0 ms + unduh 38561 ms
+[audio] Lq57ZfZpfu4 siap (audio/mp4, 3098045 byte) antre 0 ms + unduh 30486 ms
+Server YouTube Music siap di port 3001
+Server YouTube Music siap di port 3001
+[audio] nyNm-dVBMoo siap (audio/mp4, 2995281 byte) antre 0 ms + unduh 21501 ms
+Server YouTube Music siap di port 3001
+[audio] OsbI3Qli1r8 dibatalkan
+[audio] uXpCTnQ_LnQ siap (audio/mp4, 3364761 byte) antre 0 ms + unduh 13236 ms
+[audio] WR0MHZ-vO9Q siap (audio/mp4, 3395123 byte) antre 10259 ms + unduh 16684 ms
+[audio] ju-w3dXQeJg siap (audio/mp4, 3421442 byte) antre 0 ms + unduh 13631 ms
+[audio] o7fgFaXKVa0 siap (audio/mp4, 3297444 byte) antre 0 ms + unduh 12192 ms
+[audio] K1T8JXbg6Qg siap (audio/mp4, 2560680 byte) antre 0 ms + unduh 14141 ms
+[audio] hc-mzJoaowM siap (audio/mp4, 2421965 byte) antre 0 ms + unduh 12966 ms
+[audio] 84tUOYhLbjY siap (audio/mp4, 3310764 byte) antre 0 ms + unduh 12972 ms
+[audio] IFtwhMK64H8 siap (audio/mp4, 3077451 byte) antre 0 ms + unduh 11718 ms
+[audio] wCQohfT6Q78 siap (audio/mp4, 2953789 byte) antre 0 ms + unduh 12215 ms
+[audio] 3KnHgNT7Dd4 siap (audio/mp4, 2995804 byte) antre 0 ms + unduh 13202 ms
+[audio] h2GQVlMkFiE siap (audio/mp4, 3521922 byte) antre 0 ms + unduh 20528 ms
+[audio] d3-1VYAmJ4k siap (audio/mp4, 3968387 byte) antre 0 ms + unduh 15978 ms
+[audio] oCdXuomafSU dibatalkan
+[audio] bEIH0jLkBnM dibatalkan
+[audio] SzHXW_vK93U siap (audio/mp4, 2771071 byte) antre 0 ms + unduh 13913 ms
+[audio] NR25XauVVfw siap (audio/mp4, 3595276 byte) antre 0 ms + unduh 13056 ms
+[audio] oCdXuomafSU siap (audio/mp4, 4343387 byte) antre 0 ms + unduh 13014 ms
+[audio] bEIH0jLkBnM siap (audio/mp4, 3345695 byte) antre 0 ms + unduh 15255 ms
+[audio] tdS3ijuqxW4 siap (audio/mp4, 3110569 byte) antre 0 ms + unduh 13228 ms
+[audio] _tUOs5PAGqs siap (audio/mp4, 4035022 byte) antre 0 ms + unduh 12944 ms
+[audio] Yefzmr4FXbI siap (audio/mp4, 3043766 byte) antre 0 ms + unduh 13034 ms
+[audio] G4NMyUk2L_c siap (audio/mp4, 2672669 byte) antre 0 ms + unduh 11904 ms
+[audio] rkRNBHOQci4 siap (audio/mp4, 3221768 byte) antre 0 ms + unduh 18437 ms
+Server YouTube Music siap di port 3001
+[audio] Z85lxckrtzg siap (audio/mp4, 5793534 byte) antre 1 ms + unduh 16732 ms
+[audio] rO4QZU4TedM dibatalkan
+[audio] jRwvDQiZscc siap (audio/mp4, 3511408 byte) antre 0 ms + unduh 13122 ms
+[audio] 1VchsjYi5qY siap (audio/mp4, 3957497 byte) antre 0 ms + unduh 13816 ms
+[audio] L1lUTH3FWSg siap (audio/mp4, 3189234 byte) antre 0 ms + unduh 13553 ms
+[audio] 4nZeskukkTk siap (audio/mp4, 2390422 byte) antre 0 ms + unduh 11377 ms
+[audio] tgz0EVQk40A siap (audio/mp4, 3903422 byte) antre 0 ms + unduh 13394 ms
+Server YouTube Music siap di port 3001
+[audio] 5Dds1H-mvhM siap (audio/mp4, 3198880 byte) antre 0 ms + unduh 15695 ms
+[audio] 3zrqIkyt8vc siap (audio/mp4, 4537387 byte) antre 0 ms + unduh 14674 ms
+[audio] LF9gChEwNiE siap (audio/mp4, 3564847 byte) antre 0 ms + unduh 14459 ms
+[audio] 6N0C-YVt9gU siap (audio/mp4, 5016522 byte) antre 0 ms + unduh 17219 ms
+[audio] rCVTlzQ9zks siap (audio/mp4, 3907553 byte) antre 0 ms + unduh 13874 ms
+[audio] bsP7vZ83A20 siap (audio/mp4, 3763613 byte) antre 0 ms + unduh 13684 ms
+[audio] 0uKSv_dzyAw siap (audio/mp4, 4338505 byte) antre 0 ms + unduh 28281 ms
+[audio] T6GkevdOkE0 siap (audio/mp4, 2549007 byte) antre 0 ms + unduh 13826 ms
+[audio] N5saoeZ_JaU siap (audio/mp4, 3849516 byte) antre 0 ms + unduh 13666 ms
+[audio] De-wJIxx-bc siap (audio/mp4, 3474982 byte) antre 0 ms + unduh 12665 ms
+[audio] sjUgiGbj3a8 siap (audio/mp4, 4080032 byte) antre 0 ms + unduh 13457 ms
+[audio] VY0GY4jxCj8 siap (audio/mp4, 3865003 byte) antre 0 ms + unduh 13552 ms
+[audio] ds3sGeb8pK0 siap (audio/mp4, 3226532 byte) antre 0 ms + unduh 12837 ms
+[audio] 4IJ0ZmtbBJI siap (audio/mp4, 3760609 byte) antre 0 ms + unduh 14885 ms
+[audio] Frm14sy6KMw siap (audio/mp4, 3809802 byte) antre 0 ms + unduh 13568 ms
+[audio] 4febO0OejZs siap (audio/mp4, 4533671 byte) antre 0 ms + unduh 13645 ms
+[audio] 90YhIy-DKu4 siap (audio/mp4, 4081534 byte) antre 0 ms + unduh 13476 ms
+[audio] IAqD2lc6Vl8 siap (audio/mp4, 3176212 byte) antre 0 ms + unduh 13877 ms
+[audio] PM5wHBcEjjM siap (audio/mp4, 3509592 byte) antre 0 ms + unduh 13481 ms
+[audio] HPKA9ny0fq4 siap (audio/mp4, 2864584 byte) antre 0 ms + unduh 10079 ms
+[audio] NtM24jAh4Hg siap (audio/mp4, 3958999 byte) antre 0 ms + unduh 13921 ms
+[audio] FT1b7uq4JrA siap (audio/mp4, 4193064 byte) antre 0 ms + unduh 16483 ms
+[audio] El0AfTkxfyM siap (audio/mp4, 4502517 byte) antre 0 ms + unduh 19567 ms
+[audio] SuNHuNSmMl8 siap (audio/mp4, 3124766 byte) antre 0 ms + unduh 23448 ms
+[audio] w455efjANTU siap (audio/mp4, 3453578 byte) antre 0 ms + unduh 17526 ms
+[audio] PHywEC8r03M siap (audio/mp4, 4478315 byte) antre 0 ms + unduh 16471 ms
+[audio] 5mXtufkZ14Q siap (audio/mp4, 3321939 byte) antre 0 ms + unduh 14902 ms
+[audio] nrexSesfQ4I siap (audio/mp4, 3952240 byte) antre 0 ms + unduh 35994 ms
+[audio] wNXfpjp_Lw4 siap (audio/mp4, 4279173 byte) antre 0 ms + unduh 17082 ms
+[audio] lbx1bGrIoxQ siap (audio/mp4, 2971063 byte) antre 0 ms + unduh 24983 ms
+[audio] T_ESeyaRz5A siap (audio/mp4, 3018003 byte) antre 0 ms + unduh 15125 ms
+[audio] -2VpRiHIBlo siap (audio/mp4, 3316538 byte) antre 0 ms + unduh 14645 ms
+[audio] nGERR7LXNR4 siap (audio/mp4, 2944025 byte) antre 0 ms + unduh 15248 ms
+[audio] h5PmBBtPAiY siap (audio/mp4, 3111999 byte) antre 0 ms + unduh 31200 ms
+[audio] P5Ao8m3Ev48 siap (audio/mp4, 3705667 byte) antre 0 ms + unduh 15990 ms
+[audio] DRXHrc8vi9w siap (audio/mp4, 4972846 byte) antre 0 ms + unduh 49042 ms
+[audio] T-k-SZaM46k siap (audio/mp4, 2651639 byte) antre 0 ms + unduh 13352 ms
+[audio] kXw2xHTOOZo siap (audio/mp4, 2515119 byte) antre 0 ms + unduh 15990 ms
+[audio] IDOZpFyNAt0 siap (audio/mp4, 3099982 byte) antre 0 ms + unduh 14969 ms
+[audio] JqYYhHcLzE8 siap (audio/mp4, 3790966 byte) antre 0 ms + unduh 15477 ms
+[audio] byLMp3C7OJE siap (audio/mp4, 5499788 byte) antre 0 ms + unduh 15197 ms
+[audio] _xvtY-kbZCo siap (audio/mp4, 3233407 byte) antre 0 ms + unduh 14961 ms
+[audio] EOw5L9noneQ siap (audio/mp4, 3267682 byte) antre 0 ms + unduh 15482 ms
+[audio] HOkswcWQXDM siap (audio/mp4, 2511079 byte) antre 0 ms + unduh 14475 ms
+[audio] BaN8fR8CciM siap (audio/mp4, 3341557 byte) antre 0 ms + unduh 15271 ms
+[audio] jOB6F05BxEU siap (audio/mp4, 2487046 byte) antre 0 ms + unduh 15313 ms
+[audio] YCXYkcpD5tw siap (audio/mp4, 3531686 byte) antre 0 ms + unduh 16315 ms
+[audio] 2yrz7-3G17U siap (audio/mp4, 2380059 byte) antre 0 ms + unduh 14037 ms
+[audio] JvGpsTwsoBU siap (audio/mp4, 3236411 byte) antre 0 ms + unduh 45796 ms
+[audio] bTluyPDWPac siap (audio/mp4, 1014923 byte) antre 0 ms + unduh 11360 ms
+[audio] K8PEhv0Sv20 siap (audio/mp4, 1577411 byte) antre 0 ms + unduh 11880 ms
+[audio] 7Iv3UV-G8UI siap (audio/mp4, 1928560 byte) antre 0 ms + unduh 11607 ms
+[audio] WiBp1X9QZA8 siap (audio/mp4, 1488874 byte) antre 0 ms + unduh 11621 ms
+[audio] ChsEy3p49qc siap (audio/mp4, 1462417 byte) antre 0 ms + unduh 11044 ms
+[audio] GEYsgtVw7gM siap (audio/mp4, 3294241 byte) antre 0 ms + unduh 11612 ms
+[audio] fGC0jKig6RY siap (audio/mp4, 3933269 byte) antre 0 ms + unduh 13536 ms
+[audio] y561FrOd1ek siap (audio/mp4, 2596814 byte) antre 0 ms + unduh 13438 ms
+[audio] aeKNcm0-H40 siap (audio/mp4, 4280676 byte) antre 0 ms + unduh 15862 ms
+Server YouTube Music siap di port 3001
+[error] /lyrics lyrics 401
+[audio] TogwClAedrU siap (audio/mp4, 3466721 byte) antre 0 ms + unduh 15488 ms
+[audio] 2cL2LkST4a4 siap (audio/mp4, 3849977 byte) antre 0 ms + unduh 16345 ms
+[audio] GwEnno5NRao siap (audio/mp4, 9556043 byte) antre 0 ms + unduh 17486 ms
+[audio] 5jbjN0Ai9X4 siap (audio/mp4, 3205069 byte) antre 0 ms + unduh 12847 ms
+[audio] Z79Hxqm8jcI siap (audio/mp4, 2431194 byte) antre 0 ms + unduh 11682 ms
+[audio] 5GUaMOpfmr8 siap (audio/mp4, 2615965 byte) antre 0 ms + unduh 12583 ms
+[audio] 9LW9DpmhrPE siap (audio/mp4, 3828655 byte) antre 0 ms + unduh 12389 ms
+[audio] Khe1vAJqX8k siap (audio/mp4, 3270584 byte) antre 0 ms + unduh 8923 ms
+[audio] 95LZOnNZAt4 siap (audio/mp4, 2673118 byte) antre 0 ms + unduh 11634 ms
+[audio] 0t0HtFYjcU8 siap (audio/mp4, 3410217 byte) antre 0 ms + unduh 17723 ms
+[audio] Ayvb1BMHO-o siap (audio/mp4, 2768095 byte) antre 0 ms + unduh 24854 ms
+[audio] GsjyO3KMr84 siap (audio/mp4, 1458248 byte) antre 0 ms + unduh 11580 ms
+[audio] zNQ6yzwm6iM siap (audio/mp4, 4047738 byte) antre 0 ms + unduh 33076 ms
+[audio] 3zh9Wb1KuW8 siap (audio/mp4, 3005908 byte) antre 0 ms + unduh 12013 ms
+[audio] anM5AMp77Ag siap (audio/mp4, 2699305 byte) antre 0 ms + unduh 12425 ms
+[audio] eg65SbqmT0s siap (audio/mp4, 3374603 byte) antre 0 ms + unduh 13451 ms
+[audio] HITWkcOq4zg siap (audio/mp4, 2430344 byte) antre 0 ms + unduh 8008 ms
+[audio] R-maTg10QKs siap (audio/mp4, 3331743 byte) antre 0 ms + unduh 12936 ms
+[audio] 9B0yX0UIN9M siap (audio/mp4, 3995787 byte) antre 0 ms + unduh 12666 ms
+[audio] Kcj5-jWxgKs siap (audio/mp4, 2741425 byte) antre 0 ms + unduh 11669 ms
+[audio] B26R96GcaYw siap (audio/mp4, 3238627 byte) antre 0 ms + unduh 12877 ms
+[audio] rgNdeflYdYw siap (audio/mp4, 4158286 byte) antre 0 ms + unduh 14278 ms
+[audio] 4dq95O_XqUM siap (audio/mp4, 3671654 byte) antre 0 ms + unduh 12121 ms
+[audio] F2CKuKIVn3w siap (audio/mp4, 2356454 byte) antre 0 ms + unduh 16674 ms
+[audio] yuTesDwv6uA siap (audio/mp4, 4685939 byte) antre 0 ms + unduh 13803 ms
+[audio] yIAsrNc76-Y siap (audio/mp4, 3923829 byte) antre 0 ms + unduh 14464 ms
+[audio] dtN5DJ9Gvh4 siap (audio/mp4, 3192619 byte) antre 0 ms + unduh 12452 ms
+[audio] 4fQwo95ucn4 siap (audio/mp4, 3330604 byte) antre 0 ms + unduh 12215 ms
+[audio] TqyfmFaZlqw siap (audio/mp4, 3848011 byte) antre 0 ms + unduh 12452 ms
+[audio] F9GXgPHeKfA siap (audio/mp4, 4031992 byte) antre 0 ms + unduh 73777 ms
+[audio] udNgJUiBCRg siap (audio/mp4, 3537736 byte) antre 0 ms + unduh 12284 ms
+[audio] mJ1N7-HyH1A siap (audio/mp4, 4192063 byte) antre 0 ms + unduh 14106 ms
+[audio] 4vx5AH33VqM siap (audio/mp4, 1468110 byte) antre 0 ms + unduh 11794 ms
+[audio] zqKrpw36xnU siap (audio/mp4, 3888154 byte) antre 0 ms + unduh 12587 ms
+[audio] voAu0YRWUNE siap (audio/mp4, 3229359 byte) antre 0 ms + unduh 13247 ms
+[audio] d6NPs3OQIAU siap (audio/mp4, 2994902 byte) antre 0 ms + unduh 11381 ms
+[audio] GWysc_zFTIA siap (audio/mp4, 4579294 byte) antre 0 ms + unduh 14004 ms
+[audio] 65xX7zyr-fA siap (audio/mp4, 3185334 byte) antre 0 ms + unduh 12205 ms
+[audio] C0ppulkmXPw siap (audio/mp4, 3860535 byte) antre 0 ms + unduh 12320 ms
+[audio] NinLIDs9qmU siap (audio/mp4, 4443421 byte) antre 0 ms + unduh 14026 ms
+[audio] 4af1n9LeVKo siap (audio/mp4, 2395984 byte) antre 0 ms + unduh 12586 ms
+[audio] wNjvuRZtQeI siap (audio/mp4, 3442006 byte) antre 0 ms + unduh 13559 ms
+[audio] 0N3j1erm3-Y siap (audio/mp4, 3616590 byte) antre 0 ms + unduh 14956 ms
+[audio] ZNYOMnfjyI8 siap (audio/mp4, 3854372 byte) antre 0 ms + unduh 13799 ms
+[audio] -S8iIjxyzSU siap (audio/mp4, 1528453 byte) antre 0 ms + unduh 11657 ms
+[audio] UpmSK1GPlBc siap (audio/mp4, 4082761 byte) antre 0 ms + unduh 13620 ms
+[audio] r_hJWTufE6w siap (audio/mp4, 3786908 byte) antre 0 ms + unduh 11971 ms
+[audio] vvN8jr-CGiE siap (audio/mp4, 3594957 byte) antre 0 ms + unduh 13900 ms
+[audio] XXV6oIory8s siap (audio/mp4, 3954190 byte) antre 0 ms + unduh 14150 ms
+[audio] csVeFCLhmAM siap (audio/mp4, 3829035 byte) antre 0 ms + unduh 13312 ms
+[audio] tdzsOODJiX8 siap (audio/mp4, 3687828 byte) antre 0 ms + unduh 14260 ms
+[audio] tty54CzXZDg siap (audio/mp4, 3913111 byte) antre 0 ms + unduh 13948 ms
+[audio] r2t7T-i5COA siap (audio/mp4, 3715265 byte) antre 0 ms + unduh 14434 ms
+[audio] vwY6c4k04i0 siap (audio/mp4, 1472664 byte) antre 0 ms + unduh 10461 ms
+[audio] MtLHwqbE1eI siap (audio/mp4, 2132684 byte) antre 0 ms + unduh 7929 ms
+[audio] wJptjgJNLs8 siap (audio/mp4, 2616602 byte) antre 0 ms + unduh 12746 ms
+[audio] nuxZTnJE_OE siap (audio/mp4, 4057713 byte) antre 0 ms + unduh 69200 ms
+[audio] ozPtL1R6mZ8 siap (audio/mp4, 3535079 byte) antre 0 ms + unduh 13530 ms
+Server YouTube Music siap di port 3001
+[error] /lyrics lyrics 404
+[error] /lyrics lyrics 401
+[audio] FnpioNZO6w8 siap (audio/mp4, 5264362 byte) antre 0 ms + unduh 78100 ms
+[error] /lyrics lyrics 401
+[error] /lyrics lyrics 401
+[error] /lyrics lyrics 401
+[error] /lyrics lyrics 401
+[audio] GwSSrwryxN0 siap (audio/mp4, 4765012 byte) antre 0 ms + unduh 196048 ms
+[error] /lyrics lyrics 401
+[error] /lyrics lyrics 401
+[audio] rOBn-L-QIac siap (audio/mp4, 1936644 byte) antre 0 ms + unduh 72534 ms
