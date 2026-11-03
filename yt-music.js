@@ -1,7 +1,7 @@
 // yt-music.js — Langkah 1: sakelar mode LAGU SAYA / YOUTUBE MUSIC. Array songs lokal tidak diubah strukturnya.
 (function () {
     const LOCAL = ['127.0.0.1', 'localhost'].includes(location.hostname);
-    const SERVER = LOCAL ? 'http://127.0.0.1:3001' : 'https://desktop-e3bkb1b.tail4eac99.ts.net';
+    const SERVER = LOCAL ? 'http://127.0.0.1:3001' : 'https://spotiware.hostless.app';
     const ID_BASE = 20000000000;
     const CACHE_KEY = 'spotiware_yt_cache';
     const CACHE_MAX = 800;
