@@ -49,15 +49,18 @@
     .lyr-line.gap{font-size:1.1rem;opacity:.25;}
     .lyr-line{transition:opacity .25s,transform .25s,color .25s;}
     .lyr-line.lrc.active{color:var(--yellow,#FFD700);opacity:1;transform:scale(1.02);}
-    .lyr-w{display:inline-block;white-space:nowrap;}
+    .lyr-w{display:inline;}
+    .lyr-inst{display:flex;justify-content:center;align-items:center;width:100%;height:3rem;margin:1.1rem 0;overflow:hidden;
+        transition:height .5s ease,margin .5s ease,opacity .4s ease;}
+    .lyr-eq{display:flex;align-items:center;justify-content:center;gap:6px;height:100%;}
+    .lyr-eq i{display:block;width:5px;height:calc(var(--h) * 100%);border-radius:3px;background:var(--yellow,#FFD700);
+        transform:scaleY(.07);opacity:.4;transition:opacity .4s ease;}
+    .lyr-inst.on .lyr-eq i{opacity:1;animation:lyrEq .9s ease-in-out infinite alternate;animation-delay:calc(var(--d) * -1);}
+    .lyr-inst.done{height:0;margin:0;opacity:0;}
+    .lyr-noanim .lyr-inst{transition:none!important;}
+    @keyframes lyrEq{from{transform:scaleY(.12)}to{transform:scaleY(1)}}
     .lyr-ch{--f:0;background-image:linear-gradient(90deg,var(--yellow,#FFD700) calc(var(--f)*140% - 40%),rgba(255,255,255,.4) calc(var(--f)*140%));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
     .lyr-line.live{opacity:1;}
-    .lyr-inst{display:flex;align-items:center;height:2.6rem;margin:1.1rem 0;}
-    .lyr-eq{display:flex;align-items:center;gap:5px;height:100%;opacity:.25;transition:opacity .3s;}
-    .lyr-eq i{display:block;width:5px;height:calc(var(--h) * 100%);border-radius:3px;background:var(--yellow,#FFD700);transform:scaleY(.4);animation:lyrEq .9s ease-in-out infinite alternate;animation-delay:var(--d);animation-play-state:paused;}
-    .lyr-inst.on .lyr-eq{opacity:1;}
-    .lyr-inst.on .lyr-eq i{animation-play-state:running;}
-    @keyframes lyrEq{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
     .lyr-plain{white-space:pre-wrap;font-size:1.05rem;line-height:1.8;opacity:.92;padding-bottom:3rem;}
     .lyr-note{font-size:.78rem;color:#c9c9ce;margin-bottom:1rem;line-height:1.5;}
     .lyr-status{text-align:center;color:#c9c9ce;padding:3rem 1rem;line-height:1.6;}
@@ -517,9 +520,17 @@
             });
             walk(p);
             const pb = ttTime(p.getAttribute('begin')), pe = ttTime(p.getAttribute('end'));
-            if (!words.length) {                                          // hanya timing per baris
+            if (!words.length) {                                          // hanya timing per baris: bagi kata menurut panjangnya
                 const tx = String(p.textContent).replace(/\s+/g, ' ').trim();
-                if (tx) words.push({ t: pb, e: pe || pb + 3, w: tx, sp: false });
+                if (tx) {
+                    const end = pe || pb + 3, parts = tx.split(' '), tot = parts.reduce((s, x) => s + x.length, 0) || 1;
+                    let acc = pb;
+                    parts.forEach((x, k) => {
+                        const d = (end - pb) * (x.length / tot);
+                        words.push({ t: acc, e: acc + d, w: x, sp: k < parts.length - 1 });
+                        acc += d;
+                    });
+                }
             }
             if (!words.length) return;
             lns.push({
@@ -567,36 +578,6 @@
         return { bl: items };
     }
 
-    function gapEl() {
-        const d = document.createElement('div');
-        d.className = 'lyr-inst';
-        let h = '';
-        for (let k = 0; k < 9; k++) {
-            h += `<i style="--h:${(0.3 + 0.7 * Math.sin(Math.PI * (k + 0.5) / 9)).toFixed(2)};--d:${(k * 0.11).toFixed(2)}s"></i>`;
-        }
-        d.innerHTML = '<span class="lyr-eq">' + h + '</span>';
-        return d;
-    }
-
-    function showBL(entry) {
-        bl = entry.bl;
-        bl.forEach(it => {
-            let el;
-            if (it.type === 'gap') el = gapEl();
-            else {
-                el = document.createElement('div');
-                el.className = 'lyr-line';
-                el.textContent = it.text;
-                el.addEventListener('click', () => { audio.currentTime = Math.max(0, it.t); });
-            }
-            it.el = el;
-            it.built = false;
-            bodyEl.appendChild(el);
-            lineEls.push(el);
-        });
-        blUpdate(audio.currentTime, true);
-    }
-
     // hanya baris yang sedang tampil dipecah per huruf (ringan di HP)
     function blBuild(it) {
         it.el.textContent = '';
@@ -639,17 +620,69 @@
         });
     }
 
+    const BL_GAPLEAD = 0.5;      // detik: gelombang mulai mengecil sebelum vokal masuk
+    let blGaps = [], blRecT = null;
+
+    function gapEl() {
+        const d = document.createElement('div');
+        d.className = 'lyr-inst';
+        const N = 11;
+        let h = '';
+        for (let k = 0; k < N; k++) {
+            h += `<i style="--h:${(0.3 + 0.7 * Math.sin(Math.PI * (k + 0.5) / N)).toFixed(2)};--d:${(k * 0.09).toFixed(2)}s"></i>`;
+        }
+        d.innerHTML = '<span class="lyr-eq">' + h + '</span>';
+        return d;
+    }
+
+    function showBL(entry) {
+        bl = entry.bl;
+        blGaps = bl.filter(it => it.type === 'gap');
+        bodyEl.classList.add('lyr-noanim');                    // keadaan awal tidak dianimasikan
+        bl.forEach(it => {
+            let el;
+            if (it.type === 'gap') el = gapEl();
+            else {
+                el = document.createElement('div');
+                el.className = 'lyr-line';
+                el.textContent = it.text;
+                el.addEventListener('click', () => { audio.currentTime = Math.max(0, it.t); });
+            }
+            it.el = el;
+            it.built = false;
+            bodyEl.appendChild(el);
+            lineEls.push(el);
+        });
+        blUpdate(audio.currentTime, true);
+        requestAnimationFrame(() => requestAnimationFrame(() => bodyEl.classList.remove('lyr-noanim')));
+    }
+
+    // status tiap gelombang dihitung dari posisi lagu: pre (garis) -> on (menari) -> done (hilang). Bisa bolak-balik.
+    function blGapStates(T) {
+        let changed = false;
+        blGaps.forEach(g => {
+            const st = T >= g.e - BL_GAPLEAD ? 'done' : (T >= g.t ? 'on' : 'pre');
+            if (g.st === st) return;
+            g.st = st;
+            g.el.classList.remove('pre', 'on', 'done');
+            g.el.classList.add(st);
+            changed = true;
+        });
+        return changed;
+    }
+
     function blUpdate(t, jump) {
         if (!bl) return;
         const T = t + BL_OFFSET;
+        const gapChanged = blGapStates(T);
         let a = -1;
         for (let i = 0; i < bl.length; i++) { if (bl[i].t <= T + 0.05) a = i; else break; }
         if (a !== activeIdx || jump) {
             const big = jump || Math.abs(a - activeIdx) > 1;
-            if (lineEls[activeIdx]) lineEls[activeIdx].classList.remove('active', 'on');
+            if (lineEls[activeIdx]) lineEls[activeIdx].classList.remove('active');
             activeIdx = a;
             const cur = bl[a];
-            if (cur) cur.el.classList.add(cur.type === 'gap' ? 'on' : 'active');
+            if (cur && cur.type === 'line') cur.el.classList.add('active');
             if (big) bl.forEach((it, i) => { if (it.type === 'line' && (i < a - 3 || i > a + 1)) blDrop(it); });
             if (cur && Date.now() > userScrollUntil) centerActive(big);
         }
@@ -661,6 +694,10 @@
                 it.el.classList.add('live');
                 blFill(it, T);
             } else blDrop(it);
+        }
+        if (gapChanged) {          // gelombang muncul / hilang: pusatkan lagi setelah animasi tingginya selesai
+            clearTimeout(blRecT);
+            blRecT = setTimeout(() => { if (open && bl && Date.now() > userScrollUntil) centerActive(false); }, 560);
         }
     }
 
