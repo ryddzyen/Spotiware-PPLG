@@ -926,6 +926,21 @@ const server = http.createServer(async (req, res) => {
     try {
         if (u.pathname === '/' || u.pathname === '/health') return json(res, 200, { ok: true });
 
+        if (u.pathname === '/diag') {
+            const out = { node: process.version, ram: Math.round(process.memoryUsage().rss / 1048576) + ' MB', ytdlp: null, tes: null };
+            try { out.ytdlp = (await run(YTDLP, ['--version'], { timeout: 15000 })).stdout.trim(); }
+            catch (e) { out.ytdlp = 'GAGAL: ' + String(e.message).split('\n')[0]; }
+            const t0 = Date.now();
+            try {
+                await run(YTDLP, ['--js-runtimes', 'node', '-f', 'bestaudio[ext=m4a]', '-g', '--no-warnings',
+                    'https://www.youtube.com/watch?v=ETrsA1cFic0'], { timeout: 50000, maxBuffer: 5 * 1024 * 1024 });
+                out.tes = 'OK dalam ' + (Date.now() - t0) + ' ms';
+            } catch (e) {
+                out.tes = 'GAGAL dalam ' + (Date.now() - t0) + ' ms: ' + String(e.stderr || e.message).trim().split('\n').pop();
+            }
+            return json(res, 200, out);
+        }
+
         if (u.pathname === '/prefetch') {
             if (process.env.NO_PREFETCH === '1') { res.writeHead(204, res.cors); return res.end(); }
             const ids = (u.searchParams.get('id') || '').split(',').filter(x => /^[\w-]{6,20}$/.test(x)).slice(0, 2);
